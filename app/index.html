@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Generate a themed football squad, choose your tactics, and play a six-match season."
+  />
+  <title>GFFootball — Generative Fantasy Football</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Noto+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="paper-noise" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand-cluster">
+      <a class="back-link" href="../" aria-label="Back to booooorb">←</a>
+      <a class="wordmark" href="#top" aria-label="GFFootball home">
+        <span class="wordmark__crest">GF</span>
+        <span class="wordmark__name">Football</span>
+      </a>
+    </div>
+    <div class="topbar-context" aria-label="Current competition">
+      <span id="topbar-phase">Generative league</span>
+      <strong id="topbar-next">Build your world XI</strong>
+    </div>
+    <div class="api-status is-checking" id="api-status" aria-live="polite">
+      <span class="api-status__light" aria-hidden="true"></span>
+      <span>
+        <strong id="api-status-label">Checking AI</strong>
+        <small id="api-status-detail">Verifying Worker connection</small>
+      </span>
+    </div>
+    <div class="finance-chip" aria-live="polite">
+      <i class="topbar-chip__icon" aria-hidden="true">€</i>
+      <span>Club balance</span>
+      <strong id="club-balance" data-club-balance>€120m</strong>
+    </div>
+    <div class="season-chip" id="season-chip" aria-live="polite">
+      <i class="topbar-chip__icon" aria-hidden="true">◆</i>
+      <span data-season-label>Pre-season</span>
+      <strong data-season-points>0 pts</strong>
+      <b data-season-placement>—</b>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="setup-screen" id="setup-screen" aria-labelledby="setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow"><span>01</span> AI squad builder</p>
+        <h1 id="setup-title"><span>Build your</span> world XI.</h1>
+        <p class="lede">
+          Choose a theme and formation. AI creates an original starting eleven;
+          then you set the lineup, manage transfers, and play a six-match season.
+        </p>
+        <ol class="setup-steps" aria-label="How the season works">
+          <li><span>01</span><strong>Choose a world</strong></li>
+          <li><span>02</span><strong>Build an XI</strong></li>
+          <li><span>03</span><strong>Play the season</strong></li>
+        </ol>
+
+        <form class="theme-form theme-form--large" id="first-theme-form">
+          <label for="first-theme">Team theme</label>
+          <div class="prompt-field">
+            <span aria-hidden="true">&gt;</span>
+            <input
+              id="first-theme"
+              name="theme"
+              type="text"
+              minlength="2"
+              maxlength="80"
+              placeholder="Studio Ghibli characters"
+              autocomplete="off"
+              required
+            />
+          </div>
+
+          <fieldset class="formation-picker">
+            <legend>Starting shape</legend>
+            <label>
+              <input type="radio" name="formation" value="4-3-3" checked />
+              <span><b>4–3–3</b><i aria-hidden="true">● ● ●<br />● ● ●<br />● ● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="4-4-2" />
+              <span><b>4–4–2</b><i aria-hidden="true">● ●<br />● ● ● ●<br />● ● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="3-5-2" />
+              <span><b>3–5–2</b><i aria-hidden="true">● ●<br />● ● ● ● ●<br />● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="4-5-1" />
+              <span><b>4–5–1</b><i aria-hidden="true">●<br />● ● ● ● ●<br />● ● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="4-2-3-1" />
+              <span><b>4–2–3–1</b><i aria-hidden="true">●<br />● ● ●<br />● ●<br />● ● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="3-4-2-1" />
+              <span><b>3–4–2–1</b><i aria-hidden="true">●<br />● ●<br />● ● ● ●<br />● ● ●</i></span>
+            </label>
+            <label>
+              <input type="radio" name="formation" value="5-4-1" />
+              <span><b>5–4–1</b><i aria-hidden="true">●<br />● ● ● ●<br />● ● ● ● ●</i></span>
+            </label>
+          </fieldset>
+
+          <div class="turnstile-slot" id="setup-turnstile"></div>
+          <button class="button button--primary button--wide" data-generation-button type="submit">
+            Scout &amp; sign starting XI · €20m <span aria-hidden="true">→</span>
+          </button>
+          <p class="form-note" id="setup-mode-note"></p>
+          <p class="form-error" id="setup-error" role="alert"></p>
+        </form>
+      </div>
+
+      <div class="setup-pitch" aria-label="A tactical football pitch showing a starting eleven">
+        <div class="poster-mark poster-mark--red" aria-hidden="true"></div>
+        <div class="poster-mark poster-mark--blue" aria-hidden="true"></div>
+        <div class="poster-mark poster-mark--green" aria-hidden="true"></div>
+        <div class="setup-pitch__header">
+          <p class="setup-pitch__label">Starting XI / awaiting prompt</p>
+          <strong>11</strong>
+        </div>
+        <div class="setup-pitch__field" aria-hidden="true">
+          <i style="--x:50%;--y:88%">GK</i>
+          <i style="--x:17%;--y:68%">LB</i>
+          <i style="--x:39%;--y:72%">CB</i>
+          <i style="--x:61%;--y:72%">CB</i>
+          <i style="--x:83%;--y:68%">RB</i>
+          <i style="--x:28%;--y:48%">CM</i>
+          <i style="--x:72%;--y:48%">CM</i>
+          <i style="--x:50%;--y:39%">AM</i>
+          <i style="--x:18%;--y:17%">LW</i>
+          <i style="--x:50%;--y:12%">ST</i>
+          <i style="--x:82%;--y:17%">RW</i>
+        </div>
+        <div class="setup-pitch__footer">
+          <span>One prompt</span>
+          <span>Eleven original players</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="manager-screen" id="manager-screen" hidden aria-label="Club manager">
+      <header class="manager-window-header manager-window-header--squad">
+        <div class="manager-game-brand" aria-label="GFFootball">
+          <span class="manager-game-brand__crest">GF</span>
+          <strong>GFFootball</strong>
+        </div>
+        <nav class="manager-window-nav" aria-label="Manager windows">
+        <button class="is-active" type="button" aria-current="page">Tactics</button>
+        <button data-open-manager-window="transfers" type="button">
+        Transfers <span data-transfer-count>0</span>
+        </button>
+        <button data-open-manager-window="season" type="button">Season</button>
+        <button data-open-manager-window="stats" type="button">Stats</button>
+        </nav>
+        <div class="manager-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <span class="manager-window-header__spacer" aria-hidden="true"></span>
+        </div>
+      </header>
+
+      <div class="manager-grid">
+        <section class="pitch-column" id="pitch-panel" aria-label="Squad tactics">
+          <div class="tactics-commandbar">
+            <div class="tactics-title-block">
+              <p class="eyebrow">Manual XI</p>
+              <h1 class="tactics-context-title" id="selection-hint">Tactics board</h1>
+            </div>
+            <div class="tactics-toolbar">
+              <button class="selected-player-sell" id="selected-player-sell-button" type="button" hidden>
+                Sell selected player
+              </button>
+              <label for="formation-select">
+                <span>Formation</span>
+                <select id="formation-select">
+                  <option value="4-3-3">4–3–3</option>
+                  <option value="4-4-2">4–4–2</option>
+                  <option value="3-5-2">3–5–2</option>
+                  <option value="4-5-1">4–5–1</option>
+                  <option value="4-2-3-1">4–2–3–1</option>
+                  <option value="3-4-2-1">3–4–2–1</option>
+                  <option value="5-4-1">5–4–1</option>
+                </select>
+              </label>
+              <span class="lineup-status" id="lineup-status">0 / 11</span>
+              <button class="button button--matchday-open" id="open-matchday-button" type="button">
+                Simulate match <span aria-hidden="true">▶</span>
+              </button>
+            </div>
+          </div>
+          <div class="football-pitch" id="football-pitch" aria-label="Starting lineup"></div>
+        </section>
+
+        <section class="collection-column" id="squad-panel" aria-labelledby="collection-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow"><span>SUB</span> Player collection</p>
+              <h2 id="collection-title">Bench / Reserves</h2>
+            </div>
+            <button class="icon-button" id="credits-button" type="button" title="Image credits">©</button>
+          </div>
+          <div class="collection-filters">
+            <label class="visually-hidden" for="player-search">Search players</label>
+            <input id="player-search" type="search" placeholder="Search bench" />
+            <label class="visually-hidden" for="position-filter">Filter position</label>
+            <select id="position-filter">
+              <option value="">All positions</option>
+              <option value="GK">Goalkeepers</option>
+              <option value="DEF">Defenders</option>
+              <option value="MID">Midfielders</option>
+              <option value="FWD">Forwards</option>
+            </select>
+            <label class="visually-hidden" for="player-sort">Sort players</label>
+            <select id="player-sort">
+              <option value="value">Market value</option>
+              <option value="overall">Overall rating</option>
+              <option value="position">Position</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+          <div class="collection-list squad-gallery" id="collection-list" aria-live="polite"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="game-dialog matchday-dialog" id="matchday-dialog" aria-labelledby="matchday-dialog-title">
+    <div class="matchday-dialog__shell">
+      <header class="dialog-header matchday-dialog__header manager-status-header">
+        <div>
+          <p class="eyebrow">Season ledger</p>
+          <h2 id="matchday-dialog-title">Matchday</h2>
+        </div>
+        <div class="match-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <button class="icon-button" data-close-dialog="matchday-dialog" type="button" aria-label="Close matchday">×</button>
+        </div>
+      </header>
+
+      <div class="matchday-season-summary" id="matchday-season-summary"></div>
+
+      <dl class="record-strip matchday-record" aria-label="Season record">
+        <div><dt>W</dt><dd id="record-wins">0</dd></div>
+        <div><dt>D</dt><dd id="record-draws">0</dd></div>
+        <div><dt>L</dt><dd id="record-losses">0</dd></div>
+        <div><dt>GF</dt><dd id="record-gf">0</dd></div>
+        <div><dt>GA</dt><dd id="record-ga">0</dd></div>
+      </dl>
+
+      <div class="matchday-dialog__main">
+        <section class="matchday matchday-dialog__fixture" aria-labelledby="matchday-title">
+          <div class="matchday__identity">
+            <p class="eyebrow" id="fixture-week">Week 1 of 6</p>
+            <span class="matchday__club">GFF</span>
+            <h2 id="matchday-title">Next fixture</h2>
+          </div>
+          <div class="matchday__fixture">
+            <span class="matchday__versus">VS</span>
+            <p class="next-opponent" id="next-opponent">Opponent waiting in the tunnel.</p>
+          </div>
+          <div class="matchday-actions">
+            <p id="match-help">Complete your starting XI to play.</p>
+          </div>
+        </section>
+
+        <section class="opponent-preview" id="opponent-preview" aria-labelledby="opponent-preview-name">
+          <header class="opponent-preview__header">
+            <span class="opponent-preview__icon" id="opponent-preview-icon" aria-hidden="true">◆</span>
+            <div>
+              <p class="eyebrow">Opponent overview</p>
+              <h3 id="opponent-preview-name">Opponent XI</h3>
+              <span id="opponent-preview-meta">4–4–2 · projected 78 OVR</span>
+            </div>
+            <strong id="opponent-preview-rating">78</strong>
+          </header>
+          <dl class="opponent-preview__units" aria-label="Opponent unit ratings">
+            <div><dt>ATK</dt><dd id="opponent-preview-attack">78</dd></div>
+            <div><dt>MID</dt><dd id="opponent-preview-control">78</dd></div>
+            <div><dt>DEF</dt><dd id="opponent-preview-defence">78</dd></div>
+          </dl>
+          <div class="opponent-preview__pitch" id="opponent-preview-pitch" aria-label="Opponent starting eleven"></div>
+        </section>
+      </div>
+
+      <section class="fixtures-panel matchday-dialog__fixtures" aria-labelledby="fixtures-title">
+        <div class="subsection-heading">
+          <h3 id="fixtures-title">Season fixtures</h3>
+          <span>Six matches</span>
+        </div>
+        <ol class="fixture-list" id="fixture-list"></ol>
+      </section>
+
+      <footer class="matchday-dialog__footer">
+        <button class="button" data-close-dialog="matchday-dialog" type="button">Back to tactics</button>
+        <button class="button button--match" id="simulate-button" type="button" disabled>
+          Simulate match <span aria-hidden="true">▶</span>
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog season-window" id="season-dialog" aria-labelledby="season-window-title">
+    <div class="season-window__shell">
+      <header class="season-window__topbar manager-window-header">
+        <div class="manager-game-brand" aria-label="GFFootball">
+          <span class="manager-game-brand__crest">GF</span>
+          <strong>GFFootball</strong>
+        </div>
+        <nav class="manager-window-nav" aria-label="Manager windows">
+        <button data-close-dialog="season-dialog" type="button">Tactics</button>
+        <button data-open-manager-window="transfers" type="button">
+        Transfers <span data-transfer-count>0</span>
+        </button>
+        <button class="is-active" type="button" aria-current="page">Season</button>
+        <button data-open-manager-window="stats" type="button">Stats</button>
+        </nav>
+        <div class="manager-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <button class="icon-button" data-close-dialog="season-dialog" type="button" aria-label="Return to tactics">×</button>
+        </div>
+      </header>
+
+      <div class="dialog-header season-window__heading">
+        <div>
+          <p class="eyebrow">Competition</p>
+          <h2 id="season-window-title">Season standings</h2>
+        </div>
+        <button class="text-button text-button--danger" id="reset-button" type="button">Reset club</button>
+      </div>
+
+      <div class="season-window__body">
+      <section class="standings-panel season-window__standings" aria-labelledby="standings-title">
+        <div class="subsection-heading">
+          <h3 id="standings-title">League table</h3>
+          <span id="league-round">Pre-season</span>
+        </div>
+        <div class="league-table-wrap">
+          <table class="league-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Club</th>
+                <th scope="col">Form</th>
+                <th scope="col" title="Played">P</th>
+                <th scope="col" title="Won">W</th>
+                <th scope="col" title="Drawn">D</th>
+                <th scope="col" title="Lost">L</th>
+                <th scope="col" title="Goal difference">GD</th>
+                <th scope="col">Pts</th>
+              </tr>
+            </thead>
+            <tbody id="league-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+        <div class="season-window__side">
+        <aside class="opponent-preview season-opponent-preview" id="season-opponent-preview" aria-labelledby="season-opponent-preview-name">
+          <header class="opponent-preview__header">
+            <span class="opponent-preview__icon" id="season-opponent-preview-icon" aria-hidden="true">◆</span>
+            <div><span>Scout report</span><h3 id="season-opponent-preview-name">Opponent</h3><span id="season-opponent-preview-meta">Formation</span></div>
+            <strong id="season-opponent-preview-rating">—</strong>
+          </header>
+          <dl class="opponent-preview__units">
+            <div><dt>Attack</dt><dd id="season-opponent-preview-attack">—</dd></div>
+            <div><dt>Control</dt><dd id="season-opponent-preview-control">—</dd></div>
+            <div><dt>Defence</dt><dd id="season-opponent-preview-defence">—</dd></div>
+          </dl>
+          <div class="opponent-preview__pitch" id="season-opponent-preview-pitch" aria-label="Scouted opponent starting eleven"></div>
+        </aside>
+
+          <section class="season-fixtures-window" aria-labelledby="season-recent-fixtures-title">
+            <div class="subsection-heading">
+              <h3 id="season-recent-fixtures-title">Recent fixtures</h3>
+              <span>Latest completed</span>
+            </div>
+            <ol class="season-fixtures-list" id="season-recent-fixtures"></ol>
+          </section>
+          <section class="season-history-window" aria-labelledby="season-history-title"><div class="subsection-heading"><h3 id="season-history-title">Past seasons</h3><span>Ballon d’Or archive</span></div><ol class="season-history-list" id="season-history-list"></ol></section>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog stats-window" id="stats-dialog" aria-labelledby="stats-window-title">
+    <div class="stats-window__shell">
+      <header class="stats-window__topbar manager-window-header">
+        <div class="manager-game-brand" aria-label="GFFootball">
+          <span class="manager-game-brand__crest">GF</span>
+          <strong>GFFootball</strong>
+        </div>
+        <nav class="manager-window-nav" aria-label="Manager windows">
+        <button data-close-dialog="stats-dialog" type="button">Tactics</button>
+        <button data-open-manager-window="transfers" type="button">
+        Transfers <span data-transfer-count>0</span>
+        </button>
+        <button data-open-manager-window="season" type="button">Season</button>
+        <button class="is-active" type="button" aria-current="page">Stats</button>
+        </nav>
+        <div class="manager-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <button class="icon-button" data-close-dialog="stats-dialog" type="button" aria-label="Return to tactics">×</button>
+        </div>
+      </header>
+
+      <div class="dialog-header stats-window__heading">
+        <div>
+          <p class="eyebrow">Record book</p>
+          <h2 id="stats-window-title">Player leaders</h2>
+        </div>
+        <div class="stats-metric-switch" aria-label="Leaderboard metric">
+          <button class="is-active" data-stats-metric="goals" type="button">Goals</button>
+          <button data-stats-metric="assists" type="button">Assists</button>
+          <button data-stats-metric="ballon" type="button">Ballon d’Or</button>
+        </div>
+      </div>
+
+      <div class="stats-window__grid">
+        <section class="stats-leaderboard" aria-labelledby="stats-season-club-title">
+          <header>
+            <span>This season</span>
+            <h3 id="stats-season-club-title">Club leaders</h3>
+          </header>
+          <ol id="stats-season-club"></ol>
+        </section>
+        <section class="stats-leaderboard" aria-labelledby="stats-season-all-title">
+          <header>
+            <span>This season</span>
+            <h3 id="stats-season-all-title">All clubs</h3>
+          </header>
+          <ol id="stats-season-all"></ol>
+        </section>
+        <section class="stats-leaderboard" aria-labelledby="stats-alltime-club-title">
+          <header>
+            <span>All time</span>
+            <h3 id="stats-alltime-club-title">Club leaders</h3>
+          </header>
+          <ol id="stats-alltime-club"></ol>
+        </section>
+        <section class="stats-leaderboard" aria-labelledby="stats-alltime-all-title">
+          <header>
+            <span>All time</span>
+            <h3 id="stats-alltime-all-title">All clubs</h3>
+          </header>
+          <ol id="stats-alltime-all"></ol>
+        </section>
+      </div>
+      <div class="stats-ballon-view" id="stats-ballon-view" hidden>
+        <section class="stats-ballon-view__race" aria-labelledby="stats-ballon-race-title">
+          <header><div><p class="eyebrow">Season award</p><h3 id="stats-ballon-race-title">Ballon d’Or race</h3><p>G+A × 10, plus a club-standing bonus of up to 24 points.</p></div><span>Share of race</span></header>
+          <ol id="stats-ballon-race" class="stats-ballon-view__list"></ol>
+        </section>
+        <section class="stats-ballon-view__history" aria-labelledby="stats-ballon-alltime-title">
+          <div><p class="eyebrow">Career record</p><h3 id="stats-ballon-alltime-title">Hall of Fame</h3></div><span class="stats-ballon-view__count-label">Ballon d’Or counts</span>
+          <div id="stats-ballon-alltime"></div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog pack-dialog transfer-window" id="pack-dialog" aria-labelledby="pack-title">
+    <div class="transfer-window__shell">
+      <header class="transfer-window__topbar manager-window-header">
+        <div class="manag
+r-game-brand" aria-label="GFFootball">
+          <span class="manager-game-brand__crest">GF</span>
+          <strong>GFFootball</strong>
+        </div>
+        <nav class="manager-window-nav" aria-label="Manager windows">
+        <button data-close-dialog="pack-dialog" type="button">Tactics</button>
+        <button class="is-active" type="button" aria-current="page">
+        Transfers <span data-transfer-count>0</span>
+        </button>
+        <button data-open-manager-window="season" type="button">Season</button>
+        <button data-open-manager-window="stats" type="button">Stats</button>
+        </nav>
+        <div class="manager-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <button class="icon-button" data-close-dialog="pack-dialog" type="button" aria-label="Return to tactics">×</button>
+        </div>
+      </header>
+      <div class="dialog-header transfer-window__heading">
+        <div>
+          <p class="eyebrow">Transfer desk</p>
+          <h2 id="pack-title">Scouting report</h2>
+        </div>
+        <p>Open a scout pack and choose three concealed cards as free transfers; the remaining targets become paid signings.</p>
+      </div>
+      <section class="transfer-window__scout" aria-label="Scout a new transfer market">
+        <form class="theme-form theme-form--compact manager-tool manager-tool--scout" id="theme-form">
+          <label for="theme">Scout another theme</label>
+          <div class="compact-form-row">
+            <div class="prompt-field">
+              <span aria-hidden="true">&gt;</span>
+              <input
+                id="theme"
+                name="theme"
+                type="text"
+                minlength="2"
+                maxlength="80"
+                placeholder="Greek mythology"
+                autocomplete="off"
+                required
+              />
+            </div>
+            <button class="button button--primary" data-generation-button type="submit">Scout pack · €20m</button>
+          </div>
+          <div class="turnstile-slot" id="manager-turnstile"></div>
+          <p class="form-error" id="manager-error" role="alert"></p>
+        </form>
+      </section>
+      <div class="transfer-loading" id="transfer-loading" hidden aria-live="assertive">
+        <div class="loading-ball" aria-hidden="true"></div>
+        <div>
+          <strong>Scouting transfer targets</strong>
+          <span id="transfer-loading-message">Reading the theme...</span>
+        </div>
+      </div>
+      <div class="pack-summary" id="pack-summary"></div>
+      <div class="pack-grid" id="pack-grid"></div>
+      <footer class="transfer-window__footer">
+        <button class="button button--primary" data-close-dialog="pack-dialog" type="button">
+          Return to tactics
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="pack-opening-dialog" id="pack-opening-dialog" aria-label="Scout pack opening">
+    <div class="pack-opening-stage">
+      <div class="pack-opening-status" id="pack-opening-status" aria-live="polite">Choose three free transfers</div>
+      <button class="pack-opening-close" data-close-dialog="pack-opening-dialog" type="button" aria-label="Close pack opening">×</button>
+      <div class="pack-opening-grid" id="pack-opening-grid"></div>
+      <button class="pack-opening-continue" id="pack-opening-continue" data-action="finish-pack" type="button" hidden>
+        Continue to transfers
+      </button>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog result-dialog result-window" id="result-dialog" aria-labelledby="result-title">
+    <div class="result-window__shell">
+      <div class="dialog-header result-window__header manager-status-header">
+        <div>
+          <p class="eyebrow" id="result-week">Full time</p>
+          <h2 id="result-title">Match report</h2>
+        </div>
+        <div class="match-header-end">
+          <div class="manager-window-status" aria-label="Club status">
+            <span class="manager-status manager-status--balance">
+              <i class="manager-status__icon" aria-hidden="true">€</i>
+              <span><small>Balance</small><strong data-club-balance>€120m</strong></span>
+            </span>
+            <span class="manager-status manager-status--points">
+              <i class="manager-status__icon" aria-hidden="true">◆</i>
+              <span><small>Points</small><strong data-season-points>0 pts</strong></span>
+            </span>
+            <span class="manager-status manager-status--placement">
+              <i class="manager-status__icon" aria-hidden="true">★</i>
+              <span><small>Place</small><strong data-season-placement>—</strong></span>
+            </span>
+          </div>
+          <div class="manager-team-summary" aria-label="Current club">
+            <span class="manager-team-icon" data-club-icon data-icon="shield" aria-hidden="true">◆</span>
+            <span><small>Club</small><strong data-club-name>Prompt League XI</strong></span>
+          </div>
+          <button class="icon-button manager-team-settings" data-open-club-settings type="button" aria-label="Edit club name and crest">⚙</button>
+          <button class="icon-button" data-close-dialog="result-dialog" type="button" aria-label="Close">×</button>
+        </div>
+      </div>
+
+      <div class="result-window__score-band">
+        <div class="scoreboard" id="scoreboard"></div>
+      </div>
+
+      <div class="result-window__body">
+        <div class="result-window__left">
+          <section class="performance-map" aria-labelledby="performance-map-title">
+            <div class="performance-map__header">
+              <div>
+                <p class="eyebrow">Field overview</p>
+                <h3 id="performance-map-title">Your XI</h3>
+                <span id="performance-map-meta">4–3–3 · team overview</span>
+              </div>
+              <div class="result-team-toggle" role="group" aria-label="Field overview team">
+                <button class="is-active" data-result-team="user" type="button" aria-pressed="true">Your XI</button>
+                <button data-result-team="opponent" type="button" aria-pressed="false">Opponent</button>
+              </div>
+              <div class="rating-legend" aria-label="Rating colors">
+                <span><i class="rating-dot rating-dot--poor"></i>&lt; 5.0</span>
+                <span><i class="rating-dot rating-dot--average"></i>5.0–6.9</span>
+                <span><i class="rating-dot rating-dot--good"></i>7.0–7.9</span>
+                <span><i class="rating-dot rating-dot--excellent"></i>8.0–8.9</span>
+                <span><i class="rating-dot rating-dot--elite"></i>9.0+</span>
+              </div>
+            </div>
+            <div class="performance-pitch" id="result-pitch" aria-label="Team player match ratings by formation"></div>
+          </section>
+
+          <section class="result-window__timeline" aria-labelledby="timeline-title">
+            <h3 id="timeline-title">Match timeline</h3>
+            <ol class="event-timeline" id="event-timeline"></ol>
+          </section>
+        </div>
+
+        <section class="match-statistics result-window__statistics" aria-labelledby="match-statistics-title">
+          <h3 id="match-statistics-title">Match statistics</h3>
+          <div class="match-stat-team-labels" id="match-stat-team-labels"></div>
+          <div class="match-stat-list" id="match-stat-list"></div>
+        </section>
+      </div>
+
+      <footer class="result-window__footer">
+        <div class="season-award" id="season-award" hidden></div>
+        <button class="button button--primary" data-close-dialog="result-dialog" type="button">
+          Return to tactics
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog club-settings-dialog" id="club-settings-dialog" aria-labelledby="club-settings-title">
+    <form class="club-settings-form" id="club-settings-form">
+      <div class="dialog-header club-settings-dialog__header">
+        <div>
+          <p class="eyebrow">Club identity</p>
+          <h2 id="club-settings-title">Edit club</h2>
+        </div>
+        <button class="icon-button" data-close-dialog="club-settings-dialog" type="button" aria-label="Close club settings">×</button>
+      </div>
+
+      <label class="club-name-field" for="club-name-input">
+        <span>Team name</span>
+        <input id="club-name-input" name="clubName" type="text" minlength="2" maxlength="30" autocomplete="off" required />
+      </label>
+
+      <fieldset class="club-icon-picker">
+        <legend>Placeholder crest</legend>
+        <label><input type="radio" name="clubIcon" value="shield" /><span data-icon="shield">◆<small>Shield</small></span></label>
+        <label><input type="radio" name="clubIcon" value="star" /><span data-icon="star">★<small>Star</small></span></label>
+        <label><input type="radio" name="clubIcon" value="bolt" /><span data-icon="bolt">ϟ<small>Bolt</small></span></label>
+        <label><input type="radio" name="clubIcon" value="crown" /><span data-icon="crown">♛<small>Crown</small></span></label>
+      </fieldset>
+
+      <p class="club-settings-note">Placeholder crests can be replaced with uploaded artwork in a future update.</p>
+
+      <footer class="club-settings-dialog__footer">
+        <button class="button" data-close-dialog="club-settings-dialog" type="button">Cancel</button>
+        <button class="button button--primary" type="submit">Save club</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="game-dialog sell-dialog" id="sell-dialog" aria-labelledby="sell-dialog-title">
+    <div class="dialog-header sell-dialog__header">
+      <div>
+        <p class="eyebrow">Squad transaction</p>
+        <h2 id="sell-dialog-title">Confirm player sale</h2>
+      </div>
+      <button class="icon-button" data-close-dialog="sell-dialog" type="button" aria-label="Cancel player sale">×</button>
+    </div>
+
+    <div class="sell-dialog__player" id="sell-dialog-player">
+      <img id="sell-player-photo" src="" alt="" />
+      <div>
+        <strong id="sell-player-name">Selected player</strong>
+        <span id="sell-player-meta">Position</span>
+      </div>
+      <span class="sell-dialog__amount">
+        <small>Sale value</small>
+        <strong id="sell-player-value">€0m</strong>
+      </span>
+    </div>
+
+    <p class="sell-dialog__message" id="sell-dialog-message">
+      Sell this player?
+    </p>
+
+    <footer class="sell-dialog__footer">
+      <button class="button" data-close-dialog="sell-dialog" type="button">Keep player</button>
+      <button class="button button--danger" id="confirm-sale-button" type="button">Confirm sale</button>
+    </footer>
+  </dialog>
+
+  <dialog class="game-dialog credits-dialog" id="credits-dialog" aria-labelledby="credits-title">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow">Open media</p>
+        <h2 id="credits-title">Image credits</h2>
+      </div>
+      <button class="icon-button" data-close-dialog="credits-dialog" type="button" aria-label="Close">×</button>
+    </div>
+    <p>
+      Portraits are selected from Wikimedia Commons and Openverse. Use the
+      cycle control beside a player if an image is incorrect, or switch to the
+      local avatar.
+    </p>
+    <ul class="credits-list" id="credits-list"></ul>
+  </dialog>
+
+  <div class="loading-overlay" id="loading-overlay" hidden aria-live="assertive">
+    <div class="loading-ball" aria-hidden="true"></div>
+    <p id="loading-message">Reading the theme...</p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

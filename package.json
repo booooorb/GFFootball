@@ -1,0 +1,14 @@
+{
+  "name": "gffootball",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A generative fantasy football management game.",
+  "scripts": {
+    "test": "npm run test:app && npm run test:worker",
+    "test:app": "npm --prefix app test",
+    "test:worker": "npm --prefix worker test",
+    "worker:dev": "npm --prefix worker run dev",
+    "worker:deploy:check": "npm --prefix worker run deploy:check"
+  }
+}
+

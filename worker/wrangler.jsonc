@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "prompt-league-api",
+  "account_id": "28e49e2050f7f826b35df79466003256",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-26",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "vars": {
+    "ALLOWED_ORIGINS": "https://booooorb.github.io,http://localhost:8000,http://127.0.0.1:8000",
+    "ENVIRONMENT": "production"
+  },
+
+  "secrets": {
+    "required": ["GEMINI_API_KEY", "TURNSTILE_SECRET", "SERPAPI_API_KEY", "DEVELOPER_MODE_TOKEN"]
+  },
+
+  // Production namespaces created with Wrangler.
+  "kv_namespaces": [
+    {
+      "binding": "RATE_LIMIT",
+      "id": "c970eedc1f7d41cdbf9bd8238d28188e"
+    },
+    {
+      "binding": "PORTRAIT_CACHE",
+      "id": "f0cbdfd64eca40ac99220d6e9c2b9ea6"
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  },
+
+  "env": {
+    "development": {
+      "vars": {
+        "ALLOWED_ORIGINS": "http://localhost:8000,http://127.0.0.1:8000",
+        "ENVIRONMENT": "development"
+      },
+      "secrets": {
+        "required": ["GEMINI_API_KEY", "TURNSTILE_SECRET", "SERPAPI_API_KEY", "DEVELOPER_MODE_TOKEN"]
+      },
+      "kv_namespaces": [
+        { "binding": "RATE_LIMIT" },
+        { "binding": "PORTRAIT_CACHE" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Copy this file to .dev.vars.development and keep that copy private.
+GEMINI_API_KEY=replace_with_a_free_tier_google_ai_studio_key
+TURNSTILE_SECRET=dev-bypass
+SERPAPI_API_KEY=replace_with_your_serpapi_key
+DEVELOPER_MODE_TOKEN=replace_with_a_long_random_developer_token

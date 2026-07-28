@@ -1,0 +1,17 @@
+{
+  "name": "gffootball-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --env development",
+    "deploy": "wrangler deploy --env=\"\"",
+    "deploy:check": "wrangler deploy --dry-run --env=\"\"",
+    "types": "wrangler types --env=\"\"",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "wrangler": "^4.26.0"
+  }
+}
