@@ -12,3 +12,6 @@ coverage/
 dist/
 
 worker/worker-configuration.d.ts
+
+# Local-only NPC authoring tools and private drafts UI.
+/app/developer-mode/
