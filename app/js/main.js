@@ -250,11 +250,21 @@ function showToast(message) {
 window.addEventListener(PUBLISHED_NPC_EVENT, (event) => {
   const previousOpponents = state.season.opponents ?? [];
   const previousIds = previousOpponents.map((club) => club.id).join("|");
-  const previousPresentation = JSON.stringify(previousOpponents.map((club) => ({ id: club.id, icon: club.icon, iconImageTransform: club.iconImageTransform })));
+  const previousPresentation = JSON.stringify(previousOpponents.map((club) => ({
+    id: club.id,
+    icon: club.icon,
+    iconImage: club.iconImage,
+    iconImageTransform: club.iconImageTransform,
+  })));
   const published = event.detail?.opponents ?? loadPublishedNpcOpponents();
   const next = syncSeasonOpponents(state, published);
   const nextIds = (next.season.opponents ?? []).map((club) => club.id).join("|");
-  const nextPresentation = JSON.stringify((next.season.opponents ?? []).map((club) => ({ id: club.id, icon: club.icon, iconImageTransform: club.iconImageTransform })));
+  const nextPresentation = JSON.stringify((next.season.opponents ?? []).map((club) => ({
+    id: club.id,
+    icon: club.icon,
+    iconImage: club.iconImage,
+    iconImageTransform: club.iconImageTransform,
+  })));
   const changed = previousIds !== nextIds || previousPresentation !== nextPresentation;
   state = next;
   if (changed) {
