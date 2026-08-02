@@ -17,6 +17,40 @@ export const USER_CLUB_ID = "prompt-league-xi";
 export const USER_CLUB_NAME = "Prompt League XI";
 export const CLUB_ICON_PRESETS = ["shield", "star", "bolt", "crown"];
 
+export function playerCardTier(overall) {
+  const rating = Math.max(0, Math.min(100, Math.round(Number(overall) || 0)));
+  if (rating >= 90) {
+    return {
+      id: "chroma",
+      className: "card-tier--chroma",
+      label: "Chroma Chromium Gold",
+      shortLabel: "Chroma",
+    };
+  }
+  if (rating >= 85) {
+    return {
+      id: "shiny-gold",
+      className: "card-tier--shiny-gold",
+      label: "Shiny Gold",
+      shortLabel: "Shiny",
+    };
+  }
+  if (rating >= 75) {
+    return {
+      id: "gold",
+      className: "card-tier--gold",
+      label: "Gold",
+      shortLabel: "Gold",
+    };
+  }
+  return {
+    id: "silver",
+    className: "card-tier--silver",
+    label: "Silver",
+    shortLabel: "Silver",
+  };
+}
+
 export const FORMATIONS = {
   "4-3-3": {
     id: "4-3-3",

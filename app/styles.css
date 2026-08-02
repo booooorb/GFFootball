@@ -8451,3 +8451,561 @@ h3,
   .pack-opening-grid .pack-card.is-choice-reveal .pack-card__inner,
   .pack-opening-grid.is-final-reveal .pack-card:not(.is-free-transfer) .pack-card__inner { animation: none; }
 }
+
+/* ===== Clean 2026 tournament system + player card materials ===== */
+:root {
+  --display: "Thunder LC", "Thunder", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --title: "Thunder LC", "Thunder", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --tournament-rail: linear-gradient(
+    90deg,
+    var(--wc-mint) 0 16.66%,
+    var(--wc-purple) 16.66% 33.32%,
+    var(--wc-lime) 33.32% 49.98%,
+    var(--wc-orange) 49.98% 66.64%,
+    var(--wc-blue) 66.64% 83.3%,
+    var(--wc-red) 83.3% 100%
+  );
+  --shell-panel: rgba(9, 13, 15, 0.94);
+  --shell-panel-raised: rgba(15, 21, 24, 0.96);
+}
+
+body {
+  color: var(--wc-white);
+  background:
+    radial-gradient(circle at 12% 4%, rgba(89, 240, 208, 0.08), transparent 24rem),
+    radial-gradient(circle at 88% 16%, rgba(91, 0, 230, 0.08), transparent 28rem),
+    #050708;
+}
+
+body::after {
+  position: fixed;
+  right: -12rem;
+  bottom: -20rem;
+  z-index: -1;
+  width: min(62vw, 820px);
+  aspect-ratio: 1;
+  border: clamp(18px, 2.4vw, 36px) solid rgba(89, 240, 208, 0.055);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 clamp(20px, 3vw, 48px) rgba(91, 0, 230, 0.035),
+    0 0 0 clamp(48px, 6vw, 92px) rgba(175, 240, 0, 0.025),
+    0 0 0 clamp(78px, 9vw, 138px) rgba(255, 59, 10, 0.02);
+  content: "";
+  pointer-events: none;
+}
+
+.topbar {
+  position: sticky;
+  isolation: isolate;
+  border-bottom: 0;
+  background: rgba(5, 7, 8, 0.9);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
+}
+
+.topbar::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 3px;
+  background: var(--tournament-rail);
+  content: "";
+}
+
+.wordmark__crest,
+.manager-game-brand__crest {
+  border-radius: 12px 3px 12px 3px;
+  background:
+    linear-gradient(145deg, transparent 0 42%, rgba(5, 7, 8, 0.26) 42% 53%, transparent 53%),
+    linear-gradient(135deg, var(--wc-mint), var(--wc-lime));
+}
+
+.wordmark__name,
+.setup-copy h1,
+.dialog-header h2,
+.section-heading h2,
+.subsection-heading h3,
+.pack-player__identity h3 {
+  font-family: var(--display);
+  font-weight: 800;
+}
+
+.setup-copy {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(circle at 10% 12%, rgba(89, 240, 208, 0.09), transparent 27rem),
+    #050708;
+}
+
+.setup-copy h1 {
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.setup-copy h1 > span {
+  color: var(--wc-mint);
+  letter-spacing: 0.02em;
+}
+
+.setup-steps li,
+.prompt-field,
+.formation-picker label > span {
+  border-color: rgba(255, 253, 248, 0.13);
+  background: rgba(13, 18, 21, 0.86);
+}
+
+.setup-steps li {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.setup-pitch {
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 112%, transparent 0 29%, rgba(89, 240, 208, 0.92) 29.2% 34%, transparent 34.2% 38%, rgba(91, 0, 230, 0.92) 38.2% 43%, transparent 43.2% 47%, rgba(175, 240, 0, 0.92) 47.2% 52%, transparent 52.2% 56%, rgba(255, 59, 10, 0.92) 56.2% 61%, transparent 61.2% 65%, rgba(52, 82, 244, 0.92) 65.2% 70%, transparent 70.2%),
+    linear-gradient(146deg, #3526ba 0 26%, #a988ed 26% 35%, #07100e 35% 100%);
+}
+
+.setup-pitch::after {
+  position: absolute;
+  inset: 6% 7% 8%;
+  z-index: 0;
+  border: clamp(18px, 2.8vw, 40px) solid rgba(255, 253, 248, 0.08);
+  border-radius: 48% 48% 10% 10% / 34% 34% 10% 10%;
+  box-shadow:
+    0 0 0 clamp(18px, 2.8vw, 40px) rgba(89, 240, 208, 0.09),
+    0 0 0 clamp(36px, 5.6vw, 80px) rgba(91, 0, 230, 0.08),
+    0 0 0 clamp(54px, 8.4vw, 120px) rgba(175, 240, 0, 0.065),
+    0 0 0 clamp(72px, 11.2vw, 160px) rgba(255, 59, 10, 0.05);
+  content: "";
+  pointer-events: none;
+}
+
+.setup-pitch__header,
+.setup-pitch__field,
+.setup-pitch__footer {
+  z-index: 2;
+}
+
+.setup-pitch__field {
+  background:
+    linear-gradient(rgba(255, 253, 248, 0.11) 1px, transparent 1px) 0 0 / 100% 14%,
+    linear-gradient(90deg, rgba(255, 253, 248, 0.08) 1px, transparent 1px) 0 0 / 20% 100%,
+    rgba(0, 69, 55, 0.86);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.button,
+.manager-window-nav button,
+input,
+select {
+  font-family: var(--body);
+}
+
+.button--primary,
+.button--matchday-open,
+.button--free,
+.pack-opening-continue {
+  color: #050708;
+  background: var(--wc-lime);
+  box-shadow: none;
+}
+
+.button--primary:not(:disabled):hover,
+.button--matchday-open:not(:disabled):hover,
+.button--free:not(:disabled):hover,
+.pack-opening-continue:hover {
+  background: var(--wc-mint);
+}
+
+.manager-screen:not([hidden]),
+.season-window__shell,
+.stats-window__shell,
+.transfer-window__shell,
+.result-window__shell {
+  background:
+    linear-gradient(124deg, transparent 0 84%, rgba(52, 82, 244, 0.055) 84% 88%, transparent 88%),
+    radial-gradient(circle at 8% 92%, rgba(89, 240, 208, 0.05), transparent 26rem),
+    #050708;
+}
+
+.manager-window-header,
+.season-window__topbar.manager-window-header,
+.stats-window__topbar.manager-window-header,
+.transfer-window__topbar.manager-window-header {
+  position: relative;
+  border-bottom: 0;
+}
+
+.manager-window-header::after,
+.season-window__topbar.manager-window-header::after,
+.stats-window__topbar.manager-window-header::after,
+.transfer-window__topbar.manager-window-header::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--tournament-rail);
+  content: "";
+  opacity: 0.82;
+}
+
+.manager-screen .manager-grid {
+  border: 1px solid rgba(255, 253, 248, 0.12);
+  border-radius: 18px;
+  background: var(--shell-panel);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.manager-grid > .pitch-column {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px) 0 0 / 24px 24px,
+    #080c0e;
+}
+
+.manager-grid > .collection-column {
+  border-left-color: rgba(255, 253, 248, 0.1);
+  background: #070a0b;
+}
+
+.pitch-column .football-pitch {
+  border: 1px solid rgba(89, 240, 208, 0.32);
+  background-color: #00483b;
+  box-shadow:
+    inset 0 0 90px rgba(0, 0, 0, 0.2),
+    0 18px 44px rgba(0, 0, 0, 0.24);
+}
+
+.collection-column .collection-filters input,
+.collection-column .collection-filters select,
+.tactics-toolbar select,
+.club-name-field input {
+  border-color: rgba(255, 253, 248, 0.14);
+  background: #0c1113;
+}
+
+.manager-window-nav {
+  border-color: rgba(255, 253, 248, 0.12);
+  background: #080c0e;
+}
+
+.manager-window-nav button.is-active {
+  color: #050708;
+  background: var(--wc-mint);
+}
+
+/* Shared collectible materials. Rating 84 is included in regular gold. */
+.card-tier--silver {
+  --tier-ink: #101820;
+  --tier-edge: #f4f8fa;
+  --tier-ui-accent: #c8d3da;
+  --tier-surface: linear-gradient(135deg, #f7fafc 0%, #929da6 20%, #dce3e7 42%, #737f88 67%, #eef2f4 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 35%, rgba(255, 255, 255, 0.76) 47%, rgba(205, 245, 255, 0.2) 52%, transparent 65%);
+}
+
+.card-tier--gold {
+  --tier-ink: #241903;
+  --tier-edge: #ffe99e;
+  --tier-ui-accent: #e6bd4f;
+  --tier-surface: linear-gradient(135deg, #fff1a8 0%, #c69025 24%, #f1cf68 48%, #8d6113 73%, #f5dc86 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 38%, rgba(255, 250, 218, 0.5) 50%, transparent 63%);
+}
+
+.card-tier--shiny-gold {
+  --tier-ink: #201500;
+  --tier-edge: #fff5b9;
+  --tier-ui-accent: #ffe17a;
+  --tier-surface: linear-gradient(132deg, #fffbd2 0%, #d29512 15%, #ffe985 30%, #936003 45%, #fff2a5 61%, #b97806 79%, #ffedb5 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 30%, rgba(255, 255, 255, 0.18) 39%, rgba(255, 255, 255, 0.92) 48%, rgba(255, 237, 171, 0.42) 55%, transparent 69%);
+}
+
+.card-tier--chroma {
+  --tier-ink: #13140f;
+  --tier-edge: #fffef2;
+  --tier-ui-accent: #fff3b8;
+  --tier-surface: linear-gradient(130deg, #fffef2 0%, #ad995c 11%, #ffffff 23%, #806b2e 37%, #f5e6a3 49%, #ffffff 63%, #91803f 77%, #fff7d1 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 27%, rgba(133, 239, 255, 0.24) 38%, rgba(255, 255, 255, 0.98) 47%, rgba(239, 199, 255, 0.42) 54%, rgba(255, 238, 145, 0.2) 61%, transparent 73%);
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty) {
+  overflow: hidden;
+  color: var(--tier-ink);
+  border: 1px solid var(--tier-edge);
+  border-top: 4px solid var(--tier-edge);
+  border-radius: 15px 15px 8px 8px;
+  background: var(--tier-surface);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34), inset 0 0 0 1px rgba(16, 24, 32, 0.16);
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
+  position: absolute;
+  inset: -35% -70%;
+  z-index: 4;
+  display: block;
+  content: "";
+  pointer-events: none;
+  background: var(--tier-sheen);
+  opacity: 0.42;
+  transform: translateX(-36%);
+  transition: opacity 180ms ease, transform 420ms ease;
+}
+
+.pitch-slot.card-tier--shiny-gold::after,
+.pitch-slot.card-tier--chroma::after {
+  opacity: 0.7;
+}
+
+.pitch-slot:hover::after,
+.pitch-slot.is-selected::after {
+  opacity: 0.9;
+  transform: translateX(32%);
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]) .pitch-player-rating,
+.pitch-slot[data-card-tier]:not([data-card-tier=""]) .pitch-player-position {
+  color: var(--tier-ink);
+}
+
+.pitch-player-tier {
+  position: absolute;
+  top: 18px;
+  right: 6px;
+  left: 6px;
+  z-index: 8;
+  overflow: hidden;
+  color: var(--tier-ink);
+  font: 900 clamp(0.2rem, 0.24vw, 0.26rem)/1 var(--body);
+  letter-spacing: 0.09em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.62;
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]) .pitch-player-poster {
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 255, 255, 0.35), transparent 32%),
+    var(--tier-surface);
+}
+
+.pitch-slot.card-tier--chroma .pitch-player-poster {
+  background:
+    linear-gradient(118deg, transparent 0 33%, rgba(140, 244, 255, 0.22) 43%, rgba(255, 255, 255, 0.7) 50%, rgba(245, 205, 255, 0.22) 57%, transparent 67%),
+    var(--tier-surface);
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]) .pitch-player-photo {
+  filter: saturate(0.88) contrast(1.08);
+}
+
+.collection-player.squad-card[class*="card-tier--"] {
+  --card-accent: var(--tier-ui-accent);
+  --card-accent-ink: var(--tier-ink);
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__select {
+  border-color: rgba(255, 253, 248, 0.12);
+  border-left-color: var(--tier-ui-accent);
+  background: #0c1113;
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__visual,
+.collection-player.squad-card[class*="card-tier--"] .squad-card__poster {
+  background:
+    radial-gradient(circle at 68% 18%, rgba(255, 255, 255, 0.36), transparent 34%),
+    var(--tier-surface);
+}
+
+.squad-card__tier {
+  display: block;
+  order: 1;
+  max-width: 100%;
+  margin-top: 0.12rem;
+  overflow: hidden;
+  color: var(--tier-ui-accent);
+  font: 850 0.34rem/1 var(--body);
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__value strong {
+  color: var(--tier-ui-accent);
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__rating {
+  position: relative;
+  overflow: hidden;
+  color: var(--tier-ink);
+  background: var(--tier-surface);
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__rating::before {
+  position: absolute;
+  inset: -55% -120%;
+  display: block;
+  content: "";
+  pointer-events: none;
+  background: var(--tier-sheen);
+  opacity: 0.55;
+  transform: translateX(-28%);
+  transition: transform 380ms ease;
+}
+
+.collection-player.squad-card:hover .squad-card__rating::before {
+  transform: translateX(28%);
+}
+
+.squad-card__rating strong,
+.squad-card__rating small {
+  position: relative;
+  z-index: 1;
+}
+
+.pack-card__back,
+.pack-card__front {
+  border: 1px solid var(--tier-edge, rgba(255, 255, 255, 0.22));
+  border-radius: 0;
+  clip-path: polygon(9% 0, 91% 0, 100% 7%, 100% 93%, 91% 100%, 9% 100%, 0 93%, 0 7%);
+}
+
+.pack-card__front {
+  border-width: 2px;
+  background: #090d0f;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045), 0 18px 34px rgba(0, 0, 0, 0.34);
+}
+
+.pack-card__back {
+  border-color: rgba(255, 253, 248, 0.26);
+  background:
+    radial-gradient(ellipse at 50% 112%, transparent 0 24%, var(--wc-mint) 24.5% 31%, transparent 31.5% 35%, var(--wc-purple) 35.5% 42%, transparent 42.5% 46%, var(--wc-lime) 46.5% 53%, transparent 53.5% 57%, var(--wc-orange) 57.5% 64%, transparent 64.5% 68%, var(--wc-blue) 68.5% 75%, #070a0b 75.5%),
+    #070a0b;
+}
+
+.pack-card__back::after {
+  inset: 0.45rem;
+  border-color: rgba(255, 253, 248, 0.32);
+  border-radius: 0;
+  clip-path: inherit;
+}
+
+.pack-card__mark {
+  color: var(--wc-white);
+  text-shadow: 3px 3px 0 var(--wc-purple);
+}
+
+.pack-card[class*="card-tier--"] .pack-player__visual,
+.pack-card[class*="card-tier--"] .pack-player__poster {
+  background:
+    radial-gradient(circle at 72% 14%, rgba(255, 255, 255, 0.5) 0 2px, transparent 2.5px) 0 0 / 17px 17px,
+    linear-gradient(145deg, transparent 0 45%, rgba(5, 7, 8, 0.12) 45% 56%, transparent 56%),
+    var(--tier-surface);
+}
+
+.pack-card[class*="card-tier--"] .pack-player__visual::after {
+  background: var(--tier-sheen);
+  opacity: 0.62;
+}
+
+.pack-card.card-tier--chroma .pack-player__visual::after,
+.pack-card.card-tier--shiny-gold .pack-player__visual::after {
+  opacity: 0.9;
+}
+
+.pack-card[class*="card-tier--"] .pack-player__topline,
+.pack-card[class*="card-tier--"] .pack-player__topline strong,
+.pack-card[class*="card-tier--"] .pack-player__topline small {
+  color: var(--tier-ink);
+}
+
+.pack-card[class*="card-tier--"] .pack-player__topline b {
+  color: var(--tier-ink);
+  border: 1px solid rgba(16, 24, 32, 0.2);
+  background: rgba(255, 255, 255, 0.48);
+  backdrop-filter: blur(8px);
+}
+
+.pack-card[class*="card-tier--"] .pack-player-photo {
+  filter: saturate(0.92) contrast(1.07) drop-shadow(0 12px 12px rgba(0, 0, 0, 0.2));
+}
+
+.pack-card .pack-player__rarity {
+  right: 7%;
+  bottom: 5%;
+  left: 7%;
+  overflow: hidden;
+  color: var(--wc-white);
+  background: rgba(5, 7, 8, 0.88);
+  font-size: 0.38rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+
+.pack-card.is-free-transfer .pack-player__rarity {
+  color: var(--wc-white);
+  background: rgba(5, 7, 8, 0.88);
+}
+
+.pack-player__transfer-state {
+  position: absolute;
+  top: 2.35rem;
+  right: 0.55rem;
+  z-index: 4;
+  max-width: calc(100% - 1.1rem);
+  padding: 0.22rem 0.3rem;
+  overflow: hidden;
+  color: var(--wc-white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(5, 7, 8, 0.74);
+  font: 850 0.34rem/1 var(--body);
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+
+.pack-card.is-free-transfer .pack-player__transfer-state {
+  color: #050708;
+  border-color: var(--wc-lime);
+  background: var(--wc-lime);
+}
+
+.pack-card[class*="card-tier--"] .pack-player__identity,
+.pack-card[class*="card-tier--"] .pack-player__finance {
+  border-color: rgba(255, 253, 248, 0.1);
+  background: #090d0f;
+}
+
+.pack-opening-stage {
+  background:
+    radial-gradient(ellipse at 50% 112%, transparent 0 30%, rgba(89, 240, 208, 0.18) 30.5% 36%, transparent 36.5% 41%, rgba(91, 0, 230, 0.15) 41.5% 47%, transparent 47.5% 52%, rgba(175, 240, 0, 0.12) 52.5% 58%, transparent 58.5% 63%, rgba(255, 59, 10, 0.1) 63.5% 69%, transparent 69.5%),
+    radial-gradient(circle at 50% 45%, rgba(52, 82, 244, 0.12), transparent 36%),
+    #030506;
+}
+
+@media (max-width: 700px) {
+  body::after { display: none; }
+  .setup-pitch::after { opacity: 0.58; }
+  .pitch-player-tier { display: none; }
+  .squad-card__tier { font-size: 0.31rem; }
+  .pack-player__transfer-state { top: 2.15rem; font-size: 0.31rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-slot::after,
+  .squad-card__visual::after,
+  .squad-card__rating::before,
+  .pack-player__visual::after {
+    transition: none !important;
+    transform: none !important;
+  }
+}
