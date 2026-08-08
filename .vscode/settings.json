@@ -1,0 +1,11 @@
+{
+  "git.autoRepositoryDetection": true,
+  "git.openRepositoryInParentFolders": "never",
+  "git.repositoryScanMaxDepth": 1,
+  "git.autofetch": true,
+  "git.pruneOnFetch": true,
+  "git.confirmSync": true,
+  "liveServer.settings.root": "/app",
+  "liveServer.settings.port": 5501,
+  "window.title": "GFFootball — ${dirty}${activeEditorShort}"
+}

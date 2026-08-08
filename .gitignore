@@ -6,9 +6,13 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 coverage/
 dist/
 
 worker/worker-configuration.d.ts
+
+# Local-only NPC authoring tools and private drafts UI.
+/app/developer-mode/

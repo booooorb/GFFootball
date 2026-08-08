@@ -5,6 +5,7 @@ import {
   SEASON_LENGTH,
   USER_CLUB_ID,
   applyMatchToSave,
+  autoPickLineup,
   assignPlayerToSlot,
   ballonDorAllTime,
   chargeScoutingFee,
@@ -21,6 +22,7 @@ import {
   normalizeClubProfile,
   normalizeMarketPackPlayers,
   normalizeName,
+  playerCardTier,
   playerSeasonPerformance,
   positionCategory,
   prepareInitialSquad,
@@ -83,6 +85,7 @@ const elements = {
   themeInput: document.querySelector("#theme"),
   managerError: document.querySelector("#manager-error"),
   formationSelect: document.querySelector("#formation-select"),
+  autoPickButton: document.querySelector("#auto-pick-button"),
   openMatchdayButton: document.querySelector("#open-matchday-button"),
   managerWindowButtons: [...document.querySelectorAll("[data-open-manager-window]")],
   transferCounts: [...document.querySelectorAll("[data-transfer-count]")],
@@ -90,6 +93,7 @@ const elements = {
   lineupStatus: document.querySelector("#lineup-status"),
   selectionHint: document.querySelector("#selection-hint"),
   selectedPlayerSellButton: document.querySelector("#selected-player-sell-button"),
+  selectedPlayerInspector: document.querySelector("#selected-player-inspector"),
   collectionList: document.querySelector("#collection-list"),
   collectionTitle: document.querySelector("#collection-title"),
   playerSearch: document.querySelector("#player-search"),
@@ -125,6 +129,10 @@ const elements = {
   seasonOpponentPreviewPitch: document.querySelector("#season-opponent-preview-pitch"),
   seasonRecentFixtures: document.querySelector("#season-recent-fixtures"),
   seasonHistoryList: document.querySelector("#season-history-list"),
+  seasonBroadcastSummary: document.querySelector("#season-broadcast-summary"),
+  seasonNextButton: document.querySelector("#season-next-button"),
+  seasonNextOpponentName: document.querySelector("#season-next-opponent-name"),
+  seasonOpenMatchdayButton: document.querySelector("#season-open-matchday-button"),
   resetButton: document.querySelector("#reset-button"),
   creditsButton: document.querySelector("#credits-button"),
   creditsList: document.querySelector("#credits-list"),
@@ -142,6 +150,9 @@ const elements = {
   statsAllTimeAll: document.querySelector("#stats-alltime-all"),
   statsBallonRace: document.querySelector("#stats-ballon-race"),
   statsBallonAllTime: document.querySelector("#stats-ballon-alltime"),
+  statsFeature: document.querySelector("#stats-feature"),
+  statsSeasonSnapshot: document.querySelector("#stats-season-snapshot"),
+  statsRecordStrip: document.querySelector("#stats-record-strip"),
   sellDialog: document.querySelector("#sell-dialog"),
   sellDialogPlayer: document.querySelector("#sell-dialog-player"),
   sellPlayerPhoto: document.querySelector("#sell-player-photo"),
@@ -250,11 +261,21 @@ function showToast(message) {
 window.addEventListener(PUBLISHED_NPC_EVENT, (event) => {
   const previousOpponents = state.season.opponents ?? [];
   const previousIds = previousOpponents.map((club) => club.id).join("|");
-  const previousPresentation = JSON.stringify(previousOpponents.map((club) => ({ id: club.id, icon: club.icon, iconImageTransform: club.iconImageTransform })));
+  const previousPresentation = JSON.stringify(previousOpponents.map((club) => ({
+    id: club.id,
+    icon: club.icon,
+    iconImage: club.iconImage,
+    iconImageTransform: club.iconImageTransform,
+  })));
   const published = event.detail?.opponents ?? loadPublishedNpcOpponents();
   const next = syncSeasonOpponents(state, published);
   const nextIds = (next.season.opponents ?? []).map((club) => club.id).join("|");
-  const nextPresentation = JSON.stringify((next.season.opponents ?? []).map((club) => ({ id: club.id, icon: club.icon, iconImageTransform: club.iconImageTransform })));
+  const nextPresentation = JSON.stringify((next.season.opponents ?? []).map((club) => ({
+    id: club.id,
+    icon: club.icon,
+    iconImage: club.iconImage,
+    iconImageTransform: club.iconImageTransform,
+  })));
   const changed = previousIds !== nextIds || previousPresentation !== nextPresentation;
   state = next;
   if (changed) {
@@ -450,9 +471,23 @@ function renderSeasonHeader() {
     <span><small>Points</small><strong>${state.season.points}</strong></span>
     <span><small>Balance</small><strong>${formatMoney(state.finances.balanceMillions)}</strong></span>
   `;
+  if (elements.seasonBroadcastSummary) {
+    const table = state.collection.length ? leagueStandings(state) : [];
+    const userRow = table.find((club) => club.isUser);
+    const form = userRow ? seasonClubForm(state, USER_CLUB_ID, 5) : [];
+    elements.seasonBroadcastSummary.innerHTML = `
+      <span><small>Place</small><strong>${userRow ? `${userRow.position}${userRow.position === 1 ? "st" : userRow.position === 2 ? "nd" : userRow.position === 3 ? "rd" : "th"}` : "—"}</strong></span>
+      <span><small>Points</small><strong>${state.season.points}</strong></span>
+      <span><small>Goal difference</small><strong>${state.season.goalsFor - state.season.goalsAgainst > 0 ? "+" : ""}${state.season.goalsFor - state.season.goalsAgainst}</strong></span>
+      <span class="season-broadcast-summary__form"><small>Form</small><b>${form.length ? form.map((entry) => `<i class="is-${entry.result.toLowerCase()}">${entry.result}</i>`).join("") : "—"}</b></span>
+    `;
+  }
+  if (elements.seasonNextOpponentName && state.collection.length) {
+    elements.seasonNextOpponentName.textContent = previewOpponent(state).name;
+  }
 
   if (!state.collection.length) {
-    elements.topbarPhase.textContent = "Generative league";
+    elements.topbarPhase.textContent = "World tournament 2026";
     elements.topbarNext.textContent = "Build your world XI";
   } else if (state.season.complete) {
     elements.topbarPhase.textContent = `Season ${state.season.number} complete`;
@@ -479,6 +514,7 @@ function renderSeasonHeader() {
 function pitchPlayerMarkup(player, slot) {
   const source = safeUrl(playerImageSource(player));
   const effective = effectiveOverall(player, slot.position);
+  const tier = playerCardTier(effective);
   const seasonStats = playerSeasonPerformance(state.season, player.id);
   const rating = averageRating(player);
   const marketValue = marketValueMillions(player, state);
@@ -492,6 +528,7 @@ function pitchPlayerMarkup(player, slot) {
       <small>OVR</small>
     </span>
     <span class="pitch-player-position">${escapeHtml(positionLabel)}</span>
+    <span class="pitch-player-tier">${escapeHtml(tier.shortLabel)}</span>
     <span class="pitch-player-portrait">
       <span class="pitch-player-poster" aria-hidden="true"></span>
       <img
@@ -540,9 +577,11 @@ function renderPitch() {
       const compatible = player &&
         Number.isFinite(compatibilityPenalty(player.position, slot.position));
       const isSelected = slotPlayer?.id === selectedPlayerId;
+      const tier = slotPlayer ? playerCardTier(effectiveOverall(slotPlayer, slot.position)) : null;
       const classes = [
         "pitch-slot",
         slotPlayer ? "" : "is-empty",
+        tier?.className ?? "",
         compatible ? "is-compatible" : "",
         isSelected ? "is-selected" : "",
       ].filter(Boolean).join(" ");
@@ -554,11 +593,12 @@ function renderPitch() {
           style="--x:${slot.x}%;--y:${slot.y}%"
           data-slot-id="${escapeHtml(slot.id)}"
           data-player-id="${escapeHtml(slotPlayer?.id ?? "")}"
+          data-card-tier="${escapeHtml(tier?.id ?? "")}"
           data-position-category="${slotCategory}"
           draggable="${slotPlayer ? "true" : "false"}"
           aria-label="${
             slotPlayer
-              ? `${escapeHtml(slot.position)}: ${escapeHtml(slotPlayer.name)}, effective overall ${effectiveOverall(slotPlayer, slot.position)}, ${slotStats.goals} goals, ${slotStats.assists} assists, ${averageRating(slotPlayer)} average rating`
+              ? `${escapeHtml(slot.position)}: ${escapeHtml(slotPlayer.name)}, effective overall ${effectiveOverall(slotPlayer, slot.position)}, ${tier.label} card, ${slotStats.goals} goals, ${slotStats.assists} assists, ${averageRating(slotPlayer)} average rating`
               : `Empty ${escapeHtml(slot.position)} slot`
           }"
         >
@@ -587,6 +627,8 @@ function matchesPlayerFilters(player) {
 
 function collectionPlayerMarkup(player) {
   const selected = selectedPlayerId === player.id;
+  const starting = starterIds().has(player.id);
+  const tier = playerCardTier(player.overall);
   const seasonStats = playerSeasonPerformance(state.season, player.id);
   const careerSaves = Number(player.stats.saves) || 0;
   const careerTackles = Number(player.stats.tackles) || 0;
@@ -613,17 +655,18 @@ function collectionPlayerMarkup(player) {
 
   return `
     <article
-      class="collection-player squad-card${selected ? " is-selected" : ""}"
+      class="collection-player squad-card ${tier.className}${selected ? " is-selected" : ""}${starting ? " is-starting" : ""}"
       data-player-id="${escapeHtml(player.id)}"
-      data-membership="bench"
+      data-membership="${starting ? "starting" : "bench"}"
       data-position-category="${category}"
+      data-card-tier="${tier.id}"
       draggable="true"
     >
       <button
         class="squad-card__select"
         type="button"
         aria-pressed="${selected}"
-        aria-label="Select ${escapeHtml(player.name)}, ${escapeHtml(player.position)}, overall ${player.overall}, ${seasonStats.goals} season goals, ${seasonStats.assists} season assists, market value ${formatMoney(marketValue)}."
+        aria-label="Select ${escapeHtml(player.name)}, ${escapeHtml(player.position)}, overall ${player.overall}, ${escapeHtml(tier.label)} card, ${seasonStats.goals} season goals, ${seasonStats.assists} season assists, market value ${formatMoney(marketValue)}."
       >
         <span class="squad-card__visual">
           <span class="squad-card__poster" aria-hidden="true"></span>
@@ -637,6 +680,8 @@ function collectionPlayerMarkup(player) {
         </span>
         <span class="squad-card__identity">
           <span class="squad-card__name">${escapeHtml(player.name)}</span>
+          <span class="squad-card__tier">${escapeHtml(tier.label)}</span>
+          ${starting ? '<span class="squad-card__starter">Starting XI</span>' : ""}
           <span class="squad-card__value"><small>Market</small><strong>${formatMoney(marketValue)}</strong></span>
           <span class="squad-card__stats">${seasonMetrics}</span>
         </span>
@@ -659,7 +704,6 @@ function collectionPlayerMarkup(player) {
 }
 
 function renderCollection() {
-  const starters = starterIds();
   const sortMode = elements.playerSort.value;
   const comparePlayers = (left, right) => {
     if (sortMode === "name") return left.name.localeCompare(right.name);
@@ -676,33 +720,40 @@ function renderCollection() {
       right.overall - left.overall ||
       left.name.localeCompare(right.name);
   };
-  const reserves = state.collection
-    .filter((player) => !starters.has(player.id));
-  const visibleReserves = reserves
+  const visiblePlayers = state.collection
     .filter(matchesPlayerFilters)
     .sort(comparePlayers);
-  const groupMarkup = (title, label, players, total) => `
-    <section class="squad-group" data-squad-group="${label}" aria-labelledby="${label}-squad-title">
-      <div class="squad-group__heading">
-        <div>
-          <span class="squad-group__index">${label === "starting" ? "XI" : "SUB"}</span>
-          <h3 id="${label}-squad-title">${title}</h3>
-        </div>
-        <span class="squad-group__count">${total} ${total === 1 ? "player" : "players"}</span>
-      </div>
-      ${
-        players.length
-          ? `<div class="squad-grid">${players.map((player) => collectionPlayerMarkup(player)).join("")}</div>`
-          : `<p class="collection-empty">No ${title.toLowerCase()} players match this filter.</p>`
-      }
-    </section>
-  `;
-
-  elements.collectionTitle.textContent = `Bench / Reserves / ${reserves.length}`;
+  elements.collectionTitle.textContent = `Squad · ${state.collection.length} players`;
   elements.collectionList.innerHTML = state.collection.length
-    ? groupMarkup("Bench / Reserves", "bench", visibleReserves, reserves.length)
+    ? `<div class="squad-table-heading"><span>Player</span><span>Form</span><span>OVR</span></div><div class="squad-grid">${visiblePlayers.map((player) => collectionPlayerMarkup(player)).join("")}</div>`
     : `<p class="collection-empty">No players signed yet. Open the transfer desk and claim a free signing.</p>`;
   hydrateImageFallbacks(elements.collectionList);
+}
+
+function renderSelectedPlayerInspector() {
+  if (!elements.selectedPlayerInspector) return;
+  const player = selectedPlayer() ?? state.collection.find((candidate) => starterIds().has(candidate.id)) ?? state.collection[0];
+  if (!player) {
+    elements.selectedPlayerInspector.hidden = true;
+    return;
+  }
+  const seasonStats = playerSeasonPerformance(state.season, player.id);
+  const marketValue = marketValueMillions(player, state);
+  const role = positionCategory(player.position);
+  const roleValue = role === "GK" ? seasonStats.saves : role === "DEF" ? seasonStats.tackles : seasonStats.appearances;
+  const roleLabel = role === "GK" ? "SV" : role === "DEF" ? "TK" : "APP";
+  elements.selectedPlayerInspector.hidden = false;
+  elements.selectedPlayerInspector.innerHTML = `
+    <span class="selected-player-inspector__portrait"><img src="${escapeHtml(safeUrl(playerImageSource(player)))}" data-player-id="${escapeHtml(player.id)}" alt="" /></span>
+    <span class="selected-player-inspector__identity"><small>Selected player</small><strong>${escapeHtml(player.name)}</strong><b>${escapeHtml(player.position)} · ${player.overall} OVR</b></span>
+    <span class="selected-player-inspector__stat"><strong>${seasonStats.goals}</strong><small>Goals</small></span>
+    <span class="selected-player-inspector__stat"><strong>${seasonStats.assists}</strong><small>Assists</small></span>
+    <span class="selected-player-inspector__stat"><strong>${roleValue}</strong><small>${roleLabel}</small></span>
+    <span class="selected-player-inspector__stat"><strong>${averageRating(player)}</strong><small>Avg</small></span>
+    <span class="selected-player-inspector__value"><small>Market value</small><strong>${formatMoney(marketValue)}</strong></span>
+    <span class="selected-player-inspector__action">Player overview <span aria-hidden="true">›</span></span>
+  `;
+  hydrateImageFallbacks(elements.selectedPlayerInspector);
 }
 
 function renderMarketButton() {
@@ -906,7 +957,7 @@ function renderMatchday() {
   elements.openMatchdayButton.dataset.ready = String(state.season.complete || complete);
   elements.openMatchdayButton.innerHTML = state.season.complete
     ? 'Season complete <span aria-hidden="true">↻</span>'
-    : 'Simulate match <span aria-hidden="true">▶</span>';
+    : 'Play match <span aria-hidden="true">▶</span>';
 
   if (state.season.complete) {
     elements.opponentPreview.hidden = true;
@@ -951,6 +1002,16 @@ function statsLeaderboardMarkup(records, metric) {
   `).join("");
 }
 
+function statsFeatureMarkup(records, metric) {
+  const leaders = records.slice(0, 3);
+  if (!leaders.length) return `<p class="stats-feature__empty">Play a match to open the leader race.</p>`;
+  const ordered = leaders.length === 3 ? [leaders[1], leaders[0], leaders[2]] : leaders;
+  return `<header><span>Golden ${metric === "assists" ? "playmaker" : "boot"} race</span><small>This season · all clubs</small></header><div class="stats-feature__podium">${ordered.map((record) => {
+    const rank = leaders.indexOf(record) + 1;
+    return `<article class="stats-feature__player is-rank-${rank}"><span class="stats-feature__rank">${rank}</span>${statsPlayerIconMarkup(record, "stats-feature__portrait")}<div><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small><b>${Number(record[metric]) || 0} ${metric === "assists" ? "assists" : "goals"}</b></div></article>`;
+  }).join("")}</div>`;
+}
+
 function ballonDorRaceMarkup() {
   const race = currentBallonDorRace(state);
   if (!race.length) return `<p class="stats-empty-copy">Play matches to build the shortlist.</p>`;
@@ -979,6 +1040,7 @@ function renderStatsWindow() {
     button.setAttribute("aria-pressed", String(active));
   });
   elements.statsLeaderboardGrid.hidden = isBallon;
+  elements.statsFeature.hidden = isBallon;
   elements.statsBallonView.hidden = !isBallon;
   if (isBallon) {
     elements.statsBallonRace.innerHTML = ballonDorRaceMarkup();
@@ -989,6 +1051,20 @@ function renderStatsWindow() {
   elements.statsSeasonAll.innerHTML = statsLeaderboardMarkup(boards.seasonAllClubs, metric);
   elements.statsAllTimeClub.innerHTML = statsLeaderboardMarkup(boards.allTimeClub, metric);
   elements.statsAllTimeAll.innerHTML = statsLeaderboardMarkup(boards.allTimeAllClubs, metric);
+  elements.statsFeature.innerHTML = statsFeatureMarkup(boards.seasonAllClubs, metric);
+  const clubSeason = state.collection.map((player) => playerSeasonPerformance(state.season, player.id));
+  const seasonGoals = clubSeason.reduce((sum, record) => sum + (Number(record.goals) || 0), 0);
+  const seasonAssists = clubSeason.reduce((sum, record) => sum + (Number(record.assists) || 0), 0);
+  if (elements.statsSeasonSnapshot) {
+    const matches = state.season.matches.length;
+    const goalsPerMatch = matches ? (seasonGoals / matches).toFixed(1) : "0.0";
+    elements.statsSeasonSnapshot.innerHTML = `<header>Season snapshot</header><div><span><strong>${seasonGoals}</strong><small>Goals</small></span><span><strong>${seasonAssists}</strong><small>Assists</small></span><span><strong>${matches}</strong><small>Matches</small></span><span><strong>${goalsPerMatch}</strong><small>Goals / match</small></span></div>`;
+  }
+  if (elements.statsRecordStrip) {
+    const allTimeLeader = boards.allTimeClub[0];
+    elements.statsRecordStrip.innerHTML = `<span>All-time record</span><strong>${Number(allTimeLeader?.[metric]) || 0}</strong><small>${metric}</small><b>${escapeHtml(allTimeLeader?.name || "No record yet")}</b><button type="button" data-stats-metric="ballon">View Ballon dâ€™Or race <span aria-hidden="true">›</span></button>`;
+  }
+  hydrateImageFallbacks(elements.statsFeature);
 }
 
 function renderCredits() {
@@ -1029,6 +1105,7 @@ function render() {
   elements.formationSelect.value = state.formationId;
   renderPitch();
   renderCollection();
+  renderSelectedPlayerInspector();
   renderMarketButton();
   renderLeagueTable();
   renderFixtures();
@@ -1041,6 +1118,7 @@ function setSelectedPlayer(playerId) {
   selectedPlayerId = selectedPlayerId === playerId ? null : playerId;
   renderPitch();
   renderCollection();
+  renderSelectedPlayerInspector();
 }
 
 function assignSelectedToSlot(slotId, draggedPlayerId = null) {
@@ -1355,6 +1433,7 @@ function renderTransferMarketDialog({ open = false } = {}) {
       const priceMillions = player.isFreeTransfer ? 0 : player.askingPriceMillions;
       const affordable = state.finances.balanceMillions >= priceMillions && state.collection.length < COLLECTION_LIMIT;
       const projectedResale = marketValueMillions(player, state);
+      const tier = playerCardTier(player.overall);
       const tone = ["is-red", "is-mint", "is-blue", "is-violet", "is-orange"][index % 5];
       const availability = state.collection.length >= COLLECTION_LIMIT
         ? "Squad full — sell a player first"
@@ -1363,7 +1442,7 @@ function renderTransferMarketDialog({ open = false } = {}) {
           : player.isFreeTransfer ? "Free transfer selected" : "Available to sign";
       const revealLabel = picksRemaining ? `Flip card ${index + 1} for a free transfer` : `Card ${index + 1}`;
       return `
-        <article class="pack-player pack-card ${tone}${isRevealed ? " is-revealed" : " is-concealed"}${player.isFreeTransfer ? " is-free-transfer" : ""}" style="--order:${index};--deal-delay:${index * 62}ms;--flip-delay:${index * 48}ms">
+        <article class="pack-player pack-card ${tone} ${tier.className}${isRevealed ? " is-revealed" : " is-concealed"}${player.isFreeTransfer ? " is-free-transfer" : ""}" data-card-tier="${tier.id}" style="--order:${index};--deal-delay:${index * 62}ms;--flip-delay:${index * 48}ms">
           <div class="pack-card__inner">
             <div class="pack-card__back">
               <button class="pack-card__reveal" type="button" data-action="reveal-transfer" data-player-id="${escapeHtml(player.id)}" aria-label="${escapeHtml(revealLabel)}" ${picksRemaining ? "" : "disabled"}>
@@ -1378,7 +1457,8 @@ function renderTransferMarketDialog({ open = false } = {}) {
                 <span class="pack-player__poster" aria-hidden="true"></span>
                 <div class="pack-player__topline"><span><strong>${player.overall}</strong><small>OVR</small></span><b>${escapeHtml(player.position)}</b></div>
                 <img class="pack-player-photo" src="${escapeHtml(safeUrl(playerImageSource(player)))}" alt="" data-player-id="${escapeHtml(player.id)}" />
-                <span class="pack-player__rarity">${player.isFreeTransfer ? "Free transfer" : "Scouted target"}</span>
+                <span class="pack-player__rarity">${escapeHtml(tier.label)}</span>
+                <span class="pack-player__transfer-state">${player.isFreeTransfer ? "Free transfer" : "Scouted target"}</span>
               </div>
               <div class="pack-player__identity"><h3>${escapeHtml(player.name)}</h3><p>${escapeHtml(player.theme)}</p></div>
               <div class="pack-player__finance">
@@ -1812,6 +1892,31 @@ elements.resultTeamButtons.forEach((button) => {
     if (!currentResultMatch) return;
     renderResultPitch(currentResultMatch, button.dataset.resultTeam);
   });
+});
+
+elements.autoPickButton?.addEventListener("click", () => {
+  state.lineup = autoPickLineup(state.collection, state.formationId);
+  state.collection = reconcileLineupPlayerPositions(state.collection, state.lineup, state.formationId);
+  selectedPlayerId = null;
+  saveAndRender();
+  showToast("Best available XI selected.");
+});
+
+elements.seasonNextButton?.addEventListener("click", () => {
+  elements.seasonDialog.close();
+  elements.openMatchdayButton.click();
+});
+
+elements.seasonOpenMatchdayButton?.addEventListener("click", () => {
+  elements.seasonDialog.close();
+  elements.openMatchdayButton.click();
+});
+
+elements.statsRecordStrip?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-stats-metric='ballon']");
+  if (!button) return;
+  selectedStatsMetric = "ballon";
+  renderStatsWindow();
 });
 
 document.addEventListener("error", (event) => {

@@ -28,6 +28,7 @@ import {
   marketValueMillions,
   normalizeCardEvents,
   normalizeMarketPackPlayers,
+  playerCardTier,
   playerSeasonPerformance,
   playerSeasonStats,
   prepareInitialSquad,
@@ -81,6 +82,16 @@ function makeSave(overall = 82, anonymousUserId = "test-manager-0001") {
   save.lineup = autoPickLineup(save.collection, save.formationId);
   return save;
 }
+
+test("player cards map every rating to a complete material tier", () => {
+  assert.equal(playerCardTier(74).id, "silver");
+  assert.equal(playerCardTier(75).id, "gold");
+  assert.equal(playerCardTier(84).id, "gold");
+  assert.equal(playerCardTier(85).id, "shiny-gold");
+  assert.equal(playerCardTier(89).id, "shiny-gold");
+  assert.equal(playerCardTier(90).id, "chroma");
+  assert.equal(playerCardTier(100).label, "Chroma Chromium Gold");
+});
 
 test("formation catalog includes all seven playable tactical shapes", () => {
   assert.deepEqual(Object.keys(FORMATIONS), [

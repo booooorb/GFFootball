@@ -11,10 +11,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Noto+Sans:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&family=Noto+Sans:wght@400;500;600;700;800&family=Teko:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="host-city.css" />
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -28,7 +29,7 @@
       </a>
     </div>
     <div class="topbar-context" aria-label="Current competition">
-      <span id="topbar-phase">Generative league</span>
+      <span id="topbar-phase">World tournament 2026</span>
       <strong id="topbar-next">Build your world XI</strong>
     </div>
     <div class="api-status is-checking" id="api-status" aria-live="polite">
@@ -54,7 +55,7 @@
   <main id="top">
     <section class="setup-screen" id="setup-screen" aria-labelledby="setup-title">
       <div class="setup-copy">
-        <p class="eyebrow"><span>01</span> AI squad builder</p>
+        <p class="eyebrow"><span>26</span> Generative world tournament</p>
         <h1 id="setup-title"><span>Build your</span> world XI.</h1>
         <p class="lede">
           Choose a theme and formation. AI creates an original starting eleven;
@@ -193,7 +194,7 @@
         <section class="pitch-column" id="pitch-panel" aria-label="Squad tactics">
           <div class="tactics-commandbar">
             <div class="tactics-title-block">
-              <p class="eyebrow">Manual XI</p>
+              <p class="eyebrow">Starting XI</p>
               <h1 class="tactics-context-title" id="selection-hint">Tactics board</h1>
             </div>
             <div class="tactics-toolbar">
@@ -213,8 +214,9 @@
                 </select>
               </label>
               <span class="lineup-status" id="lineup-status">0 / 11</span>
+              <button class="button tactics-auto-pick" id="auto-pick-button" type="button">Pick best XI</button>
               <button class="button button--matchday-open" id="open-matchday-button" type="button">
-                Simulate match <span aria-hidden="true">▶</span>
+                Play match <span aria-hidden="true">▶</span>
               </button>
             </div>
           </div>
@@ -224,8 +226,8 @@
         <section class="collection-column" id="squad-panel" aria-labelledby="collection-title">
           <div class="section-heading">
             <div>
-              <p class="eyebrow"><span>SUB</span> Player collection</p>
-              <h2 id="collection-title">Bench / Reserves</h2>
+              <p class="eyebrow">Player collection</p>
+              <h2 id="collection-title">Squad</h2>
             </div>
             <button class="icon-button" id="credits-button" type="button" title="Image credits">©</button>
           </div>
@@ -251,6 +253,7 @@
           <div class="collection-list squad-gallery" id="collection-list" aria-live="polite"></div>
         </section>
       </div>
+      <aside class="selected-player-inspector" id="selected-player-inspector" aria-live="polite"></aside>
     </section>
   </main>
 
@@ -392,7 +395,9 @@
           <h2 id="season-window-title">Season standings</h2>
         </div>
         <button class="text-button text-button--danger" id="reset-button" type="button">Reset club</button>
+        <button class="button season-next-button" id="season-next-button" type="button">Next match <span aria-hidden="true">›</span></button>
       </div>
+      <div class="season-broadcast-summary" id="season-broadcast-summary" aria-label="Season summary"></div>
 
       <div class="season-window__body">
       <section class="standings-panel season-window__standings" aria-labelledby="standings-title">
@@ -445,6 +450,14 @@
           <section class="season-history-window" aria-labelledby="season-history-title"><div class="subsection-heading"><h3 id="season-history-title">Past seasons</h3><span>Ballon d’Or archive</span></div><ol class="season-history-list" id="season-history-list"></ol></section>
         </div>
       </div>
+      <footer class="season-match-strip">
+        <span class="season-match-strip__crest" data-club-icon aria-hidden="true">◆</span>
+        <span class="season-match-strip__next">Next:</span>
+        <strong id="season-next-opponent-name">Opponent</strong>
+        <small>Home</small>
+        <span class="season-match-strip__time">Sat<br><b>20:00</b></span>
+        <button class="button" id="season-open-matchday-button" type="button">Open matchday <span aria-hidden="true">›</span></button>
+      </footer>
     </div>
   </dialog>
 
@@ -499,6 +512,7 @@
         </div>
       </div>
 
+      <section class="stats-feature" id="stats-feature" aria-label="Top player leaders"></section>
       <div class="stats-window__grid">
         <section class="stats-leaderboard" aria-labelledby="stats-season-club-title">
           <header>
@@ -528,7 +542,9 @@
           </header>
           <ol id="stats-alltime-all"></ol>
         </section>
+        <section class="stats-season-snapshot" id="stats-season-snapshot" aria-label="Season snapshot"></section>
       </div>
+      <footer class="stats-record-strip" id="stats-record-strip"></footer>
       <div class="stats-ballon-view" id="stats-ballon-view" hidden>
         <section class="stats-ballon-view__race" aria-labelledby="stats-ballon-race-title">
           <header><div><p class="eyebrow">Season award</p><h3 id="stats-ballon-race-title">Ballon d’Or race</h3><p>G+A × 10, plus a club-standing bonus of up to 24 points.</p></div><span>Share of race</span></header>
@@ -545,8 +561,7 @@
   <dialog class="game-dialog pack-dialog transfer-window" id="pack-dialog" aria-labelledby="pack-title">
     <div class="transfer-window__shell">
       <header class="transfer-window__topbar manager-window-header">
-        <div class="manag
-r-game-brand" aria-label="GFFootball">
+        <div class="manager-game-brand" aria-label="GFFootball">
           <span class="manager-game-brand__crest">GF</span>
           <strong>GFFootball</strong>
         </div>
@@ -584,7 +599,8 @@ r-game-brand" aria-label="GFFootball">
       <div class="dialog-header transfer-window__heading">
         <div>
           <p class="eyebrow">Transfer desk</p>
-          <h2 id="pack-title">Scouting report</h2>
+          <h2>Transfer market</h2>
+          <strong class="transfer-theme-label" id="pack-title">Scouting report</strong>
         </div>
         <p>Open a scout pack and choose three concealed cards as free transfers; the remaining targets become paid signings.</p>
       </div>

@@ -39,6 +39,10 @@ python -m http.server 8000 --directory app
 
 Open `http://localhost:8000`.
 
+### VS Code Live Server
+
+Open the `GFFootball` folder itself in VS Code, then click **Go Live**. The checked-in workspace settings serve `app/` as the site root, so the game at `app/index.html` opens automatically with live reload.
+
 The checked-in `app/config.js` points to the current production Worker. For local Worker development, follow [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Current gameplay systems
@@ -63,4 +67,3 @@ The checked-in `app/config.js` points to the current production Worker. For loca
 ## Security
 
 Never commit Gemini, Turnstile, SerpAPI, Cloudflare, or developer-mode secrets. Browser configuration contains public endpoints and public Turnstile site keys only. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for secret setup.
-
