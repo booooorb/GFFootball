@@ -558,7 +558,11 @@ function renderPitch() {
 
   if (player) {
     const saleValue = marketValueMillions(player, state);
-    elements.selectionHint.textContent = `${player.name} selected`;
+    // Keep the screen title stable. The selected player already has a dedicated
+    // lower-third inspector; mirroring their (potentially very long) generated
+    // name into the command bar caused the title to collide with formation and
+    // match controls on wide/short desktop viewports.
+    elements.selectionHint.textContent = "Tactics board";
     elements.selectedPlayerSellButton.hidden = false;
     elements.selectedPlayerSellButton.textContent = `Sell ${player.name} · ${formatMoney(saleValue)}`;
   } else {
@@ -569,6 +573,9 @@ function renderPitch() {
 
   elements.pitch.innerHTML = formation.slots
     .map((slot) => {
+      const perspectiveScale = 0.72 + Math.min(90, Math.max(10, slot.y)) * 0.0028;
+      const projectedX = 50 + (slot.x - 50) * perspectiveScale;
+      const projectedY = Math.min(87, Math.max(13, slot.y));
       const slotPlayer = playerById(state.lineup[slot.id]);
       const slotCategory = positionCategory(slotPlayer?.position ?? slot.position);
       const slotStats = slotPlayer
@@ -590,8 +597,9 @@ function renderPitch() {
         <button
           class="${classes}"
           type="button"
-          style="--x:${slot.x}%;--y:${slot.y}%"
+          style="--x:${projectedX.toFixed(2)}%;--y:${projectedY}%"
           data-slot-id="${escapeHtml(slot.id)}"
+          data-slot-position="${escapeHtml(slot.position)}"
           data-player-id="${escapeHtml(slotPlayer?.id ?? "")}"
           data-card-tier="${escapeHtml(tier?.id ?? "")}"
           data-position-category="${slotCategory}"
@@ -720,13 +728,15 @@ function renderCollection() {
       right.overall - left.overall ||
       left.name.localeCompare(right.name);
   };
-  const visiblePlayers = state.collection
+  const starters = starterIds();
+  const benchPlayers = state.collection.filter((player) => !starters.has(player.id));
+  const visiblePlayers = benchPlayers
     .filter(matchesPlayerFilters)
     .sort(comparePlayers);
-  elements.collectionTitle.textContent = `Squad · ${state.collection.length} players`;
-  elements.collectionList.innerHTML = state.collection.length
+  elements.collectionTitle.textContent = `Bench · ${benchPlayers.length} players`;
+  elements.collectionList.innerHTML = benchPlayers.length
     ? `<div class="squad-table-heading"><span>Player</span><span>Form</span><span>OVR</span></div><div class="squad-grid">${visiblePlayers.map((player) => collectionPlayerMarkup(player)).join("")}</div>`
-    : `<p class="collection-empty">No players signed yet. Open the transfer desk and claim a free signing.</p>`;
+    : `<p class="collection-empty">Every available player is in the starting XI. Drag a player off the pitch or sign a transfer to add bench options.</p>`;
   hydrateImageFallbacks(elements.collectionList);
 }
 
@@ -1157,6 +1167,28 @@ function assignSelectedToSlot(slotId, draggedPlayerId = null) {
   saveAndRender();
 }
 
+function showDragTargets(playerId) {
+  const player = playerById(playerId);
+  if (!player) return;
+  const slots = new Map(currentFormation().slots.map((slot) => [slot.id, slot]));
+  elements.pitch.querySelectorAll("[data-slot-id]").forEach((slotElement) => {
+    const slot = slots.get(slotElement.dataset.slotId);
+    slotElement.classList.toggle(
+      "is-compatible",
+      Boolean(slot && Number.isFinite(compatibilityPenalty(player.position, slot.position))),
+    );
+  });
+  elements.pitch.classList.add("is-dragging-player");
+  elements.pitch.dataset.draggedPlayerId = playerId;
+}
+
+function clearDragTargets() {
+  elements.pitch.classList.remove("is-dragging-player");
+  delete elements.pitch.dataset.draggedPlayerId;
+  elements.pitch.querySelectorAll(".is-drop-target").forEach((candidate) => candidate.classList.remove("is-drop-target"));
+  renderPitch();
+}
+
 function cyclePortrait(player) {
   const candidates = player.portrait.candidates ?? [];
   if (!candidates.length) {
@@ -1384,28 +1416,53 @@ async function handleThemeSubmit({ theme, formationId, turnstileContainer, error
 }
 
 function openManagerWindow(windowName) {
-  if (elements.packOpeningDialog.open) elements.packOpeningDialog.close();
-  if (elements.packDialog.open) elements.packDialog.close();
-  if (elements.seasonDialog.open) elements.seasonDialog.close();
-  if (elements.statsDialog.open) elements.statsDialog.close();
+  const order = { tactics: 0, transfers: 1, season: 2, stats: 3 };
+  const currentWindow = elements.packDialog.open
+    ? "transfers"
+    : elements.seasonDialog.open
+      ? "season"
+      : elements.statsDialog.open
+        ? "stats"
+        : "tactics";
+  const targetWindow = order[windowName] === undefined ? "tactics" : windowName;
+  document.body.style.setProperty("--manager-nav-from", order[currentWindow]);
+  document.body.style.setProperty("--manager-nav-to", order[targetWindow]);
+  document.body.classList.remove("is-manager-nav-sliding");
+  void document.body.offsetWidth;
+  document.body.classList.add("is-manager-nav-sliding");
 
-  if (windowName === "transfers") {
-    renderTransferMarketDialog({ open: true });
-    return;
-  }
+  const switchWindow = () => {
+    if (elements.packOpeningDialog.open) elements.packOpeningDialog.close();
+    if (elements.packDialog.open) elements.packDialog.close();
+    if (elements.seasonDialog.open) elements.seasonDialog.close();
+    if (elements.statsDialog.open) elements.statsDialog.close();
 
-  if (windowName === "season") {
-    renderLeagueTable();
-    elements.seasonDialog.showModal();
-    return;
-  }
+    if (targetWindow === "tactics") {
+      return;
+    }
 
-  if (windowName === "stats") {
-    renderStatsWindow();
-    elements.statsDialog.showModal();
-    return;
-  }
+    if (targetWindow === "transfers") {
+      renderTransferMarketDialog({ open: true });
+      return;
+    }
 
+    if (targetWindow === "season") {
+      renderLeagueTable();
+      elements.seasonDialog.showModal();
+      return;
+    }
+
+    if (targetWindow === "stats") {
+      renderStatsWindow();
+      elements.statsDialog.showModal();
+    }
+  };
+
+  switchWindow();
+
+  window.setTimeout(() => {
+    document.body.classList.remove("is-manager-nav-sliding");
+  }, 420);
 }
 
 function renderTransferMarketDialog({ open = false } = {}) {
@@ -1807,7 +1864,9 @@ elements.formationSelect.addEventListener("change", () => {
 elements.pitch.addEventListener("click", (event) => {
   const slot = event.target.closest("[data-slot-id]");
   if (!slot) return;
-  assignSelectedToSlot(slot.dataset.slotId);
+  const playerId = slot.dataset.playerId;
+  if (playerId) setSelectedPlayer(playerId);
+  else showToast("Drag a compatible player onto this position.");
 });
 
 elements.pitch.addEventListener("dragstart", (event) => {
@@ -1816,6 +1875,7 @@ elements.pitch.addEventListener("dragstart", (event) => {
   if (!playerId) return;
   event.dataTransfer.setData("text/player-id", playerId);
   event.dataTransfer.effectAllowed = "move";
+  showDragTargets(playerId);
 });
 
 elements.pitch.addEventListener("dragover", (event) => {
@@ -1827,7 +1887,18 @@ elements.pitch.addEventListener("dragover", (event) => {
   if (player && slot && Number.isFinite(compatibilityPenalty(player.position, slot.position))) {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
+    elements.pitch.querySelectorAll(".is-drop-target").forEach((candidate) => candidate.classList.remove("is-drop-target"));
+    slotElement.classList.add("is-drop-target");
   }
+});
+
+elements.pitch.addEventListener("dragleave", (event) => {
+  const slotElement = event.target.closest("[data-slot-id]");
+  if (slotElement && !slotElement.contains(event.relatedTarget)) slotElement.classList.remove("is-drop-target");
+});
+
+elements.pitch.addEventListener("dragend", () => {
+  clearDragTargets();
 });
 
 elements.pitch.addEventListener("drop", (event) => {
@@ -1836,6 +1907,7 @@ elements.pitch.addEventListener("drop", (event) => {
   event.preventDefault();
   const playerId = event.dataTransfer.getData("text/player-id");
   assignSelectedToSlot(slotElement.dataset.slotId, playerId);
+  clearDragTargets();
 });
 
 elements.selectedPlayerSellButton.addEventListener("click", () => {
@@ -1875,6 +1947,11 @@ elements.collectionList.addEventListener("dragstart", (event) => {
   if (!row) return;
   event.dataTransfer.setData("text/player-id", row.dataset.playerId);
   event.dataTransfer.effectAllowed = "move";
+  showDragTargets(row.dataset.playerId);
+});
+
+elements.collectionList.addEventListener("dragend", () => {
+  clearDragTargets();
 });
 
 elements.playerSearch.addEventListener("input", renderCollection);
@@ -2064,7 +2141,11 @@ elements.resetButton.addEventListener("click", () => {
 document.querySelectorAll("[data-close-dialog]").forEach((button) => {
   button.addEventListener("click", () => {
     const dialog = document.getElementById(button.dataset.closeDialog);
-    dialog?.close();
+    if ([elements.packDialog, elements.seasonDialog, elements.statsDialog].includes(dialog)) {
+      openManagerWindow("tactics");
+    } else {
+      dialog?.close();
+    }
   });
 });
 
