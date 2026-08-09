@@ -208,28 +208,16 @@ let connectionReady = false;
 let portraitRefreshStarted = false;
 let animatedMarketBatchId = "";
 let packAnimationTimer = null;
-let activePlayerDragGhost = null;
 let activeDraggedPlayerId = null;
 let pointerDragSession = null;
 let suppressPlayerClick = false;
 const PORTRAIT_LOOKUP_VERSION_KEY = "gff-portrait-lookup-version";
 const PORTRAIT_LOOKUP_VERSION = 2;
 
-function clearPlayerDragImage() {
-  activePlayerDragGhost?.remove();
-  activePlayerDragGhost = null;
-}
-
-function setPlayerDragImage(event, sourceElement) {
-  if (!event.dataTransfer || !sourceElement) return;
-  clearPlayerDragImage();
+function createPointerDragGhost(sourceElement, event) {
   const rect = sourceElement.getBoundingClientRect();
-  const stage = document.createElement("div");
-  stage.className = "player-drag-ghost-stage football-pitch";
-  stage.style.setProperty("--drag-card-width", `${Math.max(72, rect.width)}px`);
-  stage.style.setProperty("--drag-card-height", `${Math.max(96, rect.height)}px`);
   const ghost = sourceElement.cloneNode(true);
-  ghost.classList.add("player-drag-ghost");
+  ghost.classList.add("pointer-player-drag-ghost");
   ghost.classList.remove(
     "is-selected",
     "is-compatible",
@@ -237,24 +225,8 @@ function setPlayerDragImage(event, sourceElement) {
     "is-ideal-position",
     "is-drop-target",
     "is-drag-source",
+    "is-pointer-drag-source",
   );
-  ghost.removeAttribute("id");
-  ghost.removeAttribute("draggable");
-  stage.append(ghost);
-  document.body.append(stage);
-  event.dataTransfer.setDragImage(
-    ghost,
-    Math.round(Math.max(72, rect.width) / 2),
-    Math.round(Math.max(96, rect.height) / 2),
-  );
-  activePlayerDragGhost = stage;
-}
-
-function createPointerDragGhost(sourceElement, event) {
-  const rect = sourceElement.getBoundingClientRect();
-  const ghost = sourceElement.cloneNode(true);
-  ghost.classList.add("pointer-player-drag-ghost");
-  ghost.classList.remove("is-selected", "is-compatible", "is-emergency-compatible", "is-ideal-position", "is-drop-target", "is-drag-source");
   ghost.removeAttribute("id");
   ghost.removeAttribute("draggable");
   ghost.style.setProperty("--pointer-ghost-width", `${rect.width}px`);
@@ -276,9 +248,14 @@ function updatePointerDropTarget(event) {
 
 function beginPointerPlayerDrag(event, sourceElement, playerId) {
   if (event.button !== 0 || !playerId) return;
+  // A pointer session has exactly one owner. Clear any stale/cancelled session
+  // before accepting another press so repeated swaps never inherit old state.
+  cancelPointerPlayerDrag();
+  sourceElement.setPointerCapture?.(event.pointerId);
   pointerDragSession = {
     playerId,
     sourceElement,
+    pointerId: event.pointerId,
     startX: event.clientX,
     startY: event.clientY,
     dragging: false,
@@ -288,13 +265,17 @@ function beginPointerPlayerDrag(event, sourceElement, playerId) {
 
 function finishPointerPlayerDrag(event) {
   const session = pointerDragSession;
-  if (!session) return;
+  if (!session || event.pointerId !== session.pointerId) return;
   pointerDragSession = null;
   if (!session.dragging) return;
   suppressPlayerClick = true;
   const target = document.elementFromPoint(event.clientX, event.clientY);
   const targetSlot = target?.closest("[data-slot-id]");
   const droppedOnBench = Boolean(target && elements.collectionList.contains(target));
+  if (session.sourceElement.hasPointerCapture?.(session.pointerId)) {
+    session.sourceElement.releasePointerCapture(session.pointerId);
+  }
+  session.sourceElement.classList.remove("is-pointer-drag-source");
   session.ghost?.remove();
   if (targetSlot) {
     assignSelectedToSlot(targetSlot.dataset.slotId, session.playerId);
@@ -315,6 +296,10 @@ function finishPointerPlayerDrag(event) {
 }
 
 function cancelPointerPlayerDrag() {
+  if (pointerDragSession?.sourceElement?.hasPointerCapture?.(pointerDragSession.pointerId)) {
+    pointerDragSession.sourceElement.releasePointerCapture(pointerDragSession.pointerId);
+  }
+  pointerDragSession?.sourceElement?.classList.remove("is-pointer-drag-source");
   pointerDragSession?.ghost?.remove();
   pointerDragSession = null;
   if (activeDraggedPlayerId) clearDragTargets();
@@ -742,6 +727,7 @@ function renderPitch() {
               : `Empty ${escapeHtml(slot.position)} slot`
           }"
         >
+          <span class="pitch-position-shine" aria-hidden="true"></span>
           ${
             slotPlayer
               ? pitchPlayerMarkup(slotPlayer, slot)
@@ -749,6 +735,11 @@ function renderPitch() {
                  <span class="pitch-slot__empty-action">empty slot</span>`
           }
         </button>
+        <span
+          class="pitch-slot-halo"
+          style="--x:${projectedX.toFixed(2)}%;--y:${projectedY}%"
+          aria-hidden="true"
+        ></span>
       `;
     })
     .join("");
@@ -1330,12 +1321,11 @@ function showDragTargets(playerId) {
 }
 
 function clearDragTargets() {
-  clearPlayerDragImage();
   activeDraggedPlayerId = null;
   elements.pitch.classList.remove("is-dragging-player");
   delete elements.pitch.dataset.draggedPlayerId;
-  elements.pitch.querySelectorAll(".is-drop-target, .is-drag-source, .is-emergency-compatible").forEach((candidate) => {
-    candidate.classList.remove("is-drop-target", "is-drag-source", "is-emergency-compatible");
+  elements.pitch.querySelectorAll(".is-drop-target, .is-drag-source, .is-compatible, .is-emergency-compatible, .is-ideal-position").forEach((candidate) => {
+    candidate.classList.remove("is-drop-target", "is-drag-source", "is-compatible", "is-emergency-compatible", "is-ideal-position");
   });
   elements.collectionList.classList.remove("is-bench-drop-target");
   renderPitch();
@@ -2091,6 +2081,7 @@ document.addEventListener("pointermove", (event) => {
     if (distance < 6) return;
     session.dragging = true;
     activeDraggedPlayerId = session.playerId;
+    session.sourceElement.classList.add("is-pointer-drag-source");
     session.ghost = createPointerDragGhost(session.sourceElement, event);
     showDragTargets(session.playerId);
   }
@@ -2103,49 +2094,6 @@ document.addEventListener("pointermove", (event) => {
 
 document.addEventListener("pointerup", finishPointerPlayerDrag);
 document.addEventListener("pointercancel", cancelPointerPlayerDrag);
-
-elements.pitch.addEventListener("dragstart", (event) => {
-  const playerElement = event.target.closest("[data-slot-id]");
-  const playerId = playerElement?.dataset.playerId;
-  if (!playerId) return;
-  activeDraggedPlayerId = playerId;
-  event.dataTransfer.setData("text/player-id", playerId);
-  event.dataTransfer.effectAllowed = "move";
-  setPlayerDragImage(event, playerElement);
-  showDragTargets(playerId);
-});
-
-elements.pitch.addEventListener("dragover", (event) => {
-  const slotElement = event.target.closest("[data-slot-id]");
-  if (!slotElement) return;
-  const playerId = activeDraggedPlayerId || event.dataTransfer.getData("text/player-id") || selectedPlayerId;
-  const player = playerById(playerId);
-  const slot = currentFormation().slots.find((candidate) => candidate.id === slotElement.dataset.slotId);
-  if (player && slot && Number.isFinite(compatibilityPenalty(player.position, slot.position))) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    elements.pitch.querySelectorAll(".is-drop-target").forEach((candidate) => candidate.classList.remove("is-drop-target"));
-    slotElement.classList.add("is-drop-target");
-  }
-});
-
-elements.pitch.addEventListener("dragleave", (event) => {
-  const slotElement = event.target.closest("[data-slot-id]");
-  if (slotElement && !slotElement.contains(event.relatedTarget)) slotElement.classList.remove("is-drop-target");
-});
-
-elements.pitch.addEventListener("dragend", () => {
-  clearDragTargets();
-});
-
-elements.pitch.addEventListener("drop", (event) => {
-  const slotElement = event.target.closest("[data-slot-id]");
-  if (!slotElement) return;
-  event.preventDefault();
-  const playerId = activeDraggedPlayerId || event.dataTransfer.getData("text/player-id");
-  assignSelectedToSlot(slotElement.dataset.slotId, playerId);
-  clearDragTargets();
-});
 
 elements.selectedPlayerSellButton.addEventListener("click", () => {
   const player = selectedPlayer();
@@ -2180,57 +2128,8 @@ elements.collectionList.addEventListener("click", (event) => {
   if (row) setSelectedPlayer(row.dataset.playerId);
 });
 
-elements.collectionList.addEventListener("dragstart", (event) => {
-  const row = event.target.closest(".collection-player");
-  if (!row) return;
-  activeDraggedPlayerId = row.dataset.playerId;
-  event.dataTransfer.setData("text/player-id", row.dataset.playerId);
-  event.dataTransfer.effectAllowed = "move";
-  setPlayerDragImage(event, row);
-  showDragTargets(row.dataset.playerId);
-});
-
-elements.collectionList.addEventListener("dragend", () => {
-  clearDragTargets();
-});
-
-document.addEventListener("dragend", () => {
-  if (activeDraggedPlayerId) clearDragTargets();
-});
-
 window.addEventListener("blur", () => {
   cancelPointerPlayerDrag();
-});
-
-elements.collectionList.addEventListener("dragover", (event) => {
-  const playerId = activeDraggedPlayerId || event.dataTransfer.getData("text/player-id") || elements.pitch.dataset.draggedPlayerId;
-  if (!playerId) return;
-  event.preventDefault();
-  event.dataTransfer.dropEffect = "move";
-  elements.collectionList.classList.add("is-bench-drop-target");
-});
-
-elements.collectionList.addEventListener("dragleave", (event) => {
-  if (!elements.collectionList.contains(event.relatedTarget)) {
-    elements.collectionList.classList.remove("is-bench-drop-target");
-  }
-});
-
-elements.collectionList.addEventListener("drop", (event) => {
-  event.preventDefault();
-  const playerId = activeDraggedPlayerId || event.dataTransfer.getData("text/player-id") || elements.pitch.dataset.draggedPlayerId;
-  if (!playerId) return clearDragTargets();
-  const lineupEntry = Object.entries(state.lineup).find(([, assignedId]) => assignedId === playerId);
-  if (lineupEntry) {
-    const nextLineup = { ...state.lineup };
-    delete nextLineup[lineupEntry[0]];
-    state.lineup = nextLineup;
-    selectedPlayerId = playerId;
-    persistSave(state);
-    render();
-    showToast(`${playerById(playerId)?.name ?? "Player"} moved to the bench.`);
-  }
-  clearDragTargets();
 });
 
 elements.playerSearch.addEventListener("input", renderCollection);
