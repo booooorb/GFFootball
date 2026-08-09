@@ -913,6 +913,237 @@ body:has(.manager-screen:not([hidden])) main {
   }
 }
 
+/* One coordinate system for every manager header. */
+@media (min-width: 901px) {
+  .manager-window-header,
+  .season-window__topbar.manager-window-header,
+  .stats-window__topbar.manager-window-header,
+  .transfer-window__topbar.manager-window-header,
+  .manager-screen .manager-window-header {
+    position: relative;
+    display: block;
+  }
+
+  .manager-window-header > .manager-game-brand {
+    position: absolute;
+    top: 0;
+    left: 32px;
+    width: 288px;
+    height: 84px;
+  }
+
+  .manager-window-header > .manager-window-nav {
+    position: absolute;
+    top: 0;
+    left: 320px;
+    width: 600px;
+    height: 84px;
+    margin: 0;
+  }
+
+  .manager-window-header > .manager-header-end {
+    position: absolute;
+    top: 0;
+    right: 32px;
+    left: 920px;
+    height: 84px;
+  }
+}
+
+@media (max-width: 900px) {
+  .manager-window-header,
+  .season-window__topbar.manager-window-header,
+  .stats-window__topbar.manager-window-header,
+  .transfer-window__topbar.manager-window-header,
+  .manager-screen .manager-window-header {
+    position: relative;
+    display: block;
+  }
+
+  .manager-window-header > .manager-game-brand {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: 230px;
+    height: 74px;
+  }
+
+  .manager-window-header > .manager-window-nav {
+    position: absolute;
+    top: 0;
+    left: 246px;
+    width: 360px;
+    height: 74px;
+    margin: 0;
+  }
+
+  .manager-window-header > .manager-header-end {
+    position: absolute;
+    top: 0;
+    right: 16px;
+    left: 606px;
+    height: 74px;
+  }
+}
+
+/* Final interaction layer, after card materials and header locks. */
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot:not(.is-compatible),
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible) {
+  opacity: .32 !important;
+  filter: grayscale(.6) saturate(.48) brightness(.68) !important;
+  animation: none !important;
+  transform: translate(-50%, -50%) scale(.95);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 18;
+  opacity: 1 !important;
+  animation: compatiblePositionFloat 1.15s ease-in-out infinite !important;
+  filter:
+    drop-shadow(3px 0 0 #45d8ad)
+    drop-shadow(-3px 0 0 #45d8ad)
+    drop-shadow(0 3px 0 #45d8ad)
+    drop-shadow(0 -3px 0 #45d8ad)
+    drop-shadow(0 0 15px rgba(69,216,173,1)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position,
+.football-pitch.is-dragging-player .pitch-slot.is-ideal-position {
+  z-index: 21;
+  animation: idealPositionFloat 1.05s ease-in-out infinite !important;
+  filter:
+    drop-shadow(3px 0 0 #f5d66e)
+    drop-shadow(-3px 0 0 #f5d66e)
+    drop-shadow(0 3px 0 #f5d66e)
+    drop-shadow(0 -3px 0 #f5d66e)
+    drop-shadow(0 0 17px rgba(245,214,110,1)) !important;
+}
+
+.football-pitch .pitch-slot.is-ideal-position::after {
+  background:
+    linear-gradient(110deg, transparent 0 35%, rgba(255,255,255,.92) 47%, rgba(255,245,184,.54) 54%, transparent 66%) 0 0 / 220% 100%,
+    var(--tier-surface, linear-gradient(145deg,#fff8d8,#d6ae4c)) !important;
+  animation: idealMaterialShine 1.4s linear infinite !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drag-source {
+  z-index: 4;
+  opacity: .08 !important;
+  animation: none !important;
+  filter: grayscale(.75) brightness(.62) !important;
+  transform: translate(-50%, -50%) scale(.88) !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drop-target {
+  z-index: 30;
+  opacity: 1 !important;
+  animation: idealPositionFloat .72s ease-in-out infinite !important;
+  filter:
+    drop-shadow(4px 0 0 #c8ffda)
+    drop-shadow(-4px 0 0 #c8ffda)
+    drop-shadow(0 4px 0 #c8ffda)
+    drop-shadow(0 -4px 0 #c8ffda)
+    drop-shadow(0 0 22px rgba(69,216,173,1)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .football-pitch .pitch-slot,
+  .football-pitch .pitch-slot::after {
+    animation: none !important;
+  }
+}
+
+@keyframes compatiblePositionFloat {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1.035); }
+  50% { transform: translate(-50%, -50%) translateY(-6px) scale(1.055); }
+}
+
+@keyframes idealPositionFloat {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1.06); }
+  50% { transform: translate(-50%, -50%) translateY(-7px) scale(1.085); }
+}
+
+@keyframes idealMaterialShine {
+  0% { background-position: 180% 0, 0 0; }
+  100% { background-position: -80% 0, 0 0; }
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot:not(.is-compatible),
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible) {
+  opacity: .34;
+  filter: grayscale(.55) saturate(.55) brightness(.72) !important;
+  transform: translate(-50%, -50%) scale(.96);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 18;
+  opacity: 1;
+  animation: compatiblePositionFloat 1.15s ease-in-out infinite;
+  filter:
+    drop-shadow(3px 0 0 #45d8ad)
+    drop-shadow(-3px 0 0 #45d8ad)
+    drop-shadow(0 3px 0 #45d8ad)
+    drop-shadow(0 -3px 0 #45d8ad)
+    drop-shadow(0 0 13px rgba(69,216,173,.95)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position,
+.football-pitch.is-dragging-player .pitch-slot.is-ideal-position {
+  z-index: 21;
+  animation: idealPositionFloat 1.05s ease-in-out infinite;
+  filter:
+    drop-shadow(3px 0 0 #f5d66e)
+    drop-shadow(-3px 0 0 #f5d66e)
+    drop-shadow(0 3px 0 #f5d66e)
+    drop-shadow(0 -3px 0 #f5d66e)
+    drop-shadow(0 0 16px rgba(245,214,110,1)) !important;
+}
+
+.football-pitch .pitch-slot.is-ideal-position::after {
+  background:
+    linear-gradient(110deg, transparent 0 35%, rgba(255,255,255,.88) 47%, rgba(255,245,184,.5) 54%, transparent 66%) 0 0 / 220% 100%,
+    var(--tier-surface, linear-gradient(145deg,#fff8d8,#d6ae4c)) !important;
+  animation: idealMaterialShine 1.4s linear infinite;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drag-source {
+  z-index: 4;
+  opacity: .1 !important;
+  animation: none;
+  filter: grayscale(.7) brightness(.7) !important;
+  transform: translate(-50%, -50%) scale(.9);
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drop-target {
+  z-index: 30;
+  opacity: 1 !important;
+  animation: idealPositionFloat .72s ease-in-out infinite;
+  filter:
+    drop-shadow(4px 0 0 #b6ffcf)
+    drop-shadow(-4px 0 0 #b6ffcf)
+    drop-shadow(0 4px 0 #b6ffcf)
+    drop-shadow(0 -4px 0 #b6ffcf)
+    drop-shadow(0 0 20px rgba(69,216,173,1)) !important;
+}
+
+.collection-list.is-bench-drop-target {
+  outline: 3px solid #45d8ad;
+  outline-offset: -5px;
+  background: rgba(69,216,173,.13) !important;
+  box-shadow: inset 0 0 28px rgba(69,216,173,.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .football-pitch .pitch-slot.is-compatible,
+  .football-pitch .pitch-slot.is-ideal-position,
+  .football-pitch .pitch-slot.is-drop-target,
+  .football-pitch .pitch-slot.is-ideal-position::after {
+    animation: none !important;
+  }
+}
+
 body:has(.manager-screen:not([hidden])) .toast {
   bottom: 132px;
 }
@@ -1063,11 +1294,11 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     height: clamp(110px, 8.05vw, 122px);
     overflow: hidden;
     color: var(--host-ink);
-    border: 2px solid #d7b45a;
-    border-top: 2px solid #f0d889;
+    border: 0;
     border-radius: 0;
     background: var(--tier-surface, linear-gradient(145deg, #fff8d8, #d6ae4c));
-    box-shadow: 0 5px 0 #98701c, 0 10px 20px rgba(2, 18, 9, .34), inset 0 0 0 2px rgba(255,255,255,.5);
+    box-shadow: none;
+    filter: drop-shadow(0 8px 7px rgba(2,18,9,.34));
     clip-path: polygon(8% 5%, 22% 0, 82% 2%, 96% 9%, 100% 20%, 96% 81%, 82% 91%, 50% 100%, 18% 91%, 4% 81%, 0 18%);
   }
 
@@ -1106,20 +1337,56 @@ body.is-manager-nav-sliding .manager-window-nav::before {
   .pitch-player-rating {
     top: 7%;
     left: 9%;
+    min-width: 28px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent !important;
+    z-index: 20 !important;
   }
 
   .pitch-player-rating strong {
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
     font-size: clamp(1.02rem, 1.3vw, 1.32rem);
+    font-weight: 800;
     line-height: .8;
   }
 
   .pitch-player-position {
-    top: 8%;
-    right: 8%;
-    max-width: 44%;
+    position: absolute !important;
+    top: 3px !important;
+    right: 3px !important;
+    left: auto !important;
+    display: grid;
+    min-width: 29px;
+    min-height: 25px;
+    max-width: 48%;
+    padding: 0;
+    place-items: center;
     color: var(--host-ink) !important;
-    font: 800 clamp(.42rem, .48vw, .52rem)/1 var(--body);
+    border-radius: 0;
+    background: transparent !important;
+    font: 800 clamp(.74rem, .86vw, .9rem)/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+    letter-spacing: .03em;
+    z-index: 20 !important;
   }
+
+  .pitch-slot.is-off-role .pitch-player-rating,
+  .pitch-slot.is-off-role .pitch-player-position {
+    color: #761d24 !important;
+    background: transparent !important;
+    box-shadow: none;
+  }
+
+  .pitch-slot.is-off-role .pitch-player-rating small {
+    color: #761d24;
+  }
+
+  .pitch-slot.is-off-role .pitch-player-rating strong {
+    color: #761d24 !important;
+    background: transparent !important;
+  }
+
+  .pitch-player-rating small { display: none; }
 
   .pitch-player-name {
     right: 8%;
@@ -1131,10 +1398,12 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     overflow: hidden;
     color: var(--host-ink);
     background: linear-gradient(90deg, transparent, rgba(247,243,234,.38) 18% 82%, transparent);
-    font: 800 clamp(.54rem, .64vw, .68rem)/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+    font: 700 clamp(.54rem, .64vw, .68rem)/1 "Barlow Condensed", "Arial Narrow", sans-serif;
     letter-spacing: 0;
     text-overflow: ellipsis;
     white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   .selected-player-inspector {
@@ -1263,10 +1532,16 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     width: 64px;
     height: 84px;
     background: var(--tier-surface, linear-gradient(145deg, #fff8d8, #d6ae4c));
+    border: 0;
   }
 
   .pitch-player-rating strong { font-size: .82rem; }
-  .pitch-player-position { font-size: .34rem; }
+  .pitch-player-position { top: 2px !important; right: 2px !important; min-width: 23px; min-height: 20px; padding: 0; font-size: .64rem; }
+  .pitch-player-rating { min-width: 23px; padding: 0; }
+  .pitch-slot.is-off-role .pitch-player-rating,
+  .pitch-slot.is-off-role .pitch-player-position,
+  .pitch-slot.is-off-role .pitch-player-rating,
+  .pitch-slot.is-off-role .pitch-player-rating strong { color: #761d24 !important; background: transparent !important; }
   .pitch-player-name { right: 4px; bottom: 7px; left: 4px; max-width: calc(100% - 8px); font-size: .45rem; }
 
   .pitch-player-tier,
@@ -1286,6 +1561,51 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible {
+  z-index: 11;
+  opacity: 1;
+  outline: 0;
+  filter:
+    drop-shadow(2px 0 0 #45d8ad)
+    drop-shadow(-2px 0 0 #45d8ad)
+    drop-shadow(0 2px 0 #45d8ad)
+    drop-shadow(0 -2px 0 #45d8ad)
+    drop-shadow(0 8px 8px rgba(2,18,9,.38));
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible:not(.is-ideal-position) {
+  transform: translate(-50%, -50%) scale(1.025);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position {
+  z-index: 13;
+  filter:
+    drop-shadow(3px 0 0 #f0c95b)
+    drop-shadow(-3px 0 0 #f0c95b)
+    drop-shadow(0 3px 0 #f0c95b)
+    drop-shadow(0 -3px 0 #f0c95b)
+    drop-shadow(0 0 10px rgba(240,201,91,.78));
+  transform: translate(-50%, -50%) scale(1.055);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position::before {
+  position: absolute;
+  top: auto;
+  right: 8px;
+  bottom: 9px;
+  left: 8px;
+  z-index: 35;
+  display: block !important;
+  padding: 3px 2px;
+  color: var(--host-ink);
+  border-radius: 2px;
+  background: #f0c95b !important;
+  content: "IDEAL POSITION";
+  font: 700 .48rem/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .04em;
+  text-align: center;
 }
 
 .manager-window-nav button:focus,
@@ -1308,4 +1628,321 @@ body.is-manager-nav-sliding .manager-window-nav::before {
   background: rgba(69,216,173,.14) !important;
   box-shadow: none !important;
   clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%) !important;
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: block !important;
+  border: 0;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 2px var(--tier-edge, rgba(255,255,255,.84));
+  clip-path: inherit;
+  content: "";
+  opacity: .95;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.pitch-player-rating strong,
+.pitch-player-position,
+.pitch-player-name {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contour outline and reference bench typography. */
+.pitch-slot,
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty) {
+  background:
+    linear-gradient(135deg,
+      var(--tier-edge, #fff2aa) 0 18%,
+      var(--tier-ui-accent, #d8ad42) 36%,
+      color-mix(in srgb, var(--tier-ui-accent, #d8ad42) 58%, #281b07) 52%,
+      var(--tier-edge, #fff2aa) 72% 100%);
+  filter: drop-shadow(0 8px 7px rgba(2,18,9,.34));
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+  display: block !important;
+  background: var(--tier-surface, linear-gradient(145deg, #fff8d8, #d6ae4c)) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tier-edge, #fff2aa) 72%, #211704),
+    inset 0 0 0 3px color-mix(in srgb, var(--tier-ui-accent, #d8ad42) 36%, transparent) !important;
+  clip-path: polygon(8% 5%, 22% 0, 82% 2%, 96% 9%, 100% 20%, 96% 81%, 82% 91%, 50% 100%, 18% 91%, 4% 81%, 0 18%);
+  content: "";
+  opacity: 1;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.pitch-player-portrait { z-index: 1; }
+.pitch-player-photo,
+.pitch-slot[data-card-tier]:not([data-card-tier=""]) .pitch-player-photo {
+  top: 20%;
+  right: 8%;
+  left: 8%;
+  width: 84%;
+  height: 53%;
+  box-sizing: border-box;
+  border: 2px solid var(--tier-edge, rgba(255,255,255,.88));
+  outline: 1px solid color-mix(in srgb, var(--tier-ui-accent, #d8ad42) 56%, #171006);
+  outline-offset: 1px;
+  box-shadow: inset 0 0 0 1px rgba(3,20,38,.28), 0 2px 5px rgba(3,20,38,.24);
+}
+.pitch-player-rating { top: 6px !important; }
+.pitch-player-rating { left: calc(9% + 4px) !important; }
+.pitch-player-position { top: 1px !important; right: 7px !important; }
+
+.pitch-player-rating strong,
+.pitch-player-position {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.pitch-player-name {
+  font-size: clamp(.58rem, .68vw, .72rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.05 !important;
+  text-transform: none !important;
+}
+
+@media (max-width: 900px) {
+  .pitch-player-rating { top: 4px !important; }
+  .pitch-player-position { top: 0 !important; right: 6px !important; }
+  .pitch-player-name { font-size: .48rem !important; }
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible {
+  filter:
+    drop-shadow(2px 0 0 #45d8ad)
+    drop-shadow(-2px 0 0 #45d8ad)
+    drop-shadow(0 2px 0 #45d8ad)
+    drop-shadow(0 -2px 0 #45d8ad)
+    drop-shadow(0 0 8px rgba(69,216,173,.72)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position {
+  filter:
+    drop-shadow(3px 0 0 #f0c95b)
+    drop-shadow(-3px 0 0 #f0c95b)
+    drop-shadow(0 3px 0 #f0c95b)
+    drop-shadow(0 -3px 0 #f0c95b)
+    drop-shadow(0 0 10px rgba(240,201,91,.82)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible:not(.is-ideal-position)::before {
+  position: absolute;
+  top: auto;
+  right: 7px;
+  bottom: 9px;
+  left: 7px;
+  z-index: 35;
+  display: block !important;
+  padding: 3px 2px;
+  color: var(--host-ink);
+  border-radius: 2px;
+  background: #45d8ad !important;
+  content: "COMPATIBLE";
+  font: 700 .48rem/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: .04em;
+  text-align: center;
+}
+
+/* Final header lock: identical pixels in Tactics and every dialog. */
+@media (min-width: 901px) {
+  .manager-window-header,
+  .season-window__topbar.manager-window-header,
+  .stats-window__topbar.manager-window-header,
+  .transfer-window__topbar.manager-window-header,
+  .manager-screen .manager-window-header {
+    position: relative !important;
+    display: block !important;
+  }
+
+  .manager-window-header > .manager-game-brand {
+    position: absolute !important;
+    top: 0 !important;
+    left: 32px !important;
+    width: 288px !important;
+    height: 84px !important;
+  }
+
+  .manager-window-header > .manager-window-nav {
+    position: absolute !important;
+    top: 0 !important;
+    left: 320px !important;
+    width: 600px !important;
+    height: 84px !important;
+    margin: 0 !important;
+  }
+
+  .manager-window-header > .manager-header-end {
+    position: absolute !important;
+    top: 0 !important;
+    right: 32px !important;
+    left: 920px !important;
+    height: 84px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .manager-window-header,
+  .season-window__topbar.manager-window-header,
+  .stats-window__topbar.manager-window-header,
+  .transfer-window__topbar.manager-window-header,
+  .manager-screen .manager-window-header {
+    position: relative !important;
+    display: block !important;
+  }
+
+  .manager-window-header > .manager-game-brand {
+    position: absolute !important;
+    top: 0 !important;
+    left: 16px !important;
+    width: 230px !important;
+    height: 74px !important;
+  }
+
+  .manager-window-header > .manager-window-nav {
+    position: absolute !important;
+    top: 0 !important;
+    left: 246px !important;
+    width: 360px !important;
+    height: 74px !important;
+    margin: 0 !important;
+  }
+
+  .manager-window-header > .manager-header-end {
+    position: absolute !important;
+    top: 0 !important;
+    right: 16px !important;
+    left: 606px !important;
+    height: 74px !important;
+  }
+}
+
+/* Definitive interaction layer: keep after every material rule. */
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot:not(.is-compatible),
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible) {
+  opacity: .32 !important;
+  filter: grayscale(.6) saturate(.48) brightness(.68) !important;
+  animation: none !important;
+  transform: translate(-50%, -50%) scale(.95);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 18;
+  opacity: 1 !important;
+  animation: compatiblePositionFloat 1.15s ease-in-out infinite !important;
+  filter: drop-shadow(3px 0 0 #45d8ad) drop-shadow(-3px 0 0 #45d8ad) drop-shadow(0 3px 0 #45d8ad) drop-shadow(0 -3px 0 #45d8ad) drop-shadow(0 0 15px rgba(69,216,173,1)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position,
+.football-pitch.is-dragging-player .pitch-slot.is-ideal-position {
+  z-index: 21;
+  animation: idealPositionFloat 1.05s ease-in-out infinite !important;
+  filter: drop-shadow(3px 0 0 #f5d66e) drop-shadow(-3px 0 0 #f5d66e) drop-shadow(0 3px 0 #f5d66e) drop-shadow(0 -3px 0 #f5d66e) drop-shadow(0 0 17px rgba(245,214,110,1)) !important;
+}
+
+.football-pitch .pitch-slot.is-ideal-position::after {
+  background: linear-gradient(110deg, transparent 0 35%, rgba(255,255,255,.92) 47%, rgba(255,245,184,.54) 54%, transparent 66%) 0 0 / 220% 100%, var(--tier-surface, linear-gradient(145deg,#fff8d8,#d6ae4c)) !important;
+  animation: idealMaterialShine 1.4s linear infinite !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drag-source {
+  z-index: 4;
+  opacity: .08 !important;
+  animation: none !important;
+  filter: grayscale(.75) brightness(.62) !important;
+  transform: translate(-50%, -50%) scale(.88) !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drop-target {
+  z-index: 30;
+  opacity: 1 !important;
+  animation: idealPositionFloat .72s ease-in-out infinite !important;
+  filter: drop-shadow(4px 0 0 #c8ffda) drop-shadow(-4px 0 0 #c8ffda) drop-shadow(0 4px 0 #c8ffda) drop-shadow(0 -4px 0 #c8ffda) drop-shadow(0 0 22px rgba(69,216,173,1)) !important;
+}
+
+/* Quiet click guidance: preserve the board and communicate with contours only. */
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot,
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot:not(.is-compatible) {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot:not(.is-compatible) {
+  filter: drop-shadow(0 8px 7px rgba(2,18,9,.34)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible,
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position {
+  z-index: 18;
+  opacity: 1 !important;
+  animation: none !important;
+  transform: translate(-50%, -50%) !important;
+  filter: drop-shadow(4px 0 0 #8fffc4) drop-shadow(-4px 0 0 #8fffc4) drop-shadow(0 4px 0 #8fffc4) drop-shadow(0 -4px 0 #8fffc4) drop-shadow(0 0 17px rgba(80,255,166,1)) !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-compatible::before,
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position::before {
+  display: none !important;
+  content: none !important;
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-ideal-position::after {
+  animation: none !important;
+  background: var(--tier-surface, linear-gradient(145deg,#fff8d8,#d6ae4c)) !important;
+}
+
+.football-pitch .pitch-slot.is-selected,
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-selected {
+  z-index: 24;
+  filter: drop-shadow(3px 0 0 #f7f3ea) drop-shadow(-3px 0 0 #f7f3ea) drop-shadow(0 3px 0 #f7f3ea) drop-shadow(0 -3px 0 #f7f3ea) drop-shadow(0 0 18px rgba(65,119,255,1)) !important;
+}
+
+/* Fixed internal coordinates for status, placement, and club identity. */
+@media (min-width: 1360px) {
+  .manager-window-header > .manager-header-end {
+    display: block !important;
+  }
+
+  .manager-window-header > .manager-header-end > .manager-window-status {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: grid !important;
+    width: 300px !important;
+    height: 84px !important;
+    grid-template-columns: 108px 92px 100px !important;
+    align-items: center;
+    gap: 0 !important;
+    margin: 0 !important;
+  }
+
+  .manager-window-header > .manager-header-end > .manager-team-summary {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    display: grid !important;
+    width: 190px !important;
+    height: 84px !important;
+    grid-template-columns: 48px minmax(0,1fr) !important;
+    align-items: center;
+    margin: 0 !important;
+  }
+
+  .manager-window-header .manager-status {
+    width: 100% !important;
+    height: 50px !important;
+    margin: 0 !important;
+  }
 }

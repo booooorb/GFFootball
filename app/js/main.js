@@ -518,9 +518,7 @@ function pitchPlayerMarkup(player, slot) {
   const seasonStats = playerSeasonPerformance(state.season, player.id);
   const rating = averageRating(player);
   const marketValue = marketValueMillions(player, state);
-  const positionLabel = player.position === slot.position
-    ? slot.position
-    : `${player.position}→${slot.position}`;
+  const positionLabel = slot.position;
 
   return `
     <span class="pitch-player-rating">
@@ -552,6 +550,7 @@ function pitchPlayerMarkup(player, slot) {
 function renderPitch() {
   const formation = currentFormation();
   const player = selectedPlayer();
+  elements.pitch.classList.toggle("is-position-previewing", Boolean(player));
   const entries = lineupEntries(state.collection, state.lineup, state.formationId);
   const count = entries.length;
   elements.lineupStatus.textContent = count === 11 ? "READY · 11 / 11" : `${count} / 11`;
@@ -583,14 +582,18 @@ function renderPitch() {
         : null;
       const compatible = player &&
         Number.isFinite(compatibilityPenalty(player.position, slot.position));
+      const isIdealPosition = Boolean(player && player.position === slot.position);
       const isSelected = slotPlayer?.id === selectedPlayerId;
+      const isOffRole = Boolean(slotPlayer && slotPlayer.position !== slot.position);
       const tier = slotPlayer ? playerCardTier(effectiveOverall(slotPlayer, slot.position)) : null;
       const classes = [
         "pitch-slot",
         slotPlayer ? "" : "is-empty",
         tier?.className ?? "",
         compatible ? "is-compatible" : "",
+        isIdealPosition ? "is-ideal-position" : "",
         isSelected ? "is-selected" : "",
+        isOffRole ? "is-off-role" : "",
       ].filter(Boolean).join(" ");
 
       return `
@@ -1177,6 +1180,11 @@ function showDragTargets(playerId) {
       "is-compatible",
       Boolean(slot && Number.isFinite(compatibilityPenalty(player.position, slot.position))),
     );
+    slotElement.classList.toggle(
+      "is-ideal-position",
+      Boolean(slot && player.position === slot.position),
+    );
+    slotElement.classList.toggle("is-drag-source", slotElement.dataset.playerId === playerId);
   });
   elements.pitch.classList.add("is-dragging-player");
   elements.pitch.dataset.draggedPlayerId = playerId;
@@ -1185,7 +1193,10 @@ function showDragTargets(playerId) {
 function clearDragTargets() {
   elements.pitch.classList.remove("is-dragging-player");
   delete elements.pitch.dataset.draggedPlayerId;
-  elements.pitch.querySelectorAll(".is-drop-target").forEach((candidate) => candidate.classList.remove("is-drop-target"));
+  elements.pitch.querySelectorAll(".is-drop-target, .is-drag-source").forEach((candidate) => {
+    candidate.classList.remove("is-drop-target", "is-drag-source");
+  });
+  elements.collectionList.classList.remove("is-bench-drop-target");
   renderPitch();
 }
 
@@ -1951,6 +1962,37 @@ elements.collectionList.addEventListener("dragstart", (event) => {
 });
 
 elements.collectionList.addEventListener("dragend", () => {
+  clearDragTargets();
+});
+
+elements.collectionList.addEventListener("dragover", (event) => {
+  const playerId = event.dataTransfer.getData("text/player-id") || elements.pitch.dataset.draggedPlayerId;
+  if (!playerId) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+  elements.collectionList.classList.add("is-bench-drop-target");
+});
+
+elements.collectionList.addEventListener("dragleave", (event) => {
+  if (!elements.collectionList.contains(event.relatedTarget)) {
+    elements.collectionList.classList.remove("is-bench-drop-target");
+  }
+});
+
+elements.collectionList.addEventListener("drop", (event) => {
+  event.preventDefault();
+  const playerId = event.dataTransfer.getData("text/player-id") || elements.pitch.dataset.draggedPlayerId;
+  if (!playerId) return clearDragTargets();
+  const lineupEntry = Object.entries(state.lineup).find(([, assignedId]) => assignedId === playerId);
+  if (lineupEntry) {
+    const nextLineup = { ...state.lineup };
+    delete nextLineup[lineupEntry[0]];
+    state.lineup = nextLineup;
+    selectedPlayerId = playerId;
+    persistSave(state);
+    render();
+    showToast(`${playerById(playerId)?.name ?? "Player"} moved to the bench.`);
+  }
   clearDragTargets();
 });
 
