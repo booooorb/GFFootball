@@ -429,16 +429,24 @@ export function compatibilityPenalty(playerPosition, slotPosition) {
   const playerRole = canonicalRole(playerPosition);
   const slotRole = canonicalRole(slotPosition);
   if (playerRole === slotRole) return 1;
-  if (!POSITION_ROLE_OPTIONS[playerRole]?.includes(slotRole)) {
-    return Number.POSITIVE_INFINITY;
+  if (POSITION_ROLE_OPTIONS[playerRole]?.includes(slotRole)) {
+    const isCamCdmSwitch =
+      (playerRole === "CAM" && slotRole === "CDM") ||
+      (playerRole === "CDM" && slotRole === "CAM");
+    return isCamCdmSwitch || positionCategory(playerRole) !== positionCategory(slotRole)
+      ? 5
+      : 2;
   }
 
-  const isCamCdmSwitch =
-    (playerRole === "CAM" && slotRole === "CDM") ||
-    (playerRole === "CDM" && slotRole === "CAM");
-  return isCamCdmSwitch || positionCategory(playerRole) !== positionCategory(slotRole)
-    ? 5
-    : 2;
+  const playerCategory = positionCategory(playerRole);
+  const slotCategory = positionCategory(slotRole);
+  if (playerCategory === "GK" || slotCategory === "GK") return 35;
+  if (playerCategory === slotCategory) return 10;
+  if (
+    (playerCategory === "DEF" && slotCategory === "FWD") ||
+    (playerCategory === "FWD" && slotCategory === "DEF")
+  ) return 24;
+  return 16;
 }
 
 export function positionRatingsForPlayer(player) {

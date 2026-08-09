@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="host-city.css" />
+    <link rel="stylesheet" href="host-city.css?v=20260808-25" />
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -196,14 +196,27 @@
             <div class="tactics-title-block">
               <p class="eyebrow">Starting XI</p>
               <h1 class="tactics-context-title" id="selection-hint">Tactics board</h1>
+              <span class="lineup-status" id="lineup-status">0 / 11</span>
             </div>
             <div class="tactics-toolbar">
               <button class="selected-player-sell" id="selected-player-sell-button" type="button" hidden>
                 Sell selected player
               </button>
-              <label for="formation-select">
+              <div class="tactics-formation-picker">
                 <span>Formation</span>
-                <select id="formation-select">
+                <button class="formation-picker__trigger" id="formation-picker-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <strong id="formation-picker-value">4-3-3</strong><i aria-hidden="true"></i>
+                </button>
+                <div class="formation-picker__menu" id="formation-picker-menu" role="listbox" aria-label="Choose formation" hidden>
+                  <button type="button" role="option" data-formation-choice="4-3-3">4–3–3 <small>Front three</small></button>
+                  <button type="button" role="option" data-formation-choice="4-4-2">4–4–2 <small>Balanced lines</small></button>
+                  <button type="button" role="option" data-formation-choice="3-5-2">3–5–2 <small>Midfield control</small></button>
+                  <button type="button" role="option" data-formation-choice="4-5-1">4–5–1 <small>Compact block</small></button>
+                  <button type="button" role="option" data-formation-choice="4-2-3-1">4–2–3–1 <small>Double pivot</small></button>
+                  <button type="button" role="option" data-formation-choice="3-4-2-1">3–4–2–1 <small>Inside forwards</small></button>
+                  <button type="button" role="option" data-formation-choice="5-4-1">5–4–1 <small>Deep defence</small></button>
+                </div>
+                <select id="formation-select" class="visually-hidden" tabindex="-1" aria-hidden="true">
                   <option value="4-3-3">4–3–3</option>
                   <option value="4-4-2">4–4–2</option>
                   <option value="3-5-2">3–5–2</option>
@@ -212,8 +225,8 @@
                   <option value="3-4-2-1">3–4–2–1</option>
                   <option value="5-4-1">5–4–1</option>
                 </select>
-              </label>
-              <span class="lineup-status" id="lineup-status">0 / 11</span>
+              </div>
+              <button class="button tactics-fix-positions" id="fix-positions-button" type="button">Fix positions</button>
               <button class="button tactics-auto-pick" id="auto-pick-button" type="button">Pick best XI</button>
               <button class="button button--matchday-open" id="open-matchday-button" type="button">
                 Play match <span aria-hidden="true">▶</span>
@@ -823,6 +836,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-  <script type="module" src="js/main.js?v=20260808-6"></script>
+    <script type="module" src="js/main.js?v=20260808-14"></script>
 </body>
 </html>

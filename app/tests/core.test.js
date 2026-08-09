@@ -422,8 +422,9 @@ test("position compatibility follows directional role families with graded penal
   assert.equal(compatibilityPenalty("CB", "CDM"), 5);
   assert.equal(compatibilityPenalty("CAM", "CDM"), 5);
   assert.equal(compatibilityPenalty("LB", "LW"), 5);
-  assert.equal(compatibilityPenalty("CDM", "CB"), Number.POSITIVE_INFINITY);
-  assert.equal(compatibilityPenalty("GK", "ST"), Number.POSITIVE_INFINITY);
+  assert.equal(compatibilityPenalty("CDM", "CB"), 16);
+  assert.equal(compatibilityPenalty("ST", "CB"), 24);
+  assert.equal(compatibilityPenalty("GK", "ST"), 35);
 });
 
 test("pitch swaps are transactional and never silently remove a starter", () => {
@@ -448,16 +449,15 @@ test("pitch swaps are transactional and never silently remove a starter", () => 
   const cbSlot = formation.slots.find((slot) => slot.position === "CB");
   const cdmSlot = formation.slots.find((slot) => slot.position === "CDM");
   const cbPlayer = save.collection.find((player) => player.id === save.lineup[cbSlot.id]);
-  const rejected = assignPlayerToSlot(
+  const emergencySwap = assignPlayerToSlot(
     save.lineup,
     save.formationId,
     cbPlayer,
     cdmSlot.id,
     save.collection,
   );
-  assert.equal(rejected.changed, false);
-  assert.equal(rejected.reason, "swap-incompatible");
-  assert.deepEqual(rejected.lineup, save.lineup);
+  assert.equal(emergencySwap.changed, true);
+  assert.equal(emergencySwap.lineup[cdmSlot.id], cbPlayer.id);
 });
 
 test("formation changes refit the current XI without choosing bench players", () => {

@@ -509,7 +509,7 @@ body:has(.manager-screen:not([hidden])) main {
   }
 
   .manager-grid .tactics-toolbar {
-    grid-template-columns: 132px 164px minmax(190px, 230px);
+    grid-template-columns: 150px 164px minmax(190px, 230px);
     justify-content: end;
   }
 
@@ -561,6 +561,365 @@ body:has(.manager-screen:not([hidden])) main {
   .selected-player-inspector__identity strong {
     font-size: clamp(40px, 3vw, 52px);
     line-height: .78;
+  }
+}
+
+/* Brighter warning red for an off-role player's reduced OVR number. */
+.pitch-slot.is-off-role .pitch-player-rating,
+.pitch-slot.is-off-role .pitch-player-rating strong {
+  color: var(--off-role-color, #e13b46) !important;
+}
+
+.pitch-slot.is-off-role .pitch-player-position {
+  color: var(--off-role-color, #e13b46) !important;
+}
+
+.pitch-slot.is-off-role[style*="--role-penalty:24"],
+.pitch-slot.is-off-role[style*="--role-penalty:35"] {
+  text-shadow: 0 0 5px color-mix(in srgb, var(--off-role-color) 52%, transparent);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-emergency-compatible {
+  opacity: 1 !important;
+  filter: drop-shadow(2px 0 0 #f04450) drop-shadow(-2px 0 0 #f04450) drop-shadow(0 2px 0 #f04450) drop-shadow(0 -2px 0 #f04450) drop-shadow(0 0 9px rgba(240,68,80,.68)) !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drop-target.is-emergency-compatible {
+  filter: drop-shadow(4px 0 0 #ff5360) drop-shadow(-4px 0 0 #ff5360) drop-shadow(0 4px 0 #ff5360) drop-shadow(0 -4px 0 #ff5360) drop-shadow(0 0 22px rgba(255,20,45,.95)) !important;
+}
+
+/* Last-write drag visibility and full-card cursor ghost. */
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible):not(.is-drag-source) {
+  opacity: .74 !important;
+  filter: grayscale(.16) saturate(.84) brightness(.88) drop-shadow(0 7px 6px rgba(2,18,9,.28)) !important;
+  transform: translate(-50%, -50%) scale(.98) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 22 !important;
+  opacity: 1 !important;
+  outline: 4px solid #24ff91 !important;
+  outline-offset: -5px !important;
+  box-shadow: inset 0 0 0 5px #24ff91, inset 0 0 16px rgba(36,255,145,.92), 0 0 22px rgba(36,255,145,.95) !important;
+  filter: drop-shadow(5px 0 0 #55f5b7) drop-shadow(-5px 0 0 #55f5b7) drop-shadow(0 5px 0 #55f5b7) drop-shadow(0 -5px 0 #55f5b7) drop-shadow(0 0 25px rgba(63,255,172,1)) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible::before,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible::before {
+  position: absolute !important;
+  inset: 2px !important;
+  z-index: 40 !important;
+  display: block !important;
+  border: 4px solid #24ff91 !important;
+  background: transparent !important;
+  box-shadow: 0 0 9px #24ff91, inset 0 0 7px rgba(36,255,145,.86) !important;
+  clip-path: inherit !important;
+  content: "" !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.player-drag-ghost-stage {
+  position: fixed !important;
+  top: -1200px !important;
+  left: -1200px !important;
+  z-index: 99999 !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.player-drag-ghost-stage .player-drag-ghost {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 14px 12px rgba(0,0,0,.48)) !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* Shine-based suitability feedback and four-control tactics toolbar. */
+@keyframes compatibleShineSweep {
+  0% { background-position: 170% 0; opacity: .28; }
+  45% { opacity: .92; }
+  100% { background-position: -70% 0; opacity: .34; }
+}
+
+@media (min-width: 901px) {
+  .manager-grid .tactics-commandbar {
+    grid-template-columns: minmax(300px, 1fr) 692px !important;
+  }
+
+  .manager-grid .tactics-toolbar {
+    gap: 12px !important;
+  }
+
+  .manager-grid .tactics-toolbar > .tactics-formation-picker {
+    flex-basis: 150px !important;
+  }
+
+  .manager-grid .tactics-fix-positions {
+    flex: 0 0 140px !important;
+    width: 140px !important;
+    min-height: 58px !important;
+    padding: 0 10px !important;
+    color: var(--host-ink) !important;
+    border: 2px solid rgba(3,20,38,.6) !important;
+    border-radius: 4px !important;
+    background: rgba(69,216,173,.13) !important;
+    font: 600 1.16rem/1 var(--display) !important;
+    text-transform: uppercase !important;
+  }
+
+  .manager-grid .tactics-fix-positions:hover,
+  .manager-grid .tactics-fix-positions:focus-visible {
+    background: var(--host-mint) !important;
+  }
+
+  .manager-grid .tactics-auto-pick {
+    flex: 0 0 156px !important;
+    width: 156px !important;
+  }
+
+  .manager-grid .button--matchday-open {
+    flex: 0 0 210px !important;
+    width: 210px !important;
+  }
+}
+
+.pitch-slot[draggable="false"],
+.collection-player[draggable="false"] {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.pointer-player-drag-ghost {
+  position: fixed !important;
+  z-index: 100000 !important;
+  display: block !important;
+  width: var(--pointer-ghost-width) !important;
+  min-width: var(--pointer-ghost-width) !important;
+  height: var(--pointer-ghost-height) !important;
+  min-height: var(--pointer-ghost-height) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: drop-shadow(0 16px 14px rgba(0,0,0,.55)) !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+  cursor: grabbing !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  outline: 0 !important;
+  box-shadow: 0 7px 13px rgba(2,18,9,.3) !important;
+  filter: drop-shadow(0 0 13px rgba(63,255,172,.72)) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible::before,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible::before {
+  position: absolute !important;
+  inset: 3px !important;
+  z-index: 45 !important;
+  display: block !important;
+  border: 0 !important;
+  background: linear-gradient(112deg, transparent 0 27%, rgba(55,255,165,.1) 36%, rgba(225,255,241,.92) 48%, rgba(70,255,172,.42) 57%, transparent 69%) 0 0 / 240% 100% !important;
+  box-shadow: inset 0 0 12px rgba(56,255,165,.32) !important;
+  clip-path: inherit !important;
+  content: "" !important;
+  mix-blend-mode: screen;
+  opacity: .7 !important;
+  animation: compatibleShineSweep 1.35s ease-in-out infinite !important;
+  pointer-events: none !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drag-source {
+  opacity: 0 !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+/* Unified tactics command buttons. */
+@media (min-width: 901px) {
+  .manager-grid .tactics-commandbar {
+    grid-template-columns: minmax(300px, 1fr) 700px !important;
+  }
+
+  .manager-grid .tactics-toolbar {
+    gap: 10px !important;
+  }
+
+  .manager-grid .tactics-fix-positions,
+  .manager-grid .tactics-auto-pick {
+    flex: 0 0 156px !important;
+    width: 156px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 12px !important;
+    color: var(--host-ink) !important;
+    border: 2px solid var(--host-ink) !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font: 600 1.16rem/1 var(--display) !important;
+    letter-spacing: .015em !important;
+    text-transform: uppercase !important;
+  }
+
+  .manager-grid .tactics-fix-positions:hover,
+  .manager-grid .tactics-fix-positions:focus-visible,
+  .manager-grid .tactics-auto-pick:hover,
+  .manager-grid .tactics-auto-pick:focus-visible {
+    color: var(--host-ink) !important;
+    border-color: var(--host-ink) !important;
+    background: var(--host-mint) !important;
+    outline: 0 !important;
+  }
+
+  .manager-grid .button--matchday-open {
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    font-size: 1.3rem !important;
+  }
+}
+
+/* Final drag presentation overrides. */
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible):not(.is-drag-source) {
+  opacity: .74 !important;
+  filter: grayscale(.16) saturate(.84) brightness(.88) drop-shadow(0 7px 6px rgba(2,18,9,.28)) !important;
+  transform: translate(-50%, -50%) scale(.98) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 22 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(5px 0 0 #55f5b7) drop-shadow(-5px 0 0 #55f5b7) drop-shadow(0 5px 0 #55f5b7) drop-shadow(0 -5px 0 #55f5b7) drop-shadow(0 0 25px rgba(63,255,172,1)) !important;
+}
+
+.player-drag-ghost-stage {
+  position: fixed !important;
+  top: -1200px !important;
+  left: -1200px !important;
+  z-index: 99999 !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.player-drag-ghost-stage .player-drag-ghost {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 14px 12px rgba(0,0,0,.48)) !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* Clear drag guidance without hiding the rest of the XI. */
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible):not(.is-drag-source) {
+  opacity: .74 !important;
+  filter: grayscale(.16) saturate(.84) brightness(.88) drop-shadow(0 7px 6px rgba(2,18,9,.28)) !important;
+  transform: translate(-50%, -50%) scale(.98) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 22 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(5px 0 0 #55f5b7) drop-shadow(-5px 0 0 #55f5b7) drop-shadow(0 5px 0 #55f5b7) drop-shadow(0 -5px 0 #55f5b7) drop-shadow(0 0 25px rgba(63,255,172,1)) !important;
+}
+
+.player-drag-ghost-stage {
+  position: fixed !important;
+  top: -1200px !important;
+  left: -1200px !important;
+  z-index: 99999 !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.player-drag-ghost-stage .player-drag-ghost {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 14px 12px rgba(0,0,0,.48)) !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* Keep the formation control at one usable size at every desktop width. */
+@media (min-width: 901px) and (max-width: 1359px) {
+  .manager-grid .tactics-commandbar {
+    grid-template-columns: minmax(260px, 1fr) 540px !important;
+  }
+
+  .manager-grid .tactics-toolbar {
+    grid-template-columns: 150px 150px 188px !important;
+    gap: 16px !important;
+    justify-content: end;
+  }
+}
+
+@media (min-width: 901px) {
+  .tactics-toolbar .tactics-formation-picker {
+    display: block !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    height: 62px;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .tactics-formation-picker .formation-picker__trigger {
+    display: grid !important;
+    width: 150px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    overflow: visible;
   }
 }
 
@@ -1754,6 +2113,143 @@ body.is-manager-nav-sliding .manager-window-nav::before {
   text-align: center;
 }
 
+.tactics-formation-picker {
+  position: relative;
+  z-index: 60;
+  width: 150px;
+  min-width: 150px;
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+.tactics-toolbar .tactics-formation-picker {
+  width: 150px !important;
+  min-width: 150px !important;
+  justify-self: end;
+}
+
+.tactics-formation-picker > span {
+  position: absolute;
+  right: auto;
+  bottom: -.72rem;
+  left: 0;
+  display: block;
+  width: 116px;
+  margin: 0;
+  color: var(--host-ink);
+  font: 600 .7rem/1 var(--display);
+  letter-spacing: .14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.formation-picker__trigger {
+  display: grid;
+  width: 100%;
+  min-height: 58px;
+  grid-template-columns: minmax(0,1fr) 24px;
+  align-items: center;
+  padding: 0 4px 0 8px;
+  color: var(--host-ink);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.formation-picker__trigger strong {
+  font: 700 2.4rem/.9 var(--display);
+  letter-spacing: -.015em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.formation-picker__trigger i {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 34px;
+  overflow: hidden;
+  color: transparent;
+  font-size: 0;
+}
+
+.formation-picker__trigger i::before,
+.formation-picker__trigger i::after {
+  position: absolute;
+  left: 5px;
+  width: 10px;
+  height: 10px;
+  border-top: 3px solid var(--host-ink);
+  border-left: 3px solid var(--host-ink);
+  content: "";
+  transition: transform 160ms ease;
+}
+
+.formation-picker__trigger i::before { top: 3px; transform: rotate(45deg); }
+.formation-picker__trigger i::after { bottom: 3px; transform: rotate(225deg); }
+.formation-picker__trigger[aria-expanded="true"] i::before { transform: translateY(3px) rotate(45deg); }
+.formation-picker__trigger[aria-expanded="true"] i::after { transform: translateY(-3px) rotate(225deg); }
+
+.formation-picker__trigger:focus-visible { outline: 0; }
+
+.formation-picker__menu {
+  position: absolute;
+  top: calc(100% + 13px);
+  left: 50%;
+  z-index: 100;
+  display: grid;
+  width: 260px;
+  grid-template-columns: 1fr;
+  gap: 3px;
+  padding: 8px;
+  overflow: hidden;
+  border: 2px solid var(--host-gold);
+  border-radius: 7px;
+  background: var(--host-ink);
+  box-shadow: 0 18px 38px rgba(3,20,38,.42);
+  clip-path: polygon(0 0, 95% 0, 100% 8%, 100% 100%, 5% 100%, 0 92%);
+  transform: translateX(-50%);
+}
+
+.formation-picker__menu[hidden] { display: none; }
+
+.formation-picker__menu button {
+  display: grid;
+  min-height: 43px;
+  grid-template-columns: 82px minmax(0,1fr);
+  align-items: center;
+  padding: 7px 10px;
+  color: var(--host-paper);
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  font: 700 1.08rem/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.formation-picker__menu button small {
+  color: rgba(247,243,234,.62);
+  font: 500 .78rem/1 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+.formation-picker__menu button:hover,
+.formation-picker__menu button:focus-visible {
+  outline: 0;
+  border-left-color: var(--host-mint);
+  background: rgba(69,216,173,.13);
+}
+
+.formation-picker__menu button.is-active {
+  color: var(--host-ink);
+  border-left-color: var(--host-gold);
+  background: var(--host-mint);
+}
+
+.formation-picker__menu button.is-active small { color: rgba(3,20,38,.68); }
+
 /* Final header lock: identical pixels in Tactics and every dialog. */
 @media (min-width: 901px) {
   .manager-window-header,
@@ -1945,4 +2441,204 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     height: 50px !important;
     margin: 0 !important;
   }
+}
+
+/* Formation command group: flex-based so legacy grid breakpoints cannot squash it. */
+@media (min-width: 901px) {
+  .manager-grid .tactics-toolbar {
+    position: relative !important;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 16px !important;
+  }
+
+  .manager-grid .tactics-toolbar > .tactics-formation-picker {
+    position: relative !important;
+    display: block !important;
+    flex: 0 0 150px !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    height: 64px !important;
+    margin: 0 !important;
+  }
+
+  .manager-grid .formation-picker__trigger {
+    position: relative !important;
+    display: grid !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    grid-template-columns: 116px 22px !important;
+    padding: 0 4px 0 8px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .manager-grid .formation-picker__trigger strong {
+    display: block !important;
+    width: 116px !important;
+    overflow: visible !important;
+    font-size: 38px !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .manager-grid .tactics-auto-pick {
+    flex: 0 0 clamp(150px, 12vw, 164px) !important;
+    width: clamp(150px, 12vw, 164px) !important;
+  }
+
+  .manager-grid .button--matchday-open {
+    flex: 0 0 clamp(188px, 16vw, 230px) !important;
+    width: clamp(188px, 16vw, 230px) !important;
+  }
+
+  .manager-grid .lineup-status {
+    position: absolute !important;
+    right: auto !important;
+    bottom: .35rem !important;
+    left: 1.1rem !important;
+  }
+
+  .manager-grid .tactics-title-block .lineup-status {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    min-height: 0 !important;
+    margin: 9px 0 0 2px !important;
+    padding: 0 !important;
+    color: #189875 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font: 600 1rem/1 var(--display) !important;
+    letter-spacing: .08em !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+  }
+}
+
+/* Compact, contiguous navigation shared by every manager window. */
+@media (min-width: 901px) {
+  .manager-window-header > .manager-window-nav,
+  .season-window__topbar.manager-window-header > .manager-window-nav,
+  .stats-window__topbar.manager-window-header > .manager-window-nav,
+  .transfer-window__topbar.manager-window-header > .manager-window-nav {
+    left: 320px !important;
+    width: 560px !important;
+    grid-template-columns: repeat(4, 140px) !important;
+    column-gap: 0 !important;
+  }
+
+  .manager-window-header > .manager-window-nav button {
+    width: 140px !important;
+    min-width: 140px !important;
+    margin: 0 !important;
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+
+  .manager-window-header > .manager-header-end {
+    right: 32px !important;
+    left: auto !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1359px) {
+  .manager-window-header > .manager-header-end {
+    display: flex !important;
+    width: 240px !important;
+    justify-content: flex-end !important;
+  }
+
+  .manager-window-header > .manager-header-end > .manager-window-status {
+    width: 220px !important;
+    margin-left: auto !important;
+    justify-content: end !important;
+  }
+}
+
+@media (min-width: 1360px) {
+  .manager-window-header > .manager-header-end {
+    width: 490px !important;
+  }
+}
+
+/* Final off-role OVR color override. */
+.pitch-slot.is-off-role .pitch-player-rating,
+.pitch-slot.is-off-role .pitch-player-rating strong {
+  color: var(--off-role-color, #e13b46) !important;
+}
+
+.pitch-slot.is-off-role .pitch-player-position {
+  color: var(--off-role-color, #e13b46) !important;
+}
+
+.pitch-slot.is-off-role[style*="--role-penalty:24"],
+.pitch-slot.is-off-role[style*="--role-penalty:35"] {
+  text-shadow: 0 0 5px color-mix(in srgb, var(--off-role-color) 52%, transparent);
+}
+
+.football-pitch.is-position-previewing:not(.is-dragging-player) .pitch-slot.is-emergency-compatible {
+  opacity: 1 !important;
+  filter: drop-shadow(2px 0 0 #f04450) drop-shadow(-2px 0 0 #f04450) drop-shadow(0 2px 0 #f04450) drop-shadow(0 -2px 0 #f04450) drop-shadow(0 0 9px rgba(240,68,80,.68)) !important;
+}
+
+.football-pitch.is-dragging-player .pitch-slot.is-drop-target.is-emergency-compatible {
+  filter: drop-shadow(4px 0 0 #ff5360) drop-shadow(-4px 0 0 #ff5360) drop-shadow(0 4px 0 #ff5360) drop-shadow(0 -4px 0 #ff5360) drop-shadow(0 0 22px rgba(255,20,45,.95)) !important;
+}
+
+/* Definitive drag visibility and cursor-card rendering. */
+.football-pitch.is-dragging-player .pitch-slot:not(.is-compatible):not(.is-drag-source) {
+  opacity: .74 !important;
+  filter: grayscale(.16) saturate(.84) brightness(.88) drop-shadow(0 7px 6px rgba(2,18,9,.28)) !important;
+  transform: translate(-50%, -50%) scale(.98) !important;
+}
+
+.football-pitch.is-position-previewing .pitch-slot.is-compatible,
+.football-pitch.is-dragging-player .pitch-slot.is-compatible {
+  z-index: 22 !important;
+  opacity: 1 !important;
+  outline: 4px solid #24ff91 !important;
+  outline-offset: -5px !important;
+  box-shadow: inset 0 0 0 5px #24ff91, inset 0 0 16px rgba(36,255,145,.92), 0 0 22px rgba(36,255,145,.95) !important;
+  filter: drop-shadow(5px 0 0 #55f5b7) drop-shadow(-5px 0 0 #55f5b7) drop-shadow(0 5px 0 #55f5b7) drop-shadow(0 -5px 0 #55f5b7) drop-shadow(0 0 25px rgba(63,255,172,1)) !important;
+}
+
+.player-drag-ghost-stage {
+  position: fixed !important;
+  top: -1200px !important;
+  left: -1200px !important;
+  z-index: 99999 !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.player-drag-ghost-stage .player-drag-ghost {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  width: var(--drag-card-width) !important;
+  height: var(--drag-card-height) !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 14px 12px rgba(0,0,0,.48)) !important;
+  transform: none !important;
+  animation: none !important;
+  pointer-events: none !important;
 }
