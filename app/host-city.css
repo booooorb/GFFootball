@@ -25,9 +25,23 @@
   color: var(--host-ink);
   border: 0;
   border-radius: 0;
-  background: var(--host-paper) url("assets/host-city-bg.svg") center / cover no-repeat;
+  background: var(--host-paper);
   box-shadow: none;
   font-family: var(--body);
+}
+
+.manager-animated-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  background: var(--host-ink);
+  filter: saturate(1.32) contrast(1.06);
+  pointer-events: none;
 }
 
 .manager-screen:not([hidden])::before,
@@ -1238,6 +1252,368 @@ body:has(.manager-screen:not([hidden])) main {
     grid-template-columns: 150px 150px 188px !important;
     gap: 16px !important;
     justify-content: end;
+  }
+}
+
+/* Season workspace: three focused views using the same command language as Tactics. */
+.season-window__heading-grid.manager-grid {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.season-window__shell {
+  grid-template-rows: clamp(78px, 10.55svh, 108px) 12.05svh minmax(0, 1fr) !important;
+}
+
+.season-window__commandbar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(320px, .78fr) minmax(610px, 1.22fr);
+  align-items: center;
+  gap: 1rem;
+  min-height: 12.05svh;
+  padding: .8rem 1rem 1rem;
+}
+
+.season-window__title-block h2 {
+  margin: 0;
+  color: var(--host-ink);
+  font: 600 clamp(4rem, 5vw, 5.05rem)/.7 var(--display);
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: scaleX(.88);
+  transform-origin: left center;
+}
+
+.season-view-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.season-view-switch button {
+  min-height: 58px;
+  padding: .65rem 1rem;
+  color: var(--host-ink);
+  border: 2px solid var(--host-ink);
+  border-radius: 4px;
+  background: transparent;
+  font: 600 1.25rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.season-view-switch button:hover,
+.season-view-switch button:focus-visible,
+.season-view-switch button.is-active {
+  color: var(--host-paper);
+  background: var(--host-ink);
+}
+
+.season-window__body {
+  display: block !important;
+  min-height: 0;
+  padding: 0 0 1.25rem !important;
+  overflow: hidden;
+}
+
+.season-window__body > [data-season-panel] {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  border: 2px solid var(--host-ink);
+  border-radius: 8px;
+  background: var(--host-ink);
+}
+
+.season-window__body > [data-season-panel][hidden] {
+  display: none !important;
+}
+
+.season-window__standings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, .64fr);
+  gap: 1rem;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.season-standings-table,
+.season-enemy-preview {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid var(--host-ink);
+  border-radius: 8px;
+  background: var(--host-ink);
+}
+
+.season-standings-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.season-standings-table .league-table-wrap {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.season-enemy-preview {
+  display: flex;
+  flex-direction: column;
+  color: var(--host-paper);
+}
+
+.season-enemy-preview__header {
+  display: grid;
+  min-height: 72px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  color: var(--host-paper);
+  background: var(--host-ink);
+}
+
+.season-enemy-preview__header > div {
+  display: grid;
+  min-width: 0;
+  gap: .12rem;
+}
+
+.season-enemy-preview__header span,
+.season-enemy-preview__header small {
+  color: var(--host-mint);
+  font: 600 .62rem/1 var(--display);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.season-enemy-preview__header h3 {
+  margin: 0;
+  overflow: hidden;
+  color: inherit;
+  font: 600 1.7rem/.85 var(--display);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.season-enemy-preview__header > strong {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  color: var(--host-ink);
+  background: var(--host-mint);
+  font: 600 2rem/1 var(--display);
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+
+.season-enemy-pitch.football-pitch {
+  position: relative;
+  width: calc(100% - 1rem);
+  height: calc(100% - 80px);
+  min-height: 410px;
+  flex: 0 1 auto;
+  align-self: center;
+  margin: auto;
+  overflow: hidden;
+  border: 2px solid rgba(244,239,223,.58);
+  border-radius: 12px;
+  background-color: #216224;
+  background-image:
+    linear-gradient(rgba(2,24,9,.08), rgba(2,24,9,.08)),
+    url("assets/pitches/angled-3d-pitch-v4.png");
+  background-position: 50% 49%;
+  background-size: 168% auto;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 58px rgba(0,25,7,.3), 0 12px 26px rgba(3,20,38,.24);
+}
+
+.season-enemy-pitch .pitch-slot {
+  width: clamp(52px, 4.8vw, 62px) !important;
+  height: clamp(68px, 6.15vw, 82px) !important;
+  pointer-events: none;
+}
+
+.season-enemy-pitch .pitch-player-rating strong {
+  font-size: clamp(.78rem, 1.2vw, 1rem);
+}
+
+.season-enemy-pitch .pitch-player-position {
+  font-size: clamp(.44rem, .68vw, .6rem);
+}
+
+.season-enemy-pitch .pitch-player-name {
+  font-size: clamp(.44rem, .62vw, .62rem);
+}
+
+.season-enemy-preview__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  color: var(--host-paper);
+  text-align: center;
+}
+
+.season-fixtures-window,
+.season-history-window {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.season-fixtures-window .subsection-heading,
+.season-history-window .subsection-heading {
+  min-height: 64px;
+  margin: 0;
+  padding: .9rem 1rem;
+  color: var(--host-paper);
+  background: var(--host-ink);
+}
+
+.season-fixtures-window .subsection-heading h3,
+.season-history-window .subsection-heading h3 {
+  color: inherit;
+  font: 600 2rem/.8 var(--display);
+  text-transform: uppercase;
+}
+
+.season-fixtures-list,
+.season-history-list {
+  flex: 1;
+  margin: 0;
+  padding: .75rem 1rem 1rem;
+  overflow: auto;
+  color: var(--host-paper);
+  list-style: none;
+}
+
+.season-fixture-item {
+  min-height: 54px;
+  grid-template-columns: 50px minmax(0, 1fr) 70px minmax(0, 1fr);
+  padding: .55rem .75rem;
+}
+
+.season-fixture-week,
+.season-fixture-team strong,
+.season-fixture-score {
+  font-size: .85rem;
+}
+
+.season-history-item {
+  min-height: 68px;
+  padding: .65rem .5rem;
+}
+
+@media (min-width: 901px) {
+  .season-window__title-block {
+    align-self: center;
+    padding-top: 6px;
+    overflow: visible;
+  }
+
+  .season-window__title-block h2 {
+    overflow: visible;
+    padding-top: .08em;
+    padding-bottom: .08em;
+    text-overflow: clip;
+  }
+
+  .season-window__title-block::after {
+    display: block;
+    height: 16px;
+    margin: 9px 0 0 2px;
+    content: "";
+  }
+}
+
+@media (max-width: 900px) {
+  .season-window__shell {
+    grid-template-rows: 74px 136px minmax(0, 1fr) !important;
+  }
+
+  .season-window__commandbar {
+    grid-template-columns: 1fr;
+    min-height: 136px;
+    padding: .6rem;
+  }
+
+  .season-window__title-block h2 {
+    font-size: 2.8rem;
+  }
+
+  .season-view-switch {
+    gap: .5rem;
+  }
+
+  .season-view-switch button {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .season-window__standings {
+    grid-template-columns: minmax(0, 1.2fr) minmax(310px, .8fr);
+    overflow-x: auto;
+  }
+}
+
+@media (min-width: 1360px) {
+  .season-window__shell {
+    grid-template-rows: clamp(94px, 10.7vh, 108px) clamp(112px, 12.2vh, 123px) minmax(0, 1fr) !important;
+  }
+
+  .season-window__commandbar {
+    min-height: clamp(112px, 12.2vh, 123px);
+    grid-template-columns: minmax(360px, .9fr) minmax(560px, 1.1fr);
+    padding: 12px 16px 18px;
+  }
+
+  .season-window__title-block h2 {
+    max-width: 100%;
+    overflow: hidden;
+    padding-top: .08em;
+    padding-bottom: .08em;
+    font-size: clamp(58px, 4.5vw, 72px);
+    line-height: .76;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (min-width: 1360px) and (max-height: 900px),
+       (min-aspect-ratio: 16 / 9) and (max-height: 960px) {
+  .season-window__shell {
+    grid-template-rows: 84px 92px minmax(0, 1fr) !important;
+    padding-right: clamp(48px, 5.2vw, 80px) !important;
+    padding-left: clamp(48px, 5.2vw, 80px) !important;
+  }
+
+  .season-window__topbar.manager-window-header {
+    margin-right: calc(clamp(48px, 5.2vw, 80px) * -1) !important;
+    margin-left: calc(clamp(48px, 5.2vw, 80px) * -1) !important;
+  }
+
+  .season-window__commandbar {
+    min-height: 92px;
+    padding-top: 5px;
+    padding-bottom: 9px;
+  }
+
+  .season-window__title-block h2 {
+    font-size: 58px;
   }
 }
 
@@ -3169,5 +3545,186 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     width: 230px !important;
     height: 74px !important;
     margin-left: -24px !important;
+  }
+}
+
+/* Geometric selected-player module, visually locked to the bench panel. */
+.manager-grid .selected-player-inspector {
+  isolation: isolate !important;
+  border: 1px solid rgba(69,216,173,.56) !important;
+  background:
+    linear-gradient(135deg, rgba(69,216,173,.12) 0 19%, transparent 19% 100%),
+    linear-gradient(105deg, #09263b 0 23%, #031426 23% 100%) !important;
+  box-shadow: inset 0 0 0 3px rgba(3,20,38,.72), 0 16px 32px rgba(3,20,38,.38) !important;
+  clip-path: polygon(0 0,94% 0,100% 22%,100% 100%,6% 100%,0 78%) !important;
+}
+
+.manager-grid .selected-player-inspector::before {
+  height: 5px !important;
+  background: linear-gradient(90deg,var(--host-gold) 0 20%,var(--host-mint) 20% 88%,transparent 88%) !important;
+}
+
+.manager-grid .selected-player-inspector::after {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  z-index: -1;
+  width: 72px;
+  height: 34px;
+  border-right: 2px solid rgba(69,216,173,.32);
+  border-bottom: 2px solid rgba(69,216,173,.32);
+  content: "";
+  transform: skewX(-28deg);
+}
+
+.manager-grid .selected-player-inspector__portrait {
+  margin: 10px 8px 10px 10px !important;
+  border: 2px solid #f1ca65 !important;
+  box-shadow: inset 0 0 0 3px #092036, 0 0 0 1px rgba(69,216,173,.48) !important;
+  clip-path: polygon(9% 6%,22% 0,83% 2%,97% 11%,100% 22%,96% 81%,81% 92%,50% 100%,17% 91%,3% 80%,0 18%) !important;
+}
+
+.manager-grid .selected-player-inspector__portrait::after {
+  display: none !important;
+  content: none !important;
+}
+
+.manager-grid .selected-player-inspector__portrait img {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 14% !important;
+}
+
+.selected-player-inspector__roleline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.selected-player-inspector__primary-position {
+  position: relative;
+  display: inline-grid;
+  min-width: 52px;
+  min-height: 29px;
+  place-items: center;
+  padding: 5px 13px 4px;
+  color: #031426 !important;
+  background: var(--host-mint) !important;
+  box-shadow: 0 0 0 2px #031426, 0 0 0 3px #e8c760, 0 0 16px rgba(69,216,173,.42);
+  clip-path: polygon(10% 0,100% 0,90% 100%,0 100%);
+  font: 800 1rem/1 "Barlow Condensed","Arial Narrow",sans-serif !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.selected-player-inspector__roleline em {
+  color: var(--host-paper);
+  font: 700 .84rem/1 "Barlow Condensed","Arial Narrow",sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Keep the transfer counter on the same optical baseline as its label. */
+.manager-window-header .manager-window-nav button span[data-transfer-count] {
+  align-self: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: 22px !important;
+  vertical-align: middle !important;
+  transform: none !important;
+}
+
+/* Connected lineup-tool segmented control. */
+.manager-grid .tactics-lineup-actions {
+  display: flex !important;
+  flex: 0 0 310px !important;
+  width: 310px !important;
+  height: 62px !important;
+  align-items: stretch;
+  gap: 6px !important;
+  overflow: hidden;
+  padding: 5px !important;
+  border: 2px solid var(--host-ink);
+  border-radius: 7px;
+  background: var(--host-ink);
+  box-shadow: none;
+}
+
+.manager-grid .tactics-lineup-actions .tactics-fix-positions,
+.manager-grid .tactics-lineup-actions .tactics-auto-pick {
+  flex: 1 1 50% !important;
+  width: 50% !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  color: var(--host-ink) !important;
+  border-radius: 5px !important;
+  background: var(--host-mint) !important;
+  box-shadow: inset 0 0 14px rgba(255,255,255,.16), 0 0 13px rgba(69,216,173,.48) !important;
+}
+
+.manager-grid .tactics-lineup-actions .tactics-fix-positions {
+  color: var(--host-ink) !important;
+  border: 0 !important;
+  background: var(--host-mint) !important;
+}
+
+.manager-grid .tactics-lineup-actions .tactics-auto-pick {
+  border: 0 !important;
+  background: var(--host-mint) !important;
+}
+
+.manager-grid .tactics-lineup-actions .tactics-auto-pick:hover,
+.manager-grid .tactics-lineup-actions .tactics-auto-pick:focus-visible {
+  color: var(--host-ink) !important;
+  background: #6ae2bd !important;
+  box-shadow: inset 0 0 18px rgba(255,255,255,.24), 0 0 19px rgba(69,216,173,.72) !important;
+  outline: 0 !important;
+}
+
+.manager-grid .tactics-lineup-actions .tactics-fix-positions:hover,
+.manager-grid .tactics-lineup-actions .tactics-fix-positions:focus-visible {
+  background: #6ae2bd !important;
+  box-shadow: inset 0 0 18px rgba(255,255,255,.24), 0 0 19px rgba(69,216,173,.72) !important;
+  outline: 0 !important;
+}
+
+.manager-grid .tactics-lineup-actions:focus-within {
+  box-shadow: 0 0 0 3px rgba(69,216,173,.3);
+}
+
+@media (max-width: 900px) {
+  .manager-grid .tactics-lineup-actions {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* Align the visible green pitch edge with the full bench panel footprint. */
+.manager-grid > .pitch-column {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+}
+
+.manager-grid > .pitch-column > .football-pitch {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 901px) {
+  .manager-screen .manager-grid {
+    padding-bottom: 7px !important;
+    box-sizing: border-box !important;
   }
 }

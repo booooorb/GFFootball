@@ -65,6 +65,7 @@ import {
 const elements = {
   setupScreen: document.querySelector("#setup-screen"),
   managerScreen: document.querySelector("#manager-screen"),
+  managerAnimatedBackground: document.querySelector("#manager-animated-bg"),
   seasonChip: document.querySelector("#season-chip"),
   apiStatus: document.querySelector("#api-status"),
   apiStatusLabel: document.querySelector("#api-status-label"),
@@ -122,22 +123,15 @@ const elements = {
   fixtureList: document.querySelector("#fixture-list"),
   leagueRound: document.querySelector("#league-round"),
   leagueTableBody: document.querySelector("#league-table-body"),
-  seasonOpponentPreview: document.querySelector("#season-opponent-preview"),
-  seasonOpponentPreviewIcon: document.querySelector("#season-opponent-preview-icon"),
-  seasonOpponentPreviewName: document.querySelector("#season-opponent-preview-name"),
-  seasonOpponentPreviewMeta: document.querySelector("#season-opponent-preview-meta"),
-  seasonOpponentPreviewRating: document.querySelector("#season-opponent-preview-rating"),
-  seasonOpponentPreviewAttack: document.querySelector("#season-opponent-preview-attack"),
-  seasonOpponentPreviewControl: document.querySelector("#season-opponent-preview-control"),
-  seasonOpponentPreviewDefence: document.querySelector("#season-opponent-preview-defence"),
-  seasonOpponentPreviewPitch: document.querySelector("#season-opponent-preview-pitch"),
   seasonRecentFixtures: document.querySelector("#season-recent-fixtures"),
   seasonHistoryList: document.querySelector("#season-history-list"),
-  seasonBroadcastSummary: document.querySelector("#season-broadcast-summary"),
-  seasonNextButton: document.querySelector("#season-next-button"),
-  seasonNextOpponentName: document.querySelector("#season-next-opponent-name"),
-  seasonOpenMatchdayButton: document.querySelector("#season-open-matchday-button"),
-  resetButton: document.querySelector("#reset-button"),
+  seasonEnemyName: document.querySelector("#season-enemy-name"),
+  seasonEnemyFormation: document.querySelector("#season-enemy-formation"),
+  seasonEnemyRating: document.querySelector("#season-enemy-rating"),
+  seasonEnemyPitch: document.querySelector("#season-enemy-pitch"),
+  seasonViewButtons: [...document.querySelectorAll("[data-season-view]")],
+  seasonViewPanels: [...document.querySelectorAll("[data-season-panel]")],
+  seasonWindowTitle: document.querySelector("#season-window-title"),
   creditsButton: document.querySelector("#credits-button"),
   creditsList: document.querySelector("#credits-list"),
   packDialog: document.querySelector("#pack-dialog"),
@@ -211,8 +205,74 @@ let packAnimationTimer = null;
 let activeDraggedPlayerId = null;
 let pointerDragSession = null;
 let suppressPlayerClick = false;
+let managerBackgroundReverseFrame = null;
 const PORTRAIT_LOOKUP_VERSION_KEY = "gff-portrait-lookup-version";
 const PORTRAIT_LOOKUP_VERSION = 2;
+
+function initializeManagerBackgroundPingPong() {
+  const video = elements.managerAnimatedBackground;
+  if (!video) return;
+  const turnPadding = .18;
+  video.dataset.playDirection = "forward";
+
+  const playForward = () => {
+    cancelAnimationFrame(managerBackgroundReverseFrame);
+    managerBackgroundReverseFrame = null;
+    video.dataset.playDirection = "forward";
+    video.playbackRate = .82;
+    video.play().catch(() => {});
+  };
+
+  const playBackward = () => {
+    if (video.dataset.playDirection === "reverse" || !Number.isFinite(video.duration)) return;
+    video.dataset.playDirection = "reverse";
+    video.pause();
+    // Never seek from the encoded terminal frame. Some browsers briefly expose
+    // the cleared video surface there before the first reverse seek is decoded.
+    const mediaStart = Math.min(video.duration - turnPadding, video.currentTime || video.duration);
+    if (video.currentTime > mediaStart) video.currentTime = mediaStart;
+    const clockStart = performance.now();
+
+    const reverseFrame = (now) => {
+      if (video.dataset.playDirection !== "reverse") return;
+      const nextTime = mediaStart - (((now - clockStart) / 1000) * .82);
+      if (nextTime <= turnPadding) {
+        video.currentTime = turnPadding;
+        playForward();
+        return;
+      }
+      // The interpolated source can sustain a refresh-rate reverse update.
+      // Browsers coalesce seeks internally when a display frame is skipped.
+      video.currentTime = nextTime;
+      managerBackgroundReverseFrame = requestAnimationFrame(reverseFrame);
+    };
+
+    managerBackgroundReverseFrame = requestAnimationFrame(reverseFrame);
+  };
+
+  video.addEventListener("timeupdate", () => {
+    if (video.dataset.playDirection === "forward" &&
+        Number.isFinite(video.duration) &&
+        video.duration - video.currentTime <= turnPadding) {
+      playBackward();
+    }
+  });
+  video.addEventListener("ended", () => {
+    // Fallback for a throttled tab where timeupdate could miss the turn point.
+    video.currentTime = Math.max(turnPadding, video.duration - turnPadding);
+    playBackward();
+  });
+  const applyVideoMetadata = () => {
+    video.dataset.videoWidth = String(video.videoWidth);
+    video.dataset.videoHeight = String(video.videoHeight);
+    video.dataset.videoDuration = String(video.duration);
+    playForward();
+  };
+  video.addEventListener("loadedmetadata", applyVideoMetadata, { once: true });
+  if (video.readyState >= 1) applyVideoMetadata();
+}
+
+initializeManagerBackgroundPingPong();
 
 function createPointerDragGhost(sourceElement, event) {
   const rect = sourceElement.getBoundingClientRect();
@@ -569,21 +629,6 @@ function renderSeasonHeader() {
     <span><small>Points</small><strong>${state.season.points}</strong></span>
     <span><small>Balance</small><strong>${formatMoney(state.finances.balanceMillions)}</strong></span>
   `;
-  if (elements.seasonBroadcastSummary) {
-    const table = state.collection.length ? leagueStandings(state) : [];
-    const userRow = table.find((club) => club.isUser);
-    const form = userRow ? seasonClubForm(state, USER_CLUB_ID, 5) : [];
-    elements.seasonBroadcastSummary.innerHTML = `
-      <span><small>Place</small><strong>${userRow ? `${userRow.position}${userRow.position === 1 ? "st" : userRow.position === 2 ? "nd" : userRow.position === 3 ? "rd" : "th"}` : "—"}</strong></span>
-      <span><small>Points</small><strong>${state.season.points}</strong></span>
-      <span><small>Goal difference</small><strong>${state.season.goalsFor - state.season.goalsAgainst > 0 ? "+" : ""}${state.season.goalsFor - state.season.goalsAgainst}</strong></span>
-      <span class="season-broadcast-summary__form"><small>Form</small><b>${form.length ? form.map((entry) => `<i class="is-${entry.result.toLowerCase()}">${entry.result}</i>`).join("") : "—"}</b></span>
-    `;
-  }
-  if (elements.seasonNextOpponentName && state.collection.length) {
-    elements.seasonNextOpponentName.textContent = previewOpponent(state).name;
-  }
-
   if (!state.collection.length) {
     elements.topbarPhase.textContent = "World tournament 2026";
     elements.topbarNext.textContent = "Build your world XI";
@@ -878,7 +923,14 @@ function renderSelectedPlayerInspector() {
   elements.selectedPlayerInspector.hidden = false;
   elements.selectedPlayerInspector.innerHTML = `
     <span class="selected-player-inspector__portrait"><img src="${escapeHtml(safeUrl(playerImageSource(player)))}" data-player-id="${escapeHtml(player.id)}" alt="" /></span>
-    <span class="selected-player-inspector__identity"><small>Selected player</small><strong>${escapeHtml(player.name)}</strong><b>${escapeHtml(player.position)} · ${player.overall} OVR</b></span>
+    <span class="selected-player-inspector__identity">
+      <small>Selected player</small>
+      <strong>${escapeHtml(player.name)}</strong>
+      <span class="selected-player-inspector__roleline">
+        <b class="selected-player-inspector__primary-position" aria-label="Primary position ${escapeHtml(player.position)}">${escapeHtml(player.position)}</b>
+        <em>${player.overall} OVR</em>
+      </span>
+    </span>
     <span class="selected-player-inspector__stat"><strong>${seasonStats.goals}</strong><small>Goals</small></span>
     <span class="selected-player-inspector__stat"><strong>${seasonStats.assists}</strong><small>Assists</small></span>
     <span class="selected-player-inspector__stat"><strong>${roleValue}</strong><small>${roleLabel}</small></span>
@@ -935,7 +987,7 @@ function renderLeagueTable() {
     const clubContent =
       '<span class="league-club-icon" aria-hidden="true">' + seasonClubIconMarkup(icon, iconTransform) + '</span>' +
       '<span class="league-club-copy"><strong>' + escapeHtml(club.name) + '</strong>' +
-      (club.isUser ? '<small>You</small>' : '<small>Scout opponent</small>') + '</span>';
+      (club.isUser ? '<small>You</small>' : '<small>League club</small>') + '</span>';
     const clubCell = !club.isUser && snapshot
       ? '<button class="league-club-scout ' + (selectedSeasonOpponentId === club.id ? 'is-selected' : '') + '" type="button" data-season-opponent-id="' + escapeHtml(club.id) + '" aria-label="Preview ' + escapeHtml(club.name) + '">' + clubContent + '</button>'
       : '<span class="league-club-static">' + clubContent + '</span>';
@@ -948,50 +1000,50 @@ function renderLeagueTable() {
       '</tr>';
   }).join("");
 
-  const selectedOpponent = selectedSeasonOpponentId
-    ? previewSeasonOpponent(state, selectedSeasonOpponentId)
-    : null;
-  renderSeasonOpponentPreview(selectedOpponent);
   renderSeasonRecentFixtures();
+  renderSeasonEnemyPreview();
 }
 
-function renderSeasonOpponentPreview(opponent) {
+function renderSeasonEnemyPreview() {
+  if (!elements.seasonEnemyPitch) return;
+  const opponent = selectedSeasonOpponentId
+    ? previewSeasonOpponent(state, selectedSeasonOpponentId)
+    : previewOpponent(state);
   if (!opponent) {
-    elements.seasonOpponentPreview.hidden = false;
-    elements.seasonOpponentPreviewIcon.textContent = "?";
-    elements.seasonOpponentPreviewName.textContent = "Select an opponent";
-    elements.seasonOpponentPreviewMeta.textContent = "Click a club row to scout its XI";
-    elements.seasonOpponentPreviewRating.textContent = "—";
-    elements.seasonOpponentPreviewAttack.textContent = "—";
-    elements.seasonOpponentPreviewControl.textContent = "—";
-    elements.seasonOpponentPreviewDefence.textContent = "—";
-    elements.seasonOpponentPreviewPitch.innerHTML = '<p class="season-opponent-preview__empty">Choose any opponent in the league table to inspect their formation, projected XI, OVR, and unit ratings.</p>';
+    elements.seasonEnemyName.textContent = "Next opponent";
+    elements.seasonEnemyFormation.textContent = "Awaiting season draw";
+    elements.seasonEnemyRating.textContent = "—";
+    elements.seasonEnemyPitch.innerHTML = `<p class="season-enemy-preview__empty">Build your squad to reveal the opposition XI.</p>`;
     return;
   }
   const formation = FORMATIONS[opponent.formationId] ?? FORMATIONS["4-4-2"];
   const rosterBySlot = new Map(opponent.roster.map((player) => [player.slotId, player]));
-  elements.seasonOpponentPreview.hidden = false;
-  elements.seasonOpponentPreviewIcon.innerHTML = opponentIconMarkup(opponent.icon, opponent.iconImageTransform);
-  elements.seasonOpponentPreviewName.textContent = opponent.name;
-  elements.seasonOpponentPreviewMeta.textContent = formation.label + ' · ' + (opponent.isPublished ? 'Published NPC' : 'Generated opponent');
-  elements.seasonOpponentPreviewRating.textContent = Math.round(opponent.strength);
-  elements.seasonOpponentPreviewAttack.textContent = Math.round(opponent.attack);
-  elements.seasonOpponentPreviewControl.textContent = Math.round(opponent.control);
-  elements.seasonOpponentPreviewDefence.textContent = Math.round(opponent.defence);
-  elements.seasonOpponentPreviewPitch.dataset.formation = formation.label;
-  elements.seasonOpponentPreviewPitch.innerHTML = formation.slots.map((slot, index) => {
+  elements.seasonEnemyName.textContent = opponent.name;
+  elements.seasonEnemyFormation.textContent = formation.label;
+  elements.seasonEnemyRating.textContent = Math.round(opponent.strength);
+  elements.seasonEnemyPitch.dataset.formation = formation.label;
+  elements.seasonEnemyPitch.innerHTML = formation.slots.map((slot, index) => {
     const player = rosterBySlot.get(slot.id) ?? opponent.roster[index];
     if (!player) return "";
-    return '<article class="opponent-preview-player" style="--x:' + slot.x + '%;--y:' + slot.y + '%;--order:' + index + '">' +
-      '<span><img src="' + escapeHtml(safeUrl(playerImageSource(player))) + '" alt="" data-season-opponent-player-id="' + escapeHtml(player.id) + '" />' +
-      '<strong>' + Math.round(player.overall) + '</strong></span><b>' + escapeHtml(player.name) + '</b><small>' + escapeHtml(slot.position) + '</small></article>';
+    const projectedX = Math.min(90, Math.max(10, 50 + ((slot.x - 50) * 1.08)));
+    const projectedY = Math.min(92, Math.max(8, 50 + ((slot.y - 50) * 1.08)));
+    const tier = playerCardTier(effectiveOverall(player, slot.position));
+    return `<article class="pitch-slot ${tier.className}" style="--x:${projectedX.toFixed(2)}%;--y:${projectedY}%;" data-card-tier="${escapeHtml(tier.id)}">${enemyPitchPlayerMarkup(player, slot, tier)}</article>`;
   }).join("");
-  elements.seasonOpponentPreviewPitch.querySelectorAll("img[data-season-opponent-player-id]").forEach((image) => {
-    image.addEventListener("error", () => {
-      const player = opponent.roster.find((candidate) => candidate.id === image.dataset.seasonOpponentPlayerId);
-      if (player) image.src = fallbackAvatar(player);
-    }, { once: true });
-  });
+  hydrateImageFallbacks(elements.seasonEnemyPitch);
+}
+
+function enemyPitchPlayerMarkup(player, slot, tier) {
+  return `
+    <span class="pitch-player-rating"><strong>${effectiveOverall(player, slot.position)}</strong><small>OVR</small></span>
+    <span class="pitch-player-position">${escapeHtml(slot.position)}</span>
+    <span class="pitch-player-tier">${escapeHtml(tier.shortLabel)}</span>
+    <span class="pitch-player-portrait">
+      <span class="pitch-player-poster" aria-hidden="true"></span>
+      <img class="pitch-player-photo" src="${escapeHtml(safeUrl(playerImageSource(player)))}" alt="" data-player-id="${escapeHtml(player.id)}" draggable="false" />
+    </span>
+    <span class="pitch-player-name">${escapeHtml(player.name)}</span>
+  `;
 }
 
 function renderSeasonRecentFixtures() {
@@ -1533,7 +1585,7 @@ async function handleThemeSubmit({ theme, formationId, turnstileContainer, error
     const portraitPlayers = firstScout ? state.collection : state.transferMarket.players;
     if (!firstScout) {
       hideLoading();
-      renderTransferMarketDialog({ open: true });
+      renderTransferMarketDialog({ open: true, openPack: true });
     } else {
       elements.loadingMessage.textContent = "Looking for open portraits...";
     }
@@ -1590,6 +1642,7 @@ function openManagerWindow(windowName) {
   document.body.classList.add("is-manager-nav-sliding");
 
   const switchWindow = () => {
+    moveManagerAnimatedBackground(targetWindow);
     if (elements.packOpeningDialog.open) elements.packOpeningDialog.close();
     if (elements.packDialog.open) elements.packDialog.close();
     if (elements.seasonDialog.open) elements.seasonDialog.close();
@@ -1600,7 +1653,7 @@ function openManagerWindow(windowName) {
     }
 
     if (targetWindow === "transfers") {
-      renderTransferMarketDialog({ open: true });
+      renderTransferMarketDialog({ open: true, openPack: true });
       return;
     }
 
@@ -1623,7 +1676,25 @@ function openManagerWindow(windowName) {
   }, 420);
 }
 
-function renderTransferMarketDialog({ open = false } = {}) {
+function moveManagerAnimatedBackground(windowName) {
+  const hosts = {
+    tactics: elements.managerScreen,
+    transfers: elements.packDialog.querySelector(".transfer-window__shell"),
+    season: elements.seasonDialog.querySelector(".season-window__shell"),
+    stats: elements.statsDialog.querySelector(".stats-window__shell"),
+  };
+  const host = hosts[windowName] ?? hosts.tactics;
+  const video = elements.managerAnimatedBackground;
+  if (!host || !video || video.parentElement === host) return;
+  const playbackTime = video.currentTime;
+  host.prepend(video);
+  if (Number.isFinite(playbackTime) && Math.abs(video.currentTime - playbackTime) > .05) {
+    video.currentTime = playbackTime;
+  }
+  if (video.dataset.playDirection !== "reverse") video.play().catch(() => {});
+}
+
+function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
   const market = state.transferMarket ?? createEmptyTransferMarket();
   const players = market.players ?? [];
   const freeCount = players.filter((player) => player.isFreeTransfer).length;
@@ -1691,7 +1762,7 @@ function renderTransferMarketDialog({ open = false } = {}) {
   hydrateImageFallbacks(elements.packGrid);
 
   if (open) {
-    if (players.length && !market.packOpened) {
+    if (openPack && players.length && !market.packOpened) {
       renderPackOpening({ open: true });
       return;
     }
@@ -2173,14 +2244,25 @@ elements.fixPositionsButton?.addEventListener("click", () => {
   showToast(moved ? `${moved} positions optimized for the current XI.` : "The current XI is already in its best positions.");
 });
 
-elements.seasonNextButton?.addEventListener("click", () => {
-  elements.seasonDialog.close();
-  elements.openMatchdayButton.click();
-});
+const seasonViewTitles = {
+  standings: "Season standings",
+  fixtures: "Recent fixtures",
+  history: "Past seasons",
+};
 
-elements.seasonOpenMatchdayButton?.addEventListener("click", () => {
-  elements.seasonDialog.close();
-  elements.openMatchdayButton.click();
+elements.seasonViewButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const view = button.dataset.seasonView;
+    elements.seasonViewButtons.forEach((candidate) => {
+      const active = candidate === button;
+      candidate.classList.toggle("is-active", active);
+      candidate.setAttribute("aria-pressed", String(active));
+    });
+    elements.seasonViewPanels.forEach((panel) => {
+      panel.hidden = panel.dataset.seasonPanel !== view;
+    });
+    elements.seasonWindowTitle.textContent = seasonViewTitles[view] ?? "Season standings";
+  });
 });
 
 elements.statsRecordStrip?.addEventListener("click", (event) => {
@@ -2315,26 +2397,14 @@ elements.clubSettingsForm.addEventListener("submit", (event) => {
   showToast(`${state.clubProfile.name} identity updated.`);
 });
 
-elements.resetButton.addEventListener("click", () => {
-  if (!window.confirm(
-    "Reset the entire club, transfer balance, collection, and season history?",
-  )) return;
-  clearSave();
-  state = syncSeasonOpponents(createDefaultSave(), loadPublishedNpcOpponents());
-  selectedPlayerId = null;
-  if (elements.seasonDialog.open) elements.seasonDialog.close();
-  if (elements.statsDialog.open) elements.statsDialog.close();
-  if (elements.matchdayDialog.open) elements.matchdayDialog.close();
-  if (elements.packOpeningDialog.open) elements.packOpeningDialog.close();
-  if (elements.packDialog.open) elements.packDialog.close();
-  if (elements.clubSettingsDialog.open) elements.clubSettingsDialog.close();
-  render();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
 document.querySelectorAll("[data-close-dialog]").forEach((button) => {
   button.addEventListener("click", () => {
     const dialog = document.getElementById(button.dataset.closeDialog);
+    if (dialog === elements.packOpeningDialog) {
+      dialog.close();
+      renderTransferMarketDialog({ open: true });
+      return;
+    }
     if ([elements.packDialog, elements.seasonDialog, elements.statsDialog].includes(dialog)) {
       openManagerWindow("tactics");
     } else {
@@ -2345,7 +2415,12 @@ document.querySelectorAll("[data-close-dialog]").forEach((button) => {
 
 document.querySelectorAll("dialog").forEach((dialog) => {
   dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
+    if (event.target !== dialog) return;
+    if ([elements.packDialog, elements.seasonDialog, elements.statsDialog].includes(dialog)) {
+      openManagerWindow("tactics");
+    } else {
+      dialog.close();
+    }
   });
 });
 
