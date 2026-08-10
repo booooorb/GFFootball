@@ -124,6 +124,7 @@ const elements = {
   leagueRound: document.querySelector("#league-round"),
   leagueTableBody: document.querySelector("#league-table-body"),
   seasonRecentFixtures: document.querySelector("#season-recent-fixtures"),
+  seasonFixturesTeamLabel: document.querySelector("#season-fixtures-team-label"),
   seasonHistoryList: document.querySelector("#season-history-list"),
   seasonEnemyName: document.querySelector("#season-enemy-name"),
   seasonEnemyFormation: document.querySelector("#season-enemy-formation"),
@@ -205,68 +206,24 @@ let packAnimationTimer = null;
 let activeDraggedPlayerId = null;
 let pointerDragSession = null;
 let suppressPlayerClick = false;
-let managerBackgroundReverseFrame = null;
 const PORTRAIT_LOOKUP_VERSION_KEY = "gff-portrait-lookup-version";
 const PORTRAIT_LOOKUP_VERSION = 2;
 
 function initializeManagerBackgroundPingPong() {
   const video = elements.managerAnimatedBackground;
   if (!video) return;
-  const turnPadding = .18;
+  // The asset already contains its reversed half. Native forward playback is
+  // hardware-decoded consistently; repeatedly seeking currentTime backwards is
+  // extremely slow on browsers that must decode from distant MP4 keyframes.
   video.dataset.playDirection = "forward";
-
-  const playForward = () => {
-    cancelAnimationFrame(managerBackgroundReverseFrame);
-    managerBackgroundReverseFrame = null;
-    video.dataset.playDirection = "forward";
-    video.playbackRate = .82;
-    video.play().catch(() => {});
-  };
-
-  const playBackward = () => {
-    if (video.dataset.playDirection === "reverse" || !Number.isFinite(video.duration)) return;
-    video.dataset.playDirection = "reverse";
-    video.pause();
-    // Never seek from the encoded terminal frame. Some browsers briefly expose
-    // the cleared video surface there before the first reverse seek is decoded.
-    const mediaStart = Math.min(video.duration - turnPadding, video.currentTime || video.duration);
-    if (video.currentTime > mediaStart) video.currentTime = mediaStart;
-    const clockStart = performance.now();
-
-    const reverseFrame = (now) => {
-      if (video.dataset.playDirection !== "reverse") return;
-      const nextTime = mediaStart - (((now - clockStart) / 1000) * .82);
-      if (nextTime <= turnPadding) {
-        video.currentTime = turnPadding;
-        playForward();
-        return;
-      }
-      // The interpolated source can sustain a refresh-rate reverse update.
-      // Browsers coalesce seeks internally when a display frame is skipped.
-      video.currentTime = nextTime;
-      managerBackgroundReverseFrame = requestAnimationFrame(reverseFrame);
-    };
-
-    managerBackgroundReverseFrame = requestAnimationFrame(reverseFrame);
-  };
-
-  video.addEventListener("timeupdate", () => {
-    if (video.dataset.playDirection === "forward" &&
-        Number.isFinite(video.duration) &&
-        video.duration - video.currentTime <= turnPadding) {
-      playBackward();
-    }
-  });
-  video.addEventListener("ended", () => {
-    // Fallback for a throttled tab where timeupdate could miss the turn point.
-    video.currentTime = Math.max(turnPadding, video.duration - turnPadding);
-    playBackward();
-  });
+  video.loop = true;
+  video.playbackRate = .82;
   const applyVideoMetadata = () => {
     video.dataset.videoWidth = String(video.videoWidth);
     video.dataset.videoHeight = String(video.videoHeight);
     video.dataset.videoDuration = String(video.duration);
-    playForward();
+    video.playbackRate = .82;
+    video.play().catch(() => {});
   };
   video.addEventListener("loadedmetadata", applyVideoMetadata, { once: true });
   if (video.readyState >= 1) applyVideoMetadata();
@@ -987,10 +944,8 @@ function renderLeagueTable() {
     const clubContent =
       '<span class="league-club-icon" aria-hidden="true">' + seasonClubIconMarkup(icon, iconTransform) + '</span>' +
       '<span class="league-club-copy"><strong>' + escapeHtml(club.name) + '</strong>' +
-      (club.isUser ? '<small>You</small>' : '<small>League club</small>') + '</span>';
-    const clubCell = !club.isUser && snapshot
-      ? '<button class="league-club-scout ' + (selectedSeasonOpponentId === club.id ? 'is-selected' : '') + '" type="button" data-season-opponent-id="' + escapeHtml(club.id) + '" aria-label="Preview ' + escapeHtml(club.name) + '">' + clubContent + '</button>'
-      : '<span class="league-club-static">' + clubContent + '</span>';
+      (club.isUser ? '' : '<small>League club</small>') + '</span>';
+    const clubCell = '<button class="league-club-scout ' + (selectedSeasonOpponentId === club.id ? 'is-selected' : '') + '" type="button" data-season-opponent-id="' + escapeHtml(club.id) + '" aria-label="Preview ' + escapeHtml(club.name) + '">' + clubContent + '</button>';
     return '<tr class="' + (club.isUser ? 'is-user' : '') + '">' +
       '<td class="league-position">' + club.position + '</td>' +
       '<th scope="row">' + clubCell + '</th>' +
@@ -1006,9 +961,27 @@ function renderLeagueTable() {
 
 function renderSeasonEnemyPreview() {
   if (!elements.seasonEnemyPitch) return;
-  const opponent = selectedSeasonOpponentId
-    ? previewSeasonOpponent(state, selectedSeasonOpponentId)
-    : previewOpponent(state);
+  let opponent;
+  if (selectedSeasonOpponentId === USER_CLUB_ID) {
+    const formation = currentFormation();
+    const roster = formation.slots.map((slot) => {
+      const player = state.collection.find((candidate) => candidate.id === state.lineup[slot.id]);
+      return player ? { ...player, slotId: slot.id } : null;
+    }).filter(Boolean);
+    const strength = roster.length
+      ? roster.reduce((total, player) => total + effectiveOverall(player, formation.slots.find((slot) => slot.id === player.slotId)?.position ?? player.position), 0) / roster.length
+      : 0;
+    opponent = {
+      name: normalizeClubProfile(state.clubProfile).name,
+      formationId: state.formationId,
+      roster,
+      strength,
+    };
+  } else {
+    opponent = selectedSeasonOpponentId
+      ? previewSeasonOpponent(state, selectedSeasonOpponentId)
+      : previewOpponent(state);
+  }
   if (!opponent) {
     elements.seasonEnemyName.textContent = "Next opponent";
     elements.seasonEnemyFormation.textContent = "Awaiting season draw";
@@ -1047,9 +1020,17 @@ function enemyPitchPlayerMarkup(player, slot, tier) {
 }
 
 function renderSeasonRecentFixtures() {
-  const fixtures = seasonRecentFixtures(state, 12);
+  const fallbackTeam = previewOpponent(state);
+  const selectedTeamId = selectedSeasonOpponentId ?? fallbackTeam?.id ?? USER_CLUB_ID;
+  const fixtures = seasonRecentFixtures(state, 64)
+    .filter((fixture) => fixture.homeId === selectedTeamId || fixture.awayId === selectedTeamId)
+    .slice(0, 6);
+  const selectedTeamName = fixtures.length
+    ? (fixtures[0].homeId === selectedTeamId ? fixtures[0].homeName : fixtures[0].awayName)
+    : (state.season.opponents?.find((club) => club.id === selectedTeamId)?.name ?? fallbackTeam?.name ?? normalizeClubProfile(state.clubProfile).name);
+  if (elements.seasonFixturesTeamLabel) elements.seasonFixturesTeamLabel.textContent = selectedTeamName + ' · Last 6';
   if (!fixtures.length) {
-    elements.seasonRecentFixtures.innerHTML = '<li class="season-fixture-empty">No completed league fixtures yet.</li>';
+    elements.seasonRecentFixtures.innerHTML = '<li class="season-fixture-empty">No completed fixtures for this club yet.</li>';
     return;
   }
   const iconForClub = (id, name) => {
@@ -1060,11 +1041,16 @@ function renderSeasonRecentFixtures() {
   elements.seasonRecentFixtures.innerHTML = fixtures.map((fixture) => {
     const homeIcon = iconForClub(fixture.homeId, fixture.homeName);
     const awayIcon = iconForClub(fixture.awayId, fixture.awayName);
-    return '<li class="season-fixture-item">' +
+    const selectedIsHome = fixture.homeId === selectedTeamId;
+    const selectedGoals = selectedIsHome ? fixture.homeGoals : fixture.awayGoals;
+    const opponentGoals = selectedIsHome ? fixture.awayGoals : fixture.homeGoals;
+    const result = selectedGoals > opponentGoals ? 'W' : selectedGoals < opponentGoals ? 'L' : 'D';
+    return '<li class="season-fixture-item is-result-' + result.toLowerCase() + '">' +
       '<span class="season-fixture-week">W' + fixture.week + '</span>' +
       '<span class="season-fixture-team season-fixture-team--home"><span class="season-fixture-icon">' + seasonClubIconMarkup(homeIcon.icon, homeIcon.transform) + '</span><strong>' + escapeHtml(fixture.homeName) + '</strong></span>' +
       '<strong class="season-fixture-score">' + fixture.homeGoals + '–' + fixture.awayGoals + '</strong>' +
       '<span class="season-fixture-team season-fixture-team--away"><span class="season-fixture-icon">' + seasonClubIconMarkup(awayIcon.icon, awayIcon.transform) + '</span><strong>' + escapeHtml(fixture.awayName) + '</strong></span>' +
+      '<b class="season-fixture-result" aria-label="' + (result === 'W' ? 'Win' : result === 'L' ? 'Loss' : 'Draw') + '">' + result + '</b>' +
       '</li>';
   }).join('');
 }
@@ -1183,7 +1169,7 @@ function statsLeaderboardMarkup(records, metric) {
   const secondaryLabel = metric === "assists" ? "G" : "A";
   if (!records.length) return `<li class="stats-leaderboard__empty">No ${metric} recorded yet.</li>`;
   return records.slice(0, 7).map((record, index) => `
-    <li><span class="stats-leaderboard__rank">${String(index + 1).padStart(2, "0")}</span>${statsPlayerIconMarkup(record)}<span class="stats-leaderboard__player"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)} · ${Number(record[secondaryMetric]) || 0} ${secondaryLabel}</small></span><strong class="stats-leaderboard__value">${Number(record[metric]) || 0}<small>${metricLabel}</small></strong></li>
+    <li><span class="stats-leaderboard__rank">${index + 1}</span>${statsPlayerIconMarkup(record)}<span class="stats-leaderboard__player"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small></span><span class="stats-leaderboard__secondary"><b>${Number(record[secondaryMetric]) || 0}</b><small>${secondaryLabel}</small></span><strong class="stats-leaderboard__value">${Number(record[metric]) || 0}<small>${metricLabel}</small></strong></li>
   `).join("");
 }
 
@@ -1191,9 +1177,16 @@ function statsFeatureMarkup(records, metric) {
   const leaders = records.slice(0, 3);
   if (!leaders.length) return `<p class="stats-feature__empty">Play a match to open the leader race.</p>`;
   const ordered = leaders.length === 3 ? [leaders[1], leaders[0], leaders[2]] : leaders;
-  return `<header><span>Golden ${metric === "assists" ? "playmaker" : "boot"} race</span><small>This season · all clubs</small></header><div class="stats-feature__podium">${ordered.map((record) => {
+  return `<header><span><i aria-hidden="true">${metric === "assists" ? "◆" : "♛"}</i> Golden ${metric === "assists" ? "playmaker" : "boot"} race</span><small>This season · all clubs</small></header><div class="stats-feature__podium">${ordered.map((record) => {
     const rank = leaders.indexOf(record) + 1;
-    return `<article class="stats-feature__player is-rank-${rank}"><span class="stats-feature__rank">${rank}</span>${statsPlayerIconMarkup(record, "stats-feature__portrait")}<div><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small><b>${Number(record[metric]) || 0} ${metric === "assists" ? "assists" : "goals"}</b></div></article>`;
+    const player = state.collection.find((candidate) => candidate.id === record.id) ?? record;
+    const overall = Number(player.overall ?? player.rating ?? record.overall) || 80;
+    const position = player.position ?? record.position ?? "CM";
+    const tier = playerCardTier(overall);
+    const fallback = fallbackAvatar({ ...player, name: record.name, position });
+    const source = safeUrl(playerImageSource(player)) || fallback;
+    const card = `<div class="stats-feature__card pitch-slot ${tier.className}" data-card-tier="${escapeHtml(tier.id)}"><span class="pitch-player-rating"><strong>${overall}</strong><small>OVR</small></span><span class="pitch-player-position">${escapeHtml(position)}</span><span class="pitch-player-tier">${escapeHtml(tier.shortLabel)}</span><span class="pitch-player-portrait"><span class="pitch-player-poster" aria-hidden="true"></span><img class="pitch-player-photo" src="${escapeHtml(source)}" data-fallback="${escapeHtml(fallback)}" alt="" draggable="false" /></span><span class="pitch-player-name">${escapeHtml(record.name)}</span></div>`;
+    return `<article class="stats-feature__player is-rank-${rank}"><span class="stats-feature__rank">${rank}</span>${card}<div class="stats-feature__copy"><span>${escapeHtml(record.name.split(" ")[0] || "Player")}</span><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small><b>${Number(record[metric]) || 0} ${metric === "assists" ? "assists" : "goals"}</b></div></article>`;
   }).join("")}</div>`;
 }
 
@@ -1243,11 +1236,14 @@ function renderStatsWindow() {
   if (elements.statsSeasonSnapshot) {
     const matches = state.season.matches.length;
     const goalsPerMatch = matches ? (seasonGoals / matches).toFixed(1) : "0.0";
-    elements.statsSeasonSnapshot.innerHTML = `<header>Season snapshot</header><div><span><strong>${seasonGoals}</strong><small>Goals</small></span><span><strong>${seasonAssists}</strong><small>Assists</small></span><span><strong>${matches}</strong><small>Matches</small></span><span><strong>${goalsPerMatch}</strong><small>Goals / match</small></span></div>`;
+    const matchGoals = Array.from({ length: 7 }, (_, index) => Number(state.season.matches[index]?.userGoals) || 0);
+    const maxGoals = Math.max(4, ...matchGoals);
+    const bars = matchGoals.map((goals, index) => `<span class="stats-snapshot-bar" style="--bar-height:${Math.max(8, (goals / maxGoals) * 68)}%;--bar-color:var(--stats-bar-${(index % 7) + 1})"><b>${goals}</b><i></i><small>${index + 1}</small></span>`).join("");
+    elements.statsSeasonSnapshot.innerHTML = `<header>Season snapshot</header><div class="stats-snapshot-metrics"><span><strong>${seasonGoals}</strong><small>Goals</small></span><span><strong>${seasonAssists}</strong><small>Assists</small></span><span><strong>${matches}</strong><small>Matches</small></span><span><strong>${goalsPerMatch}</strong><small>Goals / match</small></span></div><div class="stats-snapshot-chart">${bars}</div>`;
   }
   if (elements.statsRecordStrip) {
     const allTimeLeader = boards.allTimeClub[0];
-    elements.statsRecordStrip.innerHTML = `<span>All-time record</span><strong>${Number(allTimeLeader?.[metric]) || 0}</strong><small>${metric}</small><b>${escapeHtml(allTimeLeader?.name || "No record yet")}</b><button type="button" data-stats-metric="ballon">View Ballon dâ€™Or race <span aria-hidden="true">›</span></button>`;
+    elements.statsRecordStrip.innerHTML = `<i class="stats-record-strip__trophy" aria-hidden="true">♛</i><span>All-time record</span><strong>${Number(allTimeLeader?.[metric]) || 0}</strong><small>${metric}</small><b>${escapeHtml(allTimeLeader?.name || "No record yet")}</b><button type="button" data-stats-metric="ballon">View Ballon d’Or race <span aria-hidden="true">›</span></button>`;
   }
   hydrateImageFallbacks(elements.statsFeature);
 }
@@ -1627,6 +1623,12 @@ async function handleThemeSubmit({ theme, formationId, turnstileContainer, error
 
 function openManagerWindow(windowName) {
   const order = { tactics: 0, transfers: 1, season: 2, stats: 3 };
+  const navGeometry = {
+    tactics: { left: "0%", width: "25%" },
+    transfers: { left: "23%", width: "29%" },
+    season: { left: "50%", width: "25%" },
+    stats: { left: "75%", width: "25%" },
+  };
   const currentWindow = elements.packDialog.open
     ? "transfers"
     : elements.seasonDialog.open
@@ -1635,8 +1637,14 @@ function openManagerWindow(windowName) {
         ? "stats"
         : "tactics";
   const targetWindow = order[windowName] === undefined ? "tactics" : windowName;
+  const fromGeometry = navGeometry[currentWindow];
+  const toGeometry = navGeometry[targetWindow];
   document.body.style.setProperty("--manager-nav-from", order[currentWindow]);
   document.body.style.setProperty("--manager-nav-to", order[targetWindow]);
+  document.body.style.setProperty("--manager-nav-from-left", fromGeometry.left);
+  document.body.style.setProperty("--manager-nav-from-width", fromGeometry.width);
+  document.body.style.setProperty("--manager-nav-to-left", toGeometry.left);
+  document.body.style.setProperty("--manager-nav-to-width", toGeometry.width);
   document.body.classList.remove("is-manager-nav-sliding");
   void document.body.offsetWidth;
   document.body.classList.add("is-manager-nav-sliding");
@@ -1658,6 +1666,7 @@ function openManagerWindow(windowName) {
     }
 
     if (targetWindow === "season") {
+      setSeasonView("roster");
       renderLeagueTable();
       elements.seasonDialog.showModal();
       return;
@@ -2244,25 +2253,21 @@ elements.fixPositionsButton?.addEventListener("click", () => {
   showToast(moved ? `${moved} positions optimized for the current XI.` : "The current XI is already in its best positions.");
 });
 
-const seasonViewTitles = {
-  standings: "Season standings",
-  fixtures: "Recent fixtures",
-  history: "Past seasons",
-};
+function setSeasonView(view) {
+  const nextView = view === "fixtures" ? "fixtures" : "roster";
+  elements.seasonViewButtons.forEach((candidate) => {
+    const active = candidate.dataset.seasonView === nextView;
+    candidate.classList.toggle("is-active", active);
+    candidate.setAttribute("aria-pressed", String(active));
+  });
+  elements.seasonViewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.seasonPanel !== nextView;
+  });
+  elements.seasonWindowTitle.textContent = "Season standings";
+}
 
 elements.seasonViewButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const view = button.dataset.seasonView;
-    elements.seasonViewButtons.forEach((candidate) => {
-      const active = candidate === button;
-      candidate.classList.toggle("is-active", active);
-      candidate.setAttribute("aria-pressed", String(active));
-    });
-    elements.seasonViewPanels.forEach((panel) => {
-      panel.hidden = panel.dataset.seasonPanel !== view;
-    });
-    elements.seasonWindowTitle.textContent = seasonViewTitles[view] ?? "Season standings";
-  });
+  button.addEventListener("click", () => setSeasonView(button.dataset.seasonView));
 });
 
 elements.statsRecordStrip?.addEventListener("click", (event) => {

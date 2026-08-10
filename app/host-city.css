@@ -12,7 +12,40 @@
   --host-gold: #d5aa43;
   --display: "Teko", "Barlow Condensed", "Arial Narrow", sans-serif;
   --title: var(--display);
-  --body: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans Condensed", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --smooth: "IBM Plex Sans Condensed", "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("assets/fonts/ibm-plex-sans-condensed/IBMPlexSansCondensed-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("assets/fonts/ibm-plex-sans-condensed/IBMPlexSansCondensed-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("assets/fonts/ibm-plex-sans-condensed/IBMPlexSansCondensed-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("assets/fonts/ibm-plex-sans-condensed/IBMPlexSansCondensed-Bold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
 }
 
 /* One tournament surface; legacy glass, gradients and ornamental skins stop here. */
@@ -407,7 +440,34 @@ body:has(.manager-screen:not([hidden])) main {
 .season-window__standings .subsection-heading h3 { color:var(--host-paper); font:600 2rem/.8 var(--display); text-transform:uppercase; }
 .season-window__standings .league-table-wrap { overflow:auto; }
 .season-window__standings .league-table th,.season-window__standings .league-table td { height:clamp(32px,4.4svh,45px); padding:.25rem .4rem; }
-.season-window__standings .league-table tbody tr.is-user { color:var(--host-ink); background:var(--host-paper); }
+.season-window__standings .league-table tbody tr.is-user {
+  color: var(--host-paper);
+  background: transparent;
+}
+
+.season-window__standings .league-table tbody tr.is-user > th,
+.season-window__standings .league-table tbody tr.is-user > td {
+  background: linear-gradient(90deg, rgba(69,216,173,.24), rgba(69,216,173,.105));
+  box-shadow:
+    inset 0 1px rgba(82,229,186,.4),
+    inset 0 -1px rgba(82,229,186,.3);
+}
+
+.season-window__standings .league-table tbody tr.is-user td:first-child {
+  color: var(--host-mint);
+  border-left: 4px solid var(--host-mint);
+  text-shadow: 0 0 12px rgba(82,229,186,.42);
+}
+
+.season-window__standings .league-table tbody tr.is-user .league-club-copy strong {
+  color: var(--host-mint);
+  text-shadow: 0 0 14px rgba(82,229,186,.24);
+}
+
+.season-window__standings .league-table tbody tr.is-user td:last-child {
+  color: var(--host-mint);
+  font-weight: 800;
+}
 .season-window__side { display:grid; min-height:0; grid-template-rows:1.2fr .72fr .55fr; gap:.75rem; }
 .season-opponent-preview,.season-fixtures-window,.season-history-window { min-height:0; overflow:hidden; border:2px solid var(--host-ink); border-radius:8px; background:rgba(244,239,223,.95); }
 .season-opponent-preview { display:grid; grid-template-columns:minmax(0,1fr) 34%; grid-template-rows:auto 1fr; }
@@ -1264,6 +1324,9 @@ body:has(.manager-screen:not([hidden])) main {
   margin: 0;
   padding: 0;
   overflow: visible;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .season-window__shell {
@@ -1279,6 +1342,81 @@ body:has(.manager-screen:not([hidden])) main {
   gap: 1rem;
   min-height: 12.05svh;
   padding: .8rem 1rem 1rem;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.season-window__title-block,
+.season-window__title-block h2 {
+  background: transparent !important;
+}
+
+/* Smooth compact typography selected from the approved font comparison. */
+.manager-window-nav button,
+.collection-filters input,
+.collection-filters select,
+.squad-card__name,
+.squad-card__tier,
+.squad-card__starter,
+.pitch-player-name,
+.pack-player__identity h3,
+.league-table,
+.league-club-copy,
+.league-form-dot,
+.season-fixture-week,
+.season-fixture-team strong,
+.season-fixture-result,
+.stats-leaderboard li,
+.selected-player-inspector small,
+.selected-player-inspector__roleline em,
+.manager-screen label,
+.season-window small,
+.stats-window small,
+.transfer-window small {
+  font-family: var(--smooth) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure every compact label follows the shared smooth UI face, including
+   dynamically rendered content that is not covered by component selectors. */
+.manager-screen :where(small, label, input, select, textarea, table, td, th, p, li),
+.season-window :where(small, label, input, select, textarea, table, td, th, p, li),
+.stats-window :where(small, label, input, select, textarea, table, td, th, p, li),
+.transfer-window :where(small, label, input, select, textarea, table, td, th, p, li),
+.matchday-dialog :where(small, label, input, select, textarea, table, td, th, p, li),
+.game-dialog :where(.eyebrow, .form-error, .collection-empty, .stats-empty-copy) {
+  font-family: var(--smooth) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Player-card typography: smooth names and compact labels; large OVR values
+   keep the sharper display face for hierarchy. */
+.pitch-slot :where(
+  .pitch-player-name,
+  .pitch-player-position,
+  .pitch-player-tier,
+  .pitch-player-rating small
+),
+.pack-card :where(
+  .pack-player__identity h3,
+  .pack-player__identity p,
+  .pack-player__finance small,
+  .pack-player__meta,
+  .pack-player-position
+),
+.collection-player :where(
+  .squad-card__name,
+  .squad-card__tier,
+  .squad-card__starter,
+  .squad-card__stats,
+  small
+) {
+  font-family: var(--smooth) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .season-window__title-block h2 {
@@ -1675,13 +1813,15 @@ body:has(.manager-screen:not([hidden])) main {
 
   .manager-window-nav::before {
     position: absolute;
-    inset: 0 auto 0 0;
+    top: 0;
+    bottom: 0;
+    left: var(--manager-nav-to-left, 0%);
     z-index: -1;
-    width: 25%;
+    width: var(--manager-nav-to-width, 25%);
     background: linear-gradient(135deg,#52e5ba,#3cc99f);
     clip-path: polygon(18% 0,100% 0,82% 100%,0 100%);
     content: "";
-    transform: translateX(calc(var(--manager-nav-to, 0) * 100%));
+    transform: none;
   }
 
   .manager-window-nav button {
@@ -2275,8 +2415,14 @@ body:has(.manager-screen:not([hidden])) .toast {
 }
 
 @keyframes managerNavSlide {
-  from { transform: translateX(calc(var(--manager-nav-from, 0) * 100%)); }
-  to { transform: translateX(calc(var(--manager-nav-to, 0) * 100%)); }
+  from {
+    left: var(--manager-nav-from-left, 0%);
+    width: var(--manager-nav-from-width, 25%);
+  }
+  to {
+    left: var(--manager-nav-to-left, 0%);
+    width: var(--manager-nav-to-width, 25%);
+  }
 }
 
 body.is-manager-nav-sliding .manager-window-nav::before {
@@ -2701,6 +2847,40 @@ body.is-manager-nav-sliding .manager-window-nav::before {
   background: rgba(69,216,173,.14) !important;
   box-shadow: none !important;
   clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%) !important;
+}
+
+/* Match the wider Transfers selection geometry when it is previewed on hover. */
+@media (min-width: 901px) {
+  .manager-window-nav button:nth-child(2) {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+  }
+
+  .manager-window-nav button:nth-child(2)::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -8%;
+    z-index: -1;
+    width: 116%;
+    background: rgba(69,216,173,.14);
+    clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%);
+    content: "";
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  .manager-window-nav button:nth-child(2):not(.is-active):hover,
+  .manager-window-nav button:nth-child(2):not(.is-active):focus-visible {
+    background: transparent !important;
+    clip-path: none !important;
+  }
+
+  .manager-window-nav button:nth-child(2):not(.is-active):hover::before,
+  .manager-window-nav button:nth-child(2):not(.is-active):focus-visible::before {
+    opacity: 1;
+  }
 }
 
 .pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
@@ -3727,4 +3907,956 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     padding-bottom: 7px !important;
     box-sizing: border-box !important;
   }
+}
+
+/* Larger, more legible Season standings table. */
+@media (min-width: 901px) {
+  .season-window__standings {
+    grid-template-columns: minmax(0, 1.22fr) minmax(390px, .55fr) !important;
+  }
+
+  .season-standings-table .subsection-heading {
+    min-height: 58px;
+    padding: .8rem 1rem !important;
+  }
+
+  .season-standings-table .subsection-heading h3 {
+    font-size: 2.35rem !important;
+  }
+
+  .season-window__standings .league-table {
+    min-width: 700px;
+    font-size: clamp(.9rem, 1.18vw, 1.12rem) !important;
+  }
+
+  .season-window__standings .league-table th,
+  .season-window__standings .league-table td {
+    height: clamp(44px, 5.2svh, 55px) !important;
+    padding: .38rem .58rem !important;
+  }
+
+  .season-window__standings .league-table thead th {
+    height: 40px !important;
+    font-size: .72rem !important;
+    letter-spacing: .08em;
+  }
+
+  .season-window__standings .league-club-scout,
+  .season-window__standings .league-club-static {
+    gap: .65rem;
+  }
+
+  .season-window__standings .league-club-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .season-window__standings .league-club-copy strong {
+    font-size: 1.04rem;
+  }
+
+  .season-window__standings .league-club-copy small {
+    font-size: .55rem;
+  }
+
+  .season-window__standings .league-form {
+    gap: .26rem;
+  }
+
+  .season-window__standings .league-form-dot {
+    width: 22px;
+    height: 22px;
+    font-size: .52rem;
+  }
+}
+
+/* Season views use the same single-shell segmented control as Player Leaders. */
+.season-view-switch {
+  display: inline-grid !important;
+  width: min(100%, 440px);
+  min-height: 54px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-self: center;
+  justify-self: end;
+  gap: 6px !important;
+  overflow: hidden;
+  padding: 3px;
+  border: 2px solid var(--host-ink);
+  border-radius: 7px;
+  background: var(--host-ink);
+}
+
+/* Permanent standings with a selected-club detail surface on the right. */
+.season-team-detail {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+/* Standings is permanent now, so it no longer inherits panel sizing via
+   [data-season-panel]. Keep the entire two-column workspace inside row 3. */
+.season-window__body > .season-window__standings {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.season-window__standings > .season-standings-table,
+.season-window__standings > .season-team-detail {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.season-team-detail > .season-fixtures-window,
+.season-team-detail > .season-enemy-preview {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.season-team-detail > [hidden] {
+  display: none !important;
+}
+
+.season-team-detail .season-fixtures-window {
+  border: 2px solid var(--host-ink);
+  border-radius: 8px;
+  background: var(--host-ink);
+}
+
+.season-team-detail .season-enemy-preview {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.season-team-detail .season-enemy-preview__header {
+  min-height: 76px;
+  flex: 0 0 76px;
+  padding: .8rem 1rem;
+}
+
+.season-team-detail .season-enemy-pitch.football-pitch {
+  width: calc(100% - 1rem);
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  margin: 0 auto .5rem;
+  background-position: 50% 49%;
+  background-size: 215% auto;
+}
+
+.season-team-detail .season-enemy-pitch .pitch-slot {
+  width: clamp(58px, 4.9vw, 66px) !important;
+  height: clamp(76px, 6.3vw, 86px) !important;
+}
+
+.season-team-detail .season-fixtures-list {
+  display: grid;
+  grid-template-rows: none;
+  grid-auto-rows: minmax(84px, auto);
+  gap: 4px;
+  padding: .65rem;
+  overflow: auto;
+}
+
+.season-team-detail .season-fixture-item {
+  position: relative;
+  display: grid;
+  min-height: 84px;
+  grid-template-columns: 38px minmax(0, 1fr) 74px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .65rem;
+  border: 1px solid rgba(244,239,223,.13);
+  border-left: 5px solid var(--fixture-result-color, var(--host-muted));
+  border-radius: 5px;
+  background: rgba(255,255,255,.035);
+}
+
+.season-team-detail .season-fixture-item.is-result-w { --fixture-result-color: var(--host-mint); }
+.season-team-detail .season-fixture-item.is-result-d { --fixture-result-color: #9ca3aa; }
+.season-team-detail .season-fixture-item.is-result-l { --fixture-result-color: #ff4452; }
+
+.season-team-detail .season-fixture-week {
+  font: 700 .78rem/1 var(--body);
+  letter-spacing: .06em;
+}
+
+.season-team-detail .season-fixture-team {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 42px auto;
+  align-self: stretch;
+  align-content: start;
+  justify-items: center;
+  gap: .25rem;
+  text-align: center;
+}
+
+.season-team-detail .season-fixture-team strong {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  font: 700 1rem/1.02 var(--body);
+  text-align: center;
+  text-overflow: unset;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  -webkit-box-orient: unset;
+  -webkit-line-clamp: unset;
+}
+
+.season-team-detail .season-fixture-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  align-self: center;
+  justify-self: center;
+}
+
+.season-team-detail .season-fixture-score {
+  color: var(--host-paper);
+  font: 700 1.7rem/1 var(--display);
+}
+
+.season-team-detail .season-fixture-result {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: var(--host-ink);
+  border-radius: 50%;
+  background: var(--fixture-result-color);
+  font: 800 .85rem/1 var(--body);
+}
+
+.season-team-detail .season-fixture-empty {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  color: var(--host-muted);
+  font: 600 1.15rem/1.3 var(--body);
+}
+
+.season-view-switch button {
+  min-height: 50px !important;
+  margin: 0;
+  padding: .45rem .8rem !important;
+  color: var(--host-paper) !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  font: 600 1.25rem/1 var(--display) !important;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.season-view-switch button.is-active {
+  color: var(--host-ink) !important;
+  background: var(--host-mint) !important;
+}
+
+.season-view-switch button:not(.is-active):hover,
+.season-view-switch button:not(.is-active):focus-visible {
+  color: var(--host-ink) !important;
+  background: #6ae2bd !important;
+  outline: 0;
+}
+
+@media (max-width: 900px) {
+  .season-view-switch {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .season-view-switch button {
+    min-height: 46px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Reference-faithful Player Leaders presentation. */
+.stats-window {
+  --stats-gold: #e8bd55;
+  --stats-line: rgba(244,239,223,.18);
+  --stats-bar-1: #4dd8ad;
+  --stats-bar-2: #36c79e;
+  --stats-bar-3: #2c70dc;
+  --stats-bar-4: #2759c7;
+  --stats-bar-5: #ff8a31;
+  --stats-bar-6: #f13f3f;
+  --stats-bar-7: #e73342;
+}
+
+.stats-window__heading {
+  align-items: center;
+}
+
+.stats-window__heading .eyebrow {
+  color: #159474;
+  letter-spacing: .16em;
+}
+
+.stats-metric-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  overflow: hidden;
+  padding: 3px;
+  border: 2px solid var(--host-ink);
+  border-radius: 7px;
+  background: var(--host-ink);
+}
+
+.stats-metric-switch button,
+.stats-metric-switch button:not(.is-active):hover {
+  color: var(--host-paper);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.stats-metric-switch button.is-active,
+.stats-metric-switch button.is-active:hover {
+  color: var(--host-ink);
+  background: var(--host-mint);
+}
+
+.stats-feature {
+  position: relative;
+  display: grid;
+  grid-template-rows: 48px minmax(0, 1fr);
+  overflow: visible;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 3px 3px, rgba(69,216,173,.16) 1px, transparent 1.5px) 0 0 / 9px 9px,
+    linear-gradient(100deg, #061a2f 0%, #031426 58%, #061a2f 100%);
+}
+
+.stats-feature::after {
+  position: absolute;
+  right: 39%;
+  bottom: -5px;
+  left: 39%;
+  height: 28px;
+  border: 4px solid var(--stats-gold);
+  border-bottom: 0;
+  content: "";
+  opacity: .9;
+  transform: perspective(60px) rotateX(20deg);
+}
+
+.stats-feature > header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .6rem 1.25rem 0;
+}
+
+.stats-feature > header span {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: var(--stats-gold);
+  font: 600 1.65rem/1 var(--display);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.stats-feature > header span i {
+  font-style: normal;
+  font-size: 1.5rem;
+}
+
+.stats-feature > header small {
+  color: var(--host-muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.stats-feature__podium {
+  position: relative;
+  z-index: 8;
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 1.2fr) minmax(0, 1fr);
+  align-items: end;
+  overflow: visible;
+}
+
+.stats-feature {
+  z-index: 6;
+}
+
+.stats-feature > header {
+  z-index: 7;
+}
+
+.stats-window__grid {
+  z-index: 2;
+}
+
+.stats-feature__player {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: 100%;
+  grid-template-columns: 42px 104px minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+  padding: .25rem 1.15rem .65rem;
+  overflow: visible;
+}
+
+.stats-feature__player.is-rank-1 {
+  grid-template-columns: 54px 158px minmax(0, 1fr);
+  background: linear-gradient(90deg, transparent, rgba(69,216,173,.12), transparent);
+}
+
+.stats-feature__rank {
+  color: var(--host-paper);
+  font: 600 3.35rem/.8 var(--display);
+  text-align: center;
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__rank {
+  color: var(--host-mint);
+  font-size: 5rem;
+}
+
+.stats-feature__card {
+  position: relative;
+  width: 104px;
+  height: 134px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #fff1b2, #b57a12 48%, #f8dd78 75%, #80500d);
+  clip-path: polygon(12% 0, 88% 0, 100% 8%, 97% 82%, 50% 100%, 3% 82%, 0 8%);
+  filter: drop-shadow(0 6px 4px rgba(0,0,0,.38));
+}
+
+.stats-feature__card::before {
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+  background:
+    linear-gradient(140deg, transparent 0 28%, rgba(215,166,43,.4) 29% 31%, transparent 32%),
+    linear-gradient(160deg, #fff8df, #eee2bd);
+  clip-path: inherit;
+  content: "";
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__card {
+  width: 158px;
+  height: 184px;
+  filter: drop-shadow(0 0 8px rgba(69,216,173,.65)) drop-shadow(0 8px 5px rgba(0,0,0,.42));
+}
+
+.stats-feature__card-rating {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: grid;
+  color: var(--host-ink);
+  text-align: center;
+}
+
+.stats-feature__card-rating b {
+  font: 700 1.45rem/.8 var(--display);
+}
+
+.stats-feature__card-rating small {
+  color: var(--host-ink);
+  font: 700 .68rem/1 var(--smooth) !important;
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__card-rating b {
+  font-size: 2rem;
+}
+
+.stats-feature__portrait.stats-player-icon {
+  position: absolute;
+  inset: 17px 7px 26px 28px;
+  z-index: 2;
+  display: block;
+  width: auto;
+  height: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  clip-path: polygon(8% 0, 100% 0, 100% 88%, 85% 100%, 0 100%, 0 12%);
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__portrait.stats-player-icon {
+  inset: 22px 10px 32px 41px;
+}
+
+.stats-feature__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.stats-feature__card-name {
+  position: absolute;
+  right: 8px;
+  bottom: 15px;
+  left: 8px;
+  z-index: 4;
+  overflow: hidden;
+  color: var(--host-ink);
+  font: 700 .7rem/1 var(--smooth);
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__card-name {
+  bottom: 18px;
+  font-size: .9rem;
+}
+
+.stats-feature__copy {
+  display: grid;
+  min-width: 0;
+  gap: .18rem;
+  align-self: center;
+}
+
+.stats-feature__copy > span {
+  color: var(--host-mint);
+  font: 700 .86rem/1 var(--smooth);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.stats-feature__copy > strong {
+  overflow: hidden;
+  color: var(--host-paper);
+  font: 600 clamp(1.35rem, 2.1vw, 2.25rem)/.82 var(--display);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__copy > strong {
+  font-size: clamp(2rem, 3vw, 3.2rem);
+}
+
+.stats-feature__copy > small {
+  color: var(--host-mint);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.stats-feature__copy > b {
+  margin-top: .3rem;
+  padding-top: .4rem;
+  color: var(--host-paper);
+  border-top: 1px solid rgba(232,189,85,.7);
+  font: 600 1.25rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.stats-window__grid {
+  grid-template-columns: minmax(0, 1.38fr) minmax(350px, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(118px, .68fr);
+  gap: .65rem .8rem;
+  padding: .75rem 0 .4rem;
+}
+
+.stats-leaderboard,
+.stats-season-snapshot {
+  border: 1px solid rgba(244,239,223,.12);
+  box-shadow: 0 8px 20px rgba(3,20,38,.12);
+}
+
+.stats-leaderboard header {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: .5rem;
+  padding: .45rem .8rem;
+  border-bottom: 1px solid var(--stats-line);
+}
+
+.stats-leaderboard header span {
+  order: 2;
+  color: var(--host-muted);
+  font: 600 .7rem/1 var(--smooth);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.stats-leaderboard header h3 {
+  margin: 0;
+  color: var(--host-mint);
+  font: 600 1.25rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.stats-leaderboard ol {
+  margin: 0;
+  padding: 0 .7rem;
+  list-style: none;
+}
+
+.stats-leaderboard li {
+  display: grid;
+  min-height: clamp(36px, 4.4svh, 46px);
+  grid-template-columns: 28px 42px minmax(0, 1fr) 46px 48px;
+  align-items: center;
+  gap: .45rem;
+  padding: 0 .25rem;
+  border-bottom: 1px solid var(--stats-line);
+  background: transparent !important;
+}
+
+.stats-leaderboard__rank {
+  color: var(--host-paper);
+  font: 700 1rem/1 var(--display);
+  text-align: center;
+}
+
+.stats-leaderboard .stats-player-icon {
+  position: relative;
+  width: 42px;
+  height: 100%;
+  min-height: 36px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(135deg, #f7e7b0, #b98622);
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 0 8%);
+}
+
+.stats-leaderboard .stats-player-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.stats-leaderboard__player {
+  display: grid;
+  min-width: 0;
+  gap: .08rem;
+}
+
+.stats-leaderboard__player strong {
+  overflow: hidden;
+  color: var(--host-paper);
+  font: 700 1rem/1 var(--smooth);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-leaderboard__player small {
+  overflow: hidden;
+  color: var(--host-muted);
+  font: 500 .68rem/1 var(--smooth) !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-leaderboard__secondary,
+.stats-leaderboard__value {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  justify-content: end;
+  gap: .2rem;
+  color: var(--host-paper);
+  font: 700 1rem/1 var(--display);
+}
+
+.stats-leaderboard__secondary small,
+.stats-leaderboard__value small {
+  color: var(--host-muted);
+  font: 600 .55rem/1 var(--smooth) !important;
+  text-transform: uppercase;
+}
+
+.stats-leaderboard__value {
+  color: var(--host-mint);
+  font-size: 1.18rem;
+}
+
+.stats-season-snapshot {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: 36px 58px minmax(42px, 1fr);
+  overflow: hidden;
+}
+
+.stats-season-snapshot header {
+  padding: .45rem .8rem;
+}
+
+.stats-season-snapshot > .stats-snapshot-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: .55rem .6rem .25rem;
+}
+
+.stats-snapshot-metrics > span {
+  display: grid;
+  border-left: 1px solid rgba(244,239,223,.25);
+  text-align: center;
+}
+
+.stats-snapshot-metrics > span:first-child {
+  border-left: 0;
+}
+
+.stats-snapshot-metrics strong {
+  font: 600 1.75rem/.8 var(--display);
+}
+
+.stats-snapshot-chart {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: end;
+  gap: .45rem;
+  margin: 0 .85rem .4rem;
+  padding-top: .9rem;
+  border-bottom: 1px solid rgba(244,239,223,.22);
+}
+
+.stats-snapshot-bar {
+  position: relative;
+  display: grid;
+  height: 100%;
+  min-height: 30px;
+  grid-template-rows: 1fr 14px;
+  align-items: end;
+  text-align: center;
+}
+
+.stats-snapshot-bar b {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--bar-height) + 14px);
+  left: 0;
+  color: var(--host-paper);
+  font: 700 .66rem/1 var(--smooth);
+}
+
+.stats-snapshot-bar i {
+  width: 100%;
+  height: var(--bar-height);
+  min-height: 4px;
+  align-self: end;
+  border-radius: 3px 3px 0 0;
+  background: var(--bar-color);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--bar-color) 55%, transparent);
+}
+
+.stats-snapshot-bar small {
+  color: var(--host-paper);
+  font: 600 .62rem/1 var(--smooth) !important;
+}
+
+.stats-record-strip {
+  grid-template-columns: 62px 210px 80px 72px minmax(0, 1fr) 285px;
+  gap: .8rem;
+  min-height: 74px;
+  margin: .25rem -.4vw 2.2rem;
+  padding: 0 1.2rem;
+  border: 1px solid rgba(244,239,223,.12);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(3,20,38,.18);
+}
+
+.stats-record-strip__trophy {
+  display: grid;
+  width: 48px;
+  height: 58px;
+  place-items: center;
+  color: var(--stats-gold);
+  font: 600 2.3rem/1 var(--display);
+  font-style: normal;
+  text-shadow: 0 0 14px rgba(232,189,85,.35);
+}
+
+.stats-record-strip > span {
+  padding-right: 1rem;
+  border-right: 1px solid rgba(244,239,223,.25);
+}
+
+.stats-record-strip > b {
+  padding-left: 1rem;
+  border-left: 1px solid rgba(244,239,223,.25);
+}
+
+.stats-record-strip button {
+  height: 100%;
+  text-align: right;
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+  .stats-feature__podium {
+    grid-template-columns: 1fr 1.08fr 1fr;
+  }
+
+  .stats-feature__player,
+  .stats-feature__player.is-rank-1 {
+    grid-template-columns: 34px 86px minmax(0, 1fr);
+    gap: .45rem;
+    padding-right: .5rem;
+    padding-left: .5rem;
+  }
+
+  .stats-feature__card,
+  .stats-feature__player.is-rank-1 .stats-feature__card {
+    width: 86px;
+    height: 118px;
+  }
+
+  .stats-feature__copy > strong,
+  .stats-feature__player.is-rank-1 .stats-feature__copy > strong {
+    font-size: 1.4rem;
+  }
+
+  .stats-record-strip {
+    grid-template-columns: 50px 155px 65px 60px minmax(0, 1fr) 220px;
+  }
+}
+
+/* Podium cards reuse the exact framed card system from Tactics and Season. */
+.stats-feature__card.pitch-slot,
+.stats-feature__card.pitch-slot:hover {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 94px;
+  height: 122px;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(135deg,
+      var(--tier-edge, #fff2aa) 0 18%,
+      var(--tier-ui-accent, #d8ad42) 36%,
+      color-mix(in srgb, var(--tier-ui-accent, #d8ad42) 58%, #281b07) 52%,
+      var(--tier-edge, #fff2aa) 72% 100%);
+  box-shadow: none;
+  filter: drop-shadow(0 8px 7px rgba(2,18,9,.34));
+  clip-path: polygon(8% 5%, 22% 0, 82% 2%, 96% 9%, 100% 20%, 96% 81%, 82% 91%, 50% 100%, 18% 91%, 4% 81%, 0 18%);
+  transform: none !important;
+  zoom: 1.106;
+  align-self: end;
+  z-index: 9;
+  bottom: 32px;
+}
+
+.stats-feature__player.is-rank-1 .stats-feature__card.pitch-slot {
+  width: 94px;
+  height: 122px;
+  filter: drop-shadow(0 0 8px rgba(69,216,173,.55)) drop-shadow(0 8px 7px rgba(2,18,9,.4));
+  zoom: 1.51;
+  transform-origin: center bottom;
+  bottom: 24px;
+}
+
+.stats-feature__card.pitch-slot::before {
+  display: none !important;
+}
+
+.stats-feature__card.pitch-slot[data-card-tier]:not([data-card-tier=""])::after {
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+  display: block !important;
+  background: var(--tier-surface, linear-gradient(145deg, #fff8d8, #d6ae4c)) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tier-edge, #fff2aa) 72%, #211704),
+    inset 0 0 0 3px color-mix(in srgb, var(--tier-ui-accent, #d8ad42) 36%, transparent) !important;
+  clip-path: inherit;
+  content: "";
+  opacity: 1;
+  pointer-events: none;
+}
+
+.stats-feature__card.pitch-slot .pitch-player-portrait {
+  z-index: 3;
+}
+
+.stats-feature__card.pitch-slot .pitch-player-photo {
+  z-index: 4;
+}
+
+.stats-feature__card.pitch-slot .pitch-player-rating,
+.stats-feature__card.pitch-slot .pitch-player-position,
+.stats-feature__card.pitch-slot .pitch-player-name {
+  z-index: 7;
+}
+
+/* Give Season Snapshot a substantial, readable seven-match bar graph. */
+.stats-season-snapshot {
+  grid-template-rows: 36px 58px minmax(70px, 1fr);
+}
+
+.stats-season-snapshot > .stats-snapshot-chart {
+  position: relative;
+  display: grid;
+  min-height: 70px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: stretch;
+  gap: .5rem;
+  margin: 0 .85rem .45rem;
+  padding: .75rem 0 0;
+  border-bottom: 1px solid rgba(244,239,223,.28);
+}
+
+.stats-season-snapshot .stats-snapshot-bar {
+  position: relative;
+  display: block;
+  height: 100%;
+  min-height: 56px;
+  border: 0;
+}
+
+.stats-season-snapshot .stats-snapshot-bar i {
+  position: absolute;
+  right: 0;
+  bottom: 15px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: var(--bar-height);
+  min-height: 5px;
+}
+
+.stats-season-snapshot .stats-snapshot-bar b {
+  bottom: calc(var(--bar-height) + 18px);
+}
+
+.stats-season-snapshot .stats-snapshot-bar small {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  left: 0;
 }

@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="host-city.css?v=20260809-56" />
+    <link rel="stylesheet" href="host-city.css?v=20260809-83" />
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -153,8 +153,8 @@
     </section>
 
     <section class="manager-screen" id="manager-screen" hidden aria-label="Club manager">
-      <video class="manager-animated-bg" id="manager-animated-bg" autoplay muted playsinline preload="auto" aria-hidden="true">
-        <source src="assets/ezgif-829a368faae3e66d.mp4" type="video/mp4" />
+      <video class="manager-animated-bg" id="manager-animated-bg" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="assets/ezgif-829a368faae3e66d-pingpong.mp4" type="video/mp4" />
       </video>
       <header class="manager-window-header manager-window-header--squad">
         <div class="manager-game-brand" aria-label="GFFootball">
@@ -411,15 +411,14 @@
           <h2 class="tactics-context-title manager-window-title" id="season-window-title">Season standings</h2>
         </div>
         <nav class="season-view-switch" aria-label="Season views">
-          <button class="is-active" data-season-view="standings" type="button" aria-pressed="true">Standings</button>
+          <button class="is-active" data-season-view="roster" type="button" aria-pressed="true">Roster preview</button>
           <button data-season-view="fixtures" type="button" aria-pressed="false">Recent fixtures</button>
-          <button data-season-view="history" type="button" aria-pressed="false">Past seasons</button>
         </nav>
       </div>
       </div>
 
       <div class="season-window__body">
-      <section class="season-window__standings" data-season-panel="standings" aria-labelledby="standings-title">
+      <section class="season-window__standings" aria-labelledby="standings-title">
         <div class="standings-panel season-standings-table">
         <div class="subsection-heading">
           <h3 id="standings-title">League table</h3>
@@ -444,10 +443,18 @@
           </table>
         </div>
         </div>
-        <aside class="season-enemy-preview" aria-labelledby="season-enemy-name">
+        <div class="season-team-detail">
+          <section class="season-fixtures-window" data-season-panel="fixtures" aria-labelledby="season-recent-fixtures-title" hidden>
+            <div class="subsection-heading">
+              <h3 id="season-recent-fixtures-title">Recent fixtures</h3>
+              <span id="season-fixtures-team-label">Selected club · Last 6</span>
+            </div>
+            <ol class="season-fixtures-list" id="season-recent-fixtures"></ol>
+          </section>
+        <aside class="season-enemy-preview" data-season-panel="roster" aria-labelledby="season-enemy-name">
           <header class="season-enemy-preview__header">
             <div>
-              <span>Opponent XI</span>
+              <span>Roster preview</span>
               <h3 id="season-enemy-name">Next opponent</h3>
               <small id="season-enemy-formation">Formation</small>
             </div>
@@ -455,15 +462,8 @@
           </header>
           <div class="season-enemy-pitch football-pitch" id="season-enemy-pitch" aria-label="Opponent starting lineup"></div>
         </aside>
+        </div>
       </section>
-          <section class="season-fixtures-window" data-season-panel="fixtures" aria-labelledby="season-recent-fixtures-title" hidden>
-            <div class="subsection-heading">
-              <h3 id="season-recent-fixtures-title">Recent fixtures</h3>
-              <span>Latest completed</span>
-            </div>
-            <ol class="season-fixtures-list" id="season-recent-fixtures"></ol>
-          </section>
-          <section class="season-history-window" data-season-panel="history" aria-labelledby="season-history-title" hidden><div class="subsection-heading"><h3 id="season-history-title">Past seasons</h3><span>Ballon d’Or archive</span></div><ol class="season-history-list" id="season-history-list"></ol></section>
       </div>
     </div>
   </dialog>
@@ -828,6 +828,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-    <script type="module" src="js/main.js?v=20260809-27"></script>
+    <script type="module" src="js/main.js?v=20260809-35"></script>
 </body>
 </html>
