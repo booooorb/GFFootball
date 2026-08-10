@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="host-city.css?v=20260809-83" />
+    <link rel="stylesheet" href="host-city.css?v=20260810-110" />
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -409,6 +409,7 @@
       <div class="season-window__commandbar tactics-commandbar">
         <div class="season-window__title-block tactics-title-block">
           <h2 class="tactics-context-title manager-window-title" id="season-window-title">Season standings</h2>
+          <span class="season-number-status" id="season-number-status">Season 1</span>
         </div>
         <nav class="season-view-switch" aria-label="Season views">
           <button class="is-active" data-season-view="roster" type="button" aria-pressed="true">Roster preview</button>
@@ -524,6 +525,7 @@
           <header>
             <span>This season</span>
             <h3 id="stats-season-club-title">Club leaders</h3>
+            <span class="stats-leaderboard__columns"><b>Apps</b><b>Avg rating</b><b data-stats-column-metric>Goals</b></span>
           </header>
           <ol id="stats-season-club"></ol>
         </section>
@@ -531,6 +533,7 @@
           <header>
             <span>This season</span>
             <h3 id="stats-season-all-title">All clubs</h3>
+            <span class="stats-leaderboard__columns"><b>Apps</b><b data-stats-column-metric>Goals</b></span>
           </header>
           <ol id="stats-season-all"></ol>
         </section>
@@ -538,6 +541,7 @@
           <header>
             <span>All time</span>
             <h3 id="stats-alltime-club-title">Club leaders</h3>
+            <span class="stats-leaderboard__columns"><b>Apps</b><b>Avg rating</b><b data-stats-column-metric>Goals</b></span>
           </header>
           <ol id="stats-alltime-club"></ol>
         </section>
@@ -545,6 +549,7 @@
           <header>
             <span>All time</span>
             <h3 id="stats-alltime-all-title">All clubs</h3>
+            <span class="stats-leaderboard__columns"><b>Apps</b><b data-stats-column-metric>Goals</b></span>
           </header>
           <ol id="stats-alltime-all"></ol>
         </section>
@@ -553,7 +558,7 @@
       <footer class="stats-record-strip" id="stats-record-strip"></footer>
       <div class="stats-ballon-view" id="stats-ballon-view" hidden>
         <section class="stats-ballon-view__race" aria-labelledby="stats-ballon-race-title">
-          <header><div><p class="eyebrow">Season award</p><h3 id="stats-ballon-race-title">Ballon d’Or race</h3><p>G+A × 10, plus a club-standing bonus of up to 24 points.</p></div><span>Share of race</span></header>
+          <header><div><p class="eyebrow">Season award</p><h3 id="stats-ballon-race-title">Ballon d’Or race</h3></div><span>Share of race</span></header>
           <ol id="stats-ballon-race" class="stats-ballon-view__list"></ol>
         </section>
         <section class="stats-ballon-view__history" aria-labelledby="stats-ballon-alltime-title">
@@ -828,6 +833,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-    <script type="module" src="js/main.js?v=20260809-35"></script>
+    <script type="module" src="js/main.js?v=20260810-48"></script>
 </body>
 </html>

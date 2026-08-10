@@ -1697,11 +1697,13 @@ function leagueGoalContributions(save, club, goalCount, seed) {
       scorerPortrait: scorer.portrait,
       scorerPosition: scorer.position,
       scorerTheme: scorer.theme,
+      scorerOverall: scorer.overall,
       assisterId: assister?.id ?? null,
       assisterName: assister?.name ?? null,
       assisterPortrait: assister?.portrait ?? null,
       assisterPosition: assister?.position ?? null,
       assisterTheme: assister?.theme ?? null,
+      assisterOverall: assister?.overall ?? null,
     };
   });
 }
@@ -1762,6 +1764,7 @@ function addStatRecord(bucket, key, {
   portrait = null,
   position = null,
   theme = null,
+  overall = null,
 }) {
   if (!name) return;
   const current = bucket[key] ?? {
@@ -1773,12 +1776,14 @@ function addStatRecord(bucket, key, {
     portrait,
     position,
     theme,
+    overall: Number(overall) || null,
   };
   current.name = name;
   current.club = club;
   if (portrait) current.portrait = portrait;
   if (position) current.position = position;
   if (theme) current.theme = theme;
+  if (Number(overall)) current.overall = Number(overall);
   current.goals += Number(goals) || 0;
   current.assists += Number(assists) || 0;
   bucket[key] = current;
@@ -1794,6 +1799,7 @@ function addLeagueContribution(bucket, clubId, clubName, contribution) {
     portrait: contribution.scorerPortrait,
     position: contribution.scorerPosition,
     theme: contribution.scorerTheme,
+    overall: contribution.scorerOverall,
   });
   if (!contribution.assisterName) return;
   const assisterKey = `league:${clubId}:${contribution.assisterId || normalizeName(contribution.assisterName)}`;
@@ -1805,6 +1811,7 @@ function addLeagueContribution(bucket, clubId, clubName, contribution) {
     portrait: contribution.assisterPortrait,
     position: contribution.assisterPosition,
     theme: contribution.assisterTheme,
+    overall: contribution.assisterOverall,
   });
 }
 
@@ -1839,9 +1846,11 @@ function addMatchToStatisticsBuckets(buckets, match) {
         scorerPortrait: scorer?.portrait,
         scorerPosition: scorer?.position,
         scorerTheme: scorer?.theme,
+        scorerOverall: scorer?.overall,
         assisterPortrait: assister?.portrait,
         assisterPosition: assister?.position,
         assisterTheme: assister?.theme,
+        assisterOverall: assister?.overall,
       },
     );
   }
@@ -1887,6 +1896,7 @@ function normalizeStatBucket(bucket) {
       portrait: record.portrait && typeof record.portrait === "object" ? record.portrait : null,
       position: typeof record.position === "string" ? record.position : null,
       theme: typeof record.theme === "string" ? record.theme : null,
+      overall: Number(record.overall) || null,
     };
   }
   return normalized;
@@ -1912,6 +1922,10 @@ export function normalizeStatistics(statistics, collection = [], season = null) 
       club: USER_CLUB_NAME,
       goals: player.stats?.goals,
       assists: player.stats?.assists,
+      portrait: player.portrait,
+      position: player.position,
+      theme: player.theme,
+      overall: player.overall,
     };
     addStatRecord(normalized.club, key, record);
     addStatRecord(normalized.allClubs, key, record);

@@ -122,6 +122,7 @@ const elements = {
   opponentPreviewPitch: document.querySelector("#opponent-preview-pitch"),
   fixtureList: document.querySelector("#fixture-list"),
   leagueRound: document.querySelector("#league-round"),
+  seasonNumberStatus: document.querySelector("#season-number-status"),
   leagueTableBody: document.querySelector("#league-table-body"),
   seasonRecentFixtures: document.querySelector("#season-recent-fixtures"),
   seasonFixturesTeamLabel: document.querySelector("#season-fixtures-team-label"),
@@ -647,6 +648,25 @@ function pitchPlayerMarkup(player, slot) {
   `;
 }
 
+function fitPlayerCardNames(root) {
+  root?.querySelectorAll?.(".pitch-player-name").forEach((name) => {
+    name.style.removeProperty("font-size");
+    name.classList.remove("is-truncated");
+    const baseSize = Number.parseFloat(getComputedStyle(name).fontSize) || 12;
+    const fits = () => name.scrollHeight <= name.clientHeight + 1 && name.scrollWidth <= name.clientWidth + 1;
+    for (const scale of [1, .95, .9, .85, .8, .75, .7, .65, .6, .55, .5]) {
+      name.style.setProperty("font-size", `${baseSize * scale}px`, "important");
+      if (fits()) return;
+    }
+    name.classList.add("is-truncated");
+  });
+}
+
+function schedulePlayerCardNameFit(root) {
+  requestAnimationFrame(() => fitPlayerCardNames(root));
+  document.fonts?.ready.then(() => fitPlayerCardNames(root));
+}
+
 function offRoleColor(penalty) {
   if (penalty <= 2) return "#bd3540";
   if (penalty <= 5) return "#d93442";
@@ -747,6 +767,7 @@ function renderPitch() {
     .join("");
 
   hydrateImageFallbacks(elements.pitch);
+  schedulePlayerCardNameFit(elements.pitch);
 }
 
 function matchesPlayerFilters(player) {
@@ -930,6 +951,7 @@ function seasonFormMarkup(clubId) {
 
 function renderLeagueTable() {
   const standings = leagueStandings(state);
+  if (elements.seasonNumberStatus) elements.seasonNumberStatus.textContent = `Season ${state.season.number}`;
   const roundLabel = state.season.week
     ? 'After week ' + state.season.week
     : "Pre-season";
@@ -1004,6 +1026,7 @@ function renderSeasonEnemyPreview() {
     return `<article class="pitch-slot ${tier.className}" style="--x:${projectedX.toFixed(2)}%;--y:${projectedY}%;" data-card-tier="${escapeHtml(tier.id)}">${enemyPitchPlayerMarkup(player, slot, tier)}</article>`;
   }).join("");
   hydrateImageFallbacks(elements.seasonEnemyPitch);
+  schedulePlayerCardNameFit(elements.seasonEnemyPitch);
 }
 
 function enemyPitchPlayerMarkup(player, slot, tier) {
@@ -1163,14 +1186,15 @@ function statsPlayerIconMarkup(record, extraClass = "") {
   return `<span class="stats-player-icon ${extraClass}" aria-label="${escapeHtml(player.name)}"><span class="stats-player-icon__initials" aria-hidden="true">${escapeHtml(playerInitials(player.name))}</span><img src="${escapeHtml(source)}" data-fallback="${escapeHtml(fallback)}" alt="" /></span>`;
 }
 
-function statsLeaderboardMarkup(records, metric) {
-  const metricLabel = metric === "assists" ? "A" : "G";
-  const secondaryMetric = metric === "assists" ? "goals" : "assists";
-  const secondaryLabel = metric === "assists" ? "G" : "A";
+function statsLeaderboardMarkup(records, metric, limit = 7, startIndex = 0, includeRating = false) {
   if (!records.length) return `<li class="stats-leaderboard__empty">No ${metric} recorded yet.</li>`;
-  return records.slice(0, 7).map((record, index) => `
-    <li><span class="stats-leaderboard__rank">${index + 1}</span>${statsPlayerIconMarkup(record)}<span class="stats-leaderboard__player"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small></span><span class="stats-leaderboard__secondary"><b>${Number(record[secondaryMetric]) || 0}</b><small>${secondaryLabel}</small></span><strong class="stats-leaderboard__value">${Number(record[metric]) || 0}<small>${metricLabel}</small></strong></li>
-  `).join("");
+  return records.slice(startIndex, startIndex + limit).map((record, index) => {
+    const player = state.collection.find((candidate) => candidate.id === record.id);
+    const seasonPerformance = player ? playerSeasonPerformance(state.season, player.id) : null;
+    const appearances = Number(record.appearances) || seasonPerformance?.appearances || state.season.matches.length;
+    const rating = player ? averageRating(player) : (Number(record.averageRating) || "—");
+    return `<li class="${includeRating ? "has-rating" : ""}"><span class="stats-leaderboard__rank">${startIndex + index + 1}</span>${statsPlayerIconMarkup(record)}<span class="stats-leaderboard__player"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small></span><span class="stats-leaderboard__apps">${appearances}</span>${includeRating ? `<span class="stats-leaderboard__rating">${rating}</span>` : ""}<strong class="stats-leaderboard__value">${Number(record[metric]) || 0}</strong></li>`;
+  }).join("");
 }
 
 function statsFeatureMarkup(records, metric) {
@@ -1179,27 +1203,48 @@ function statsFeatureMarkup(records, metric) {
   const ordered = leaders.length === 3 ? [leaders[1], leaders[0], leaders[2]] : leaders;
   return `<header><span><i aria-hidden="true">${metric === "assists" ? "◆" : "♛"}</i> Golden ${metric === "assists" ? "playmaker" : "boot"} race</span><small>This season · all clubs</small></header><div class="stats-feature__podium">${ordered.map((record) => {
     const rank = leaders.indexOf(record) + 1;
-    const player = state.collection.find((candidate) => candidate.id === record.id) ?? record;
+    const currentOpponentPlayer = state.season.matches
+      .flatMap((match) => match.opponentRoster ?? [])
+      .find((candidate) => candidate.id === record.id);
+    const leaguePlayer = currentOpponentPlayer ?? (state.season.opponents ?? [])
+      .map((opponent) => previewSeasonOpponent(state, opponent.id))
+      .flatMap((opponent) => opponent?.roster ?? [])
+      .find((candidate) => candidate.id === record.id);
+    const player = state.collection.find((candidate) => candidate.id === record.id) ?? leaguePlayer ?? record;
     const overall = Number(player.overall ?? player.rating ?? record.overall) || 80;
     const position = player.position ?? record.position ?? "CM";
     const tier = playerCardTier(overall);
     const fallback = fallbackAvatar({ ...player, name: record.name, position });
     const source = safeUrl(playerImageSource(player)) || fallback;
     const card = `<div class="stats-feature__card pitch-slot ${tier.className}" data-card-tier="${escapeHtml(tier.id)}"><span class="pitch-player-rating"><strong>${overall}</strong><small>OVR</small></span><span class="pitch-player-position">${escapeHtml(position)}</span><span class="pitch-player-tier">${escapeHtml(tier.shortLabel)}</span><span class="pitch-player-portrait"><span class="pitch-player-poster" aria-hidden="true"></span><img class="pitch-player-photo" src="${escapeHtml(source)}" data-fallback="${escapeHtml(fallback)}" alt="" draggable="false" /></span><span class="pitch-player-name">${escapeHtml(record.name)}</span></div>`;
-    return `<article class="stats-feature__player is-rank-${rank}"><span class="stats-feature__rank">${rank}</span>${card}<div class="stats-feature__copy"><span>${escapeHtml(record.name.split(" ")[0] || "Player")}</span><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small><b>${Number(record[metric]) || 0} ${metric === "assists" ? "assists" : "goals"}</b></div></article>`;
+    return `<article class="stats-feature__player is-rank-${rank}"><span class="stats-feature__rank">${rank}</span>${card}<div class="stats-feature__copy"><strong>${escapeHtml(record.name)}</strong><small>${escapeHtml(record.club)}</small><b><em>${Number(record[metric]) || 0}</em><small>${metric === "assists" ? "assists" : "goals"}</small></b></div></article>`;
   }).join("")}</div>`;
+}
+
+function fitStatsPodiumNames() {
+  elements.statsFeature.querySelectorAll(".stats-feature__copy > strong").forEach((name) => {
+    name.style.removeProperty("font-size");
+    name.classList.remove("is-truncated");
+    const baseSize = Number.parseFloat(getComputedStyle(name).fontSize) || 32;
+    const fits = () => name.scrollHeight <= name.clientHeight + 1 && name.scrollWidth <= name.clientWidth + 1;
+    for (const scale of [1, .95, .9, .85, .8]) {
+      name.style.setProperty("font-size", `${baseSize * scale}px`, "important");
+      if (fits()) return;
+    }
+    name.classList.add("is-truncated");
+  });
 }
 
 function ballonDorRaceMarkup() {
   const race = currentBallonDorRace(state);
   if (!race.length) return `<p class="stats-empty-copy">Play matches to build the shortlist.</p>`;
-  return race.slice(0, 5).map((player, index) => `<article class="ballon-race-entry"><span class="ballon-race-entry__rank">${index + 1}</span>${statsPlayerIconMarkup(player)}<div class="ballon-race-entry__copy"><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.club ?? "Club")} · ${player.goalContributions} G+A · #${player.teamPosition} (+ ${player.standingBonus})</small><span class="ballon-race-entry__bar"><i style="width:${player.percentage}%"></i></span></div><b>${player.percentage}%</b></article>`).join("");
+  return race.slice(0, 5).map((player, index) => `<li><article class="ballon-race-entry is-rank-${index + 1}"><span class="ballon-race-entry__rank">${index + 1}</span>${statsPlayerIconMarkup(player)}<div class="ballon-race-entry__copy"><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.club ?? "Club")}</small><span class="ballon-race-entry__metrics"><b>${player.goals}<small>G</small></b><b>${player.assists}<small>A</small></b><b>#${player.teamPosition}<small>Club</small></b></span><span class="ballon-race-entry__bar"><i style="width:${player.percentage}%"></i></span></div><b class="ballon-race-entry__score"><strong>${player.percentage}</strong><small>%</small></b></article></li>`).join("");
 }
 
 function ballonDorAllTimeMarkup() {
   const winners = ballonDorAllTime(state);
   if (!winners.length) return `<p class="stats-empty-copy">No Ballon d’Or winners yet.</p>`;
-  return winners.slice(0, 5).map((player, index) => `<article class="ballon-winner-entry"><span class="ballon-winner-entry__rank">${String(index + 1).padStart(2, "0")}</span>${statsPlayerIconMarkup(player)}<span><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.club ?? "Club")}</small></span><b>${player.wins}×</b></article>`).join("");
+  return winners.slice(0, 5).map((player, index) => `<article class="ballon-winner-entry"><span class="ballon-winner-entry__rank">${index + 1}</span>${statsPlayerIconMarkup(player)}<span class="ballon-winner-entry__copy"><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.club ?? "Club")}</small></span><b><strong>${player.wins}</strong><small>Wins</small></b></article>`).join("");
 }
 
 function renderSeasonHistory() {
@@ -1217,19 +1262,27 @@ function renderStatsWindow() {
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  elements.statsDialog.querySelectorAll("[data-stats-column-metric]").forEach((label) => {
+    label.textContent = metric === "assists" ? "Assists" : "Goals";
+  });
   elements.statsLeaderboardGrid.hidden = isBallon;
   elements.statsFeature.hidden = isBallon;
+  elements.statsRecordStrip.hidden = isBallon;
   elements.statsBallonView.hidden = !isBallon;
   if (isBallon) {
     elements.statsBallonRace.innerHTML = ballonDorRaceMarkup();
     elements.statsBallonAllTime.innerHTML = ballonDorAllTimeMarkup();
+    hydrateImageFallbacks(elements.statsBallonView);
     return;
   }
-  elements.statsSeasonClub.innerHTML = statsLeaderboardMarkup(boards.seasonClub, metric);
-  elements.statsSeasonAll.innerHTML = statsLeaderboardMarkup(boards.seasonAllClubs, metric);
-  elements.statsAllTimeClub.innerHTML = statsLeaderboardMarkup(boards.allTimeClub, metric);
+  elements.statsSeasonClub.innerHTML = statsLeaderboardMarkup(boards.seasonClub, metric, 3, 0, true);
+  elements.statsSeasonAll.innerHTML = statsLeaderboardMarkup(boards.seasonAllClubs, metric, 7, 3);
+  elements.statsAllTimeClub.innerHTML = statsLeaderboardMarkup(boards.allTimeClub, metric, 3, 0, true);
   elements.statsAllTimeAll.innerHTML = statsLeaderboardMarkup(boards.allTimeAllClubs, metric);
   elements.statsFeature.innerHTML = statsFeatureMarkup(boards.seasonAllClubs, metric);
+  schedulePlayerCardNameFit(elements.statsFeature);
+  requestAnimationFrame(fitStatsPodiumNames);
+  document.fonts?.ready.then(fitStatsPodiumNames);
   const clubSeason = state.collection.map((player) => playerSeasonPerformance(state.season, player.id));
   const seasonGoals = clubSeason.reduce((sum, record) => sum + (Number(record.goals) || 0), 0);
   const seasonAssists = clubSeason.reduce((sum, record) => sum + (Number(record.assists) || 0), 0);
@@ -1239,10 +1292,19 @@ function renderStatsWindow() {
     const matchGoals = Array.from({ length: 7 }, (_, index) => Number(state.season.matches[index]?.userGoals) || 0);
     const maxGoals = Math.max(4, ...matchGoals);
     const bars = matchGoals.map((goals, index) => `<span class="stats-snapshot-bar" style="--bar-height:${Math.max(8, (goals / maxGoals) * 68)}%;--bar-color:var(--stats-bar-${(index % 7) + 1})"><b>${goals}</b><i></i><small>${index + 1}</small></span>`).join("");
-    elements.statsSeasonSnapshot.innerHTML = `<header>Season snapshot</header><div class="stats-snapshot-metrics"><span><strong>${seasonGoals}</strong><small>Goals</small></span><span><strong>${seasonAssists}</strong><small>Assists</small></span><span><strong>${matches}</strong><small>Matches</small></span><span><strong>${goalsPerMatch}</strong><small>Goals / match</small></span></div><div class="stats-snapshot-chart">${bars}</div>`;
+    const snapshotIcon = (type) => {
+      const paths = {
+        goals: '<circle cx="12" cy="12" r="8.5"/><path d="m12 7 3 2.2-1.1 3.5h-3.8L9 9.2 12 7Zm-7.8 4.2 3.2 1.1 1.3 3.6-2 2.5M19.8 11.2l-3.2 1.1-1.3 3.6 2 2.5M9.7 20.1l2.3-2 2.3 2"/>',
+        assists: '<path d="M4 17.5c3.4-5.6 7.7-8.5 13.7-8.5"/><path d="m14.5 5.8 3.7 3.1-3.4 3.5"/><circle cx="5" cy="18" r="2"/>',
+        matches: '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M8 3.5v4M16 3.5v4M4 10h16M8 14h3M14 14h2"/>',
+        rate: '<path d="M4 19V6M4 19h16M7 16l3-4 3 2 5-7"/><path d="m15 7 3-.2.2 3"/>',
+      };
+      return `<i class="stats-snapshot-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${paths[type]}</svg></i>`;
+    };
+    elements.statsSeasonSnapshot.innerHTML = `<header>Season snapshot</header><div class="stats-snapshot-metrics"><span>${snapshotIcon("goals")}<strong>${seasonGoals}</strong><small>Goals</small></span><span>${snapshotIcon("assists")}<strong>${seasonAssists}</strong><small>Assists</small></span><span>${snapshotIcon("matches")}<strong>${matches}</strong><small>Matches</small></span><span>${snapshotIcon("rate")}<strong>${goalsPerMatch}</strong><small>Goals / match</small></span></div><div class="stats-snapshot-chart">${bars}</div>`;
   }
   if (elements.statsRecordStrip) {
-    const allTimeLeader = boards.allTimeClub[0];
+    const allTimeLeader = boards.allTimeAllClubs[0];
     elements.statsRecordStrip.innerHTML = `<i class="stats-record-strip__trophy" aria-hidden="true">♛</i><span>All-time record</span><strong>${Number(allTimeLeader?.[metric]) || 0}</strong><small>${metric}</small><b>${escapeHtml(allTimeLeader?.name || "No record yet")}</b><button type="button" data-stats-metric="ballon">View Ballon d’Or race <span aria-hidden="true">›</span></button>`;
   }
   hydrateImageFallbacks(elements.statsFeature);
