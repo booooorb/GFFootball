@@ -815,14 +815,15 @@ async function readCuratedPortrait(name, env, apiOrigin) {
 }
 
 async function searchPortrait(player, env) {
-  const cacheKey = `portrait:v2:${await sha256(`${player.name}:${player.theme}`)}`;
+  // v3 invalidates earlier empty name-only lookups for ambiguous characters.
+  const cacheKey = `portrait:v3:${await sha256(`${player.name}:${player.theme}`)}`;
   const cached = await readPortraitCache(cacheKey, env);
   if (cached) return cached;
 
   const query = new URLSearchParams({
-    // Requiring both the theme and "portrait" excluded many correct results.
-    // Search the exact identity, then use theme and metadata for ranking.
-    q: player.name,
+    // The theme disambiguates generated names such as "Steve" while the
+    // existing ranking still requires a strong name match.
+    q: `${player.name} ${player.theme}`.trim(),
     page_size: "30",
     mature: "false",
     license: "cc0,pdm,by,by-sa",

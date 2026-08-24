@@ -420,7 +420,10 @@ async function searchCommonsPortrait(player, fetchImpl) {
 
 async function searchOpenversePortrait(player, fetchImpl) {
   const query = new URLSearchParams({
-    q: player.name,
+    // Many generated character names are ambiguous on their own (for example,
+    // "Steve"). Include the scouting theme so Openverse returns the intended
+    // person or character rather than an unrelated namesake.
+    q: `${player.name} ${player.theme}`.trim(),
     page_size: "30",
     mature: "false",
     license: "cc0,pdm,by,by-sa",

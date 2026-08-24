@@ -85,6 +85,9 @@ const elements = {
   themeForm: document.querySelector("#theme-form"),
   themeInput: document.querySelector("#theme"),
   managerError: document.querySelector("#manager-error"),
+  scoutRoleFilter: document.querySelector("#scout-role-filter"),
+  scoutQualityFilter: document.querySelector("#scout-quality-filter"),
+  scoutBudgetFilter: document.querySelector("#scout-budget-filter"),
   formationSelect: document.querySelector("#formation-select"),
   formationPickerTrigger: document.querySelector("#formation-picker-trigger"),
   formationPickerValue: document.querySelector("#formation-picker-value"),
@@ -126,7 +129,6 @@ const elements = {
   leagueTableBody: document.querySelector("#league-table-body"),
   seasonRecentFixtures: document.querySelector("#season-recent-fixtures"),
   seasonFixturesTeamLabel: document.querySelector("#season-fixtures-team-label"),
-  seasonHistoryList: document.querySelector("#season-history-list"),
   seasonEnemyName: document.querySelector("#season-enemy-name"),
   seasonEnemyFormation: document.querySelector("#season-enemy-formation"),
   seasonEnemyRating: document.querySelector("#season-enemy-rating"),
@@ -208,7 +210,7 @@ let activeDraggedPlayerId = null;
 let pointerDragSession = null;
 let suppressPlayerClick = false;
 const PORTRAIT_LOOKUP_VERSION_KEY = "gff-portrait-lookup-version";
-const PORTRAIT_LOOKUP_VERSION = 2;
+const PORTRAIT_LOOKUP_VERSION = 3;
 
 function initializeManagerBackgroundPingPong() {
   const video = elements.managerAnimatedBackground;
@@ -437,10 +439,14 @@ function applyConnectionStatus(status) {
 function updateGenerationButtons() {
   const affordable = state.finances.balanceMillions >= SCOUTING_COST_MILLIONS;
   elements.generationButtons.forEach((button) => {
-    button.disabled = !connectionReady || !affordable;
-    button.title = affordable
-      ? ""
-      : `You need ${formatMoney(SCOUTING_COST_MILLIONS)} to scout a market.`;
+    // The status request is advisory. A transient status-check failure must not
+    // permanently lock a working generator behind a disabled button.
+    button.disabled = !affordable;
+    button.title = !affordable
+      ? `You need ${formatMoney(SCOUTING_COST_MILLIONS)} to scout a market.`
+      : connectionReady
+        ? ""
+        : "Scouting will retry the generator when submitted.";
   });
 }
 
@@ -1247,12 +1253,6 @@ function ballonDorAllTimeMarkup() {
   return winners.slice(0, 5).map((player, index) => `<article class="ballon-winner-entry"><span class="ballon-winner-entry__rank">${index + 1}</span>${statsPlayerIconMarkup(player)}<span class="ballon-winner-entry__copy"><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.club ?? "Club")}</small></span><b><strong>${player.wins}</strong><small>Wins</small></b></article>`).join("");
 }
 
-function renderSeasonHistory() {
-  if (!elements.seasonHistoryList) return;
-  const history = Array.isArray(state.seasonHistory) ? [...state.seasonHistory].reverse() : [];
-  elements.seasonHistoryList.innerHTML = history.length ? history.map((entry) => { const winner = entry.winner; return `<li class="season-history-item"><span class="season-history-item__season">S${entry.number}</span>${winner ? statsPlayerIconMarkup(winner) : ""}<span><strong>${escapeHtml(winner?.name ?? "No winner")}</strong><small>${escapeHtml(entry.clubName ?? "Club season")} · ${entry.finalPosition ?? "—"} place</small></span><b>Ballon d’Or</b></li>`; }).join("") : `<li class="stats-empty-copy">Complete a season to build your archive.</li>`;
-}
-
 function renderStatsWindow() {
   const isBallon = selectedStatsMetric === "ballon";
   const metric = selectedStatsMetric === "assists" ? "assists" : "goals";
@@ -1768,13 +1768,29 @@ function moveManagerAnimatedBackground(windowName) {
 function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
   const market = state.transferMarket ?? createEmptyTransferMarket();
   const players = market.players ?? [];
+  const roleFilter = elements.scoutRoleFilter?.value ?? "";
+  const qualityFilter = Number(elements.scoutQualityFilter?.value) || 0;
+  const budgetFilter = elements.scoutBudgetFilter?.value ?? "all";
+  const positionGroups = {
+    DEF: new Set(["LB", "CB", "RB", "LWB", "RWB"]),
+    MID: new Set(["CM", "CDM", "CAM", "LM", "RM"]),
+    FWD: new Set(["LW", "RW", "ST", "CF"]),
+  };
+  const visiblePlayers = players.filter((player) => {
+    const roleMatches = !roleFilter || player.position === roleFilter || positionGroups[roleFilter]?.has(player.position);
+    const qualityMatches = player.overall >= qualityFilter;
+    const budgetMatches = budgetFilter === "all" ||
+      (budgetFilter === "free" && player.isFreeTransfer) ||
+      (budgetFilter === "affordable" && (player.isFreeTransfer || player.askingPriceMillions <= state.finances.balanceMillions));
+    return roleMatches && qualityMatches && budgetMatches;
+  });
   const freeCount = players.filter((player) => player.isFreeTransfer).length;
   const revealsUsed = Math.max(freeCount, Number(market.freeRevealsUsed) || 0);
   const picksRemaining = Math.max(0, 3 - revealsUsed);
   elements.packTitle.textContent = market.theme || "Scouting report";
   const portraitCount = players.filter((player) => player.portrait.candidates.length).length;
   elements.packSummary.innerHTML = players.length ? [
-    `<span><small>Scout pack</small><strong>${players.length} players</strong></span>`,
+    `<span><small>Targets shown</small><strong>${visiblePlayers.length} / ${players.length}</strong></span>`,
     `<span><small>Free picks</small><strong>${revealsUsed} / 3</strong></span>`,
     `<span><small>Club balance</small><strong>${formatMoney(state.finances.balanceMillions)}</strong></span>`,
     `<span><small>Portraits found</small><strong>${portraitCount}</strong></span>`,
@@ -1784,8 +1800,8 @@ function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
     ? `${players.length} concealed transfer cards. Choose ${picksRemaining} more free ${picksRemaining === 1 ? "transfer" : "transfers"}.`
     : "Scouted transfer targets");
 
-  elements.packGrid.innerHTML = players.length
-    ? players.map((player, index) => {
+  elements.packGrid.innerHTML = visiblePlayers.length
+    ? visiblePlayers.map((player, index) => {
       const isRevealed = player.isRevealed !== false;
       const priceMillions = player.isFreeTransfer ? 0 : player.askingPriceMillions;
       const affordable = state.finances.balanceMillions >= priceMillions && state.collection.length < COLLECTION_LIMIT;
@@ -1829,7 +1845,9 @@ function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
         </article>
       `;
     }).join("")
-    : '<p class="market-empty">No players remain on this scouting list.</p>';
+    : players.length
+      ? '<p class="market-empty">No targets match these filters. Broaden the scouting criteria.</p>'
+      : '<p class="market-empty">No players remain on this scouting list.</p>';
   hydrateImageFallbacks(elements.packGrid);
 
   if (open) {
@@ -2151,6 +2169,10 @@ elements.formationPickerTrigger?.addEventListener("click", () => {
   elements.formationPickerMenu.hidden = !willOpen;
   elements.formationPickerTrigger.setAttribute("aria-expanded", String(willOpen));
 });
+
+[elements.scoutRoleFilter, elements.scoutQualityFilter, elements.scoutBudgetFilter]
+  .filter(Boolean)
+  .forEach((control) => control.addEventListener("change", () => renderTransferMarketDialog()));
 
 elements.formationPickerMenu?.addEventListener("click", (event) => {
   const choice = event.target.closest("[data-formation-choice]");

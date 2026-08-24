@@ -5729,6 +5729,215 @@ body.is-manager-nav-sliding .manager-window-nav::before {
   }
 }
 
+/* Never hide transfer-generation blockers: challenges and errors must remain actionable. */
+.transfer-window__scout {
+  overflow: visible;
+  padding-right: calc(36% + 1rem);
+  border: 1px solid rgba(86, 223, 187, .24);
+  border-radius: 9px;
+  background:
+    linear-gradient(110deg, rgba(62, 215, 174, .08), transparent 32%),
+    linear-gradient(180deg, #061a2d 0%, #031426 100%);
+  box-shadow: 0 12px 26px rgba(3, 20, 38, .22), inset 0 1px rgba(255, 255, 255, .05);
+}
+
+.transfer-window__scout .theme-form {
+  position: relative;
+}
+
+.scout-console__heading {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+  color: var(--host-paper);
+}
+
+.scout-console__heading > span:last-child {
+  display: grid;
+  gap: .08rem;
+}
+
+.scout-console__heading small,
+.scout-console__filters label > span {
+  color: var(--host-mint);
+  font: 600 .62rem/1 var(--smooth);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.scout-console__heading strong {
+  font: 600 1.02rem/1.05 var(--smooth);
+  letter-spacing: .02em;
+}
+
+.scout-console__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  color: #031426;
+  border-radius: 5px;
+  background: var(--host-mint);
+  font: 900 1.25rem/1 var(--display);
+}
+
+.scout-console__filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .48rem;
+}
+
+.scout-console__filters label {
+  display: grid;
+  min-width: 0;
+  gap: .25rem;
+}
+
+.scout-console__filters select {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 1.7rem 0 .65rem;
+  color: var(--host-paper);
+  border: 1px solid rgba(244, 239, 223, .25);
+  border-radius: 4px;
+  background-color: #09111a;
+  font: 600 .76rem/1 var(--smooth);
+}
+
+.transfer-window__scout .compact-form-row {
+  grid-template-columns: minmax(150px, 1fr) minmax(132px, 156px);
+  gap: .48rem;
+}
+
+.transfer-window__scout .compact-form-row .button {
+  min-width: 0;
+  padding-right: .55rem;
+  padding-left: .55rem;
+  font-size: .78rem;
+  white-space: nowrap;
+}
+
+.transfer-window .pack-grid > .market-empty {
+  width: min(620px, calc(100% - 2rem));
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin: 1.25rem auto 0;
+  padding: 1rem 1.3rem;
+  color: var(--host-paper);
+  border: 1px solid rgba(86, 223, 187, .26);
+  border-radius: 7px;
+  background: #031426;
+  box-shadow: 0 12px 24px rgba(3, 20, 38, .18);
+  font: 600 .9rem/1.35 var(--smooth);
+  text-align: center;
+}
+
+.transfer-window__scout .turnstile-slot {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 30;
+  display: block !important;
+  overflow: visible;
+}
+
+.transfer-window__scout .form-error:empty {
+  display: none !important;
+}
+
+.transfer-window__scout .form-error:not(:empty) {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 31;
+  display: block !important;
+  width: min(100%, 560px);
+  margin: 0;
+  padding: .48rem .68rem;
+  color: #fff5ed;
+  border-left: 4px solid #ff515d;
+  border-radius: 3px;
+  background: #6c1822;
+  box-shadow: 0 8px 18px rgba(3, 20, 38, .28);
+  font: 600 .88rem/1.25 var(--smooth);
+}
+
+/* The captcha must live inside the scout panel; cards below it must never cover it. */
+@media (min-width: 761px) {
+  .transfer-window__shell {
+    grid-template-rows: 10.55svh 15.8svh 17.2svh minmax(0, 1fr) 10.9svh;
+  }
+
+  .transfer-window__scout {
+    align-items: flex-start;
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+  }
+
+  .transfer-window__scout .theme-form {
+    display: grid;
+    grid-template-columns: minmax(290px, 310px) minmax(0, 1fr);
+    align-content: start;
+    align-items: end;
+    gap: .45rem .75rem;
+  }
+
+  .transfer-window__scout .scout-console__heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .transfer-window__scout .compact-form-row {
+    grid-column: 2 !important;
+    grid-row: 1;
+  }
+
+  .transfer-window__scout .scout-console__filters {
+    grid-column: 2 !important;
+    grid-row: 2;
+  }
+
+  .transfer-window__scout .turnstile-slot {
+    position: static;
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    z-index: auto;
+    min-height: 0;
+    pointer-events: auto !important;
+  }
+
+  .transfer-window__scout .turnstile-slot iframe {
+    pointer-events: auto !important;
+  }
+
+  .transfer-window__scout .form-error:not(:empty) {
+    position: static;
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    z-index: auto;
+    width: auto;
+  }
+
+  .pack-summary {
+    width: 36%;
+    height: 17.2svh;
+    padding: .65rem .45rem;
+    border: 1px solid rgba(86, 223, 187, .18);
+    border-left: 0;
+    border-radius: 0 9px 9px 0;
+    background: #031426;
+  }
+}
+
+@media (max-width: 760px) {
+  .scout-console__filters {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Give the club identity the same measured rhythm as the status cells. */
 @media (min-width: 1360px) {
   .manager-window-header > .manager-header-end > .manager-team-summary {

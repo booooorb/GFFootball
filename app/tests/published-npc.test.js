@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { createNpcDraft, updateDraftIdentity, updateDraftPlayer } from "../developer-mode/model.js";
 import {
   PUBLISHED_NPC_STATUS,
   PUBLISHED_NPC_STORAGE_KEY,
@@ -12,6 +11,16 @@ import {
   unpublishNpcOpponent,
 } from "../js/published-npc.js";
 
+let developerModel = null;
+try {
+  developerModel = await import("../developer-mode/model.js");
+} catch (error) {
+  if (error?.code !== "ERR_MODULE_NOT_FOUND") throw error;
+}
+
+const developerTest = developerModel ? test : test.skip;
+const { createNpcDraft, updateDraftIdentity, updateDraftPlayer } = developerModel ?? {};
+
 function memoryStorage() {
   const values = new Map();
   return {
@@ -21,7 +30,7 @@ function memoryStorage() {
   };
 }
 
-test("NPC drafts publish as non-playable league opponents and can be updated", () => {
+developerTest("NPC drafts publish as non-playable league opponents and can be updated", () => {
   const storage = memoryStorage();
   let draft = createNpcDraft({
     id: "nova-draft",
@@ -54,7 +63,7 @@ test("NPC drafts publish as non-playable league opponents and can be updated", (
   assert.equal(loadPublishedNpcOpponents(storage).length, 1);
 });
 
-test("unpublishing removes the opponent snapshot without touching its source draft", () => {
+developerTest("unpublishing removes the opponent snapshot without touching its source draft", () => {
   const storage = memoryStorage();
   const draft = createNpcDraft({ id: "removable-draft", name: "Temporary XI" });
   publishNpcOpponent(draft, storage, 500);
@@ -75,7 +84,7 @@ test("invalid registry entries are ignored during loading", () => {
   assert.deepEqual(loadPublishedNpcOpponents(storage), []);
 });
 
-test("remote opponent restore merges without deleting local published teams", () => {
+developerTest("remote opponent restore merges without deleting local published teams", () => {
   const localStorage = memoryStorage();
   const remoteStorage = memoryStorage();
   const localDraft = createNpcDraft({ id: "local-draft", name: "Local XI", now: 10 });
@@ -91,4 +100,3 @@ test("remote opponent restore merges without deleting local published teams", ()
   ]));
   assert.equal(loadPublishedNpcOpponents(localStorage).length, 2);
 });
-

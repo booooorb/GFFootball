@@ -15,7 +15,7 @@
     rel="stylesheet"
   />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="host-city.css?v=20260810-110" />
+    <link rel="stylesheet" href="host-city.css?v=20260823-115" />
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -616,10 +616,14 @@
       </div>
       <section class="transfer-window__scout" aria-label="Scout a new transfer market">
         <form class="theme-form theme-form--compact manager-tool manager-tool--scout" id="theme-form">
-          <label for="theme">Scout another theme</label>
+          <div class="scout-console__heading">
+            <span class="scout-console__icon" aria-hidden="true">⌖</span>
+            <span><small>Scouting network</small><strong>Build a target list</strong></span>
+          </div>
+          <label class="visually-hidden" for="theme">Scout another theme</label>
           <div class="compact-form-row">
             <div class="prompt-field">
-              <span aria-hidden="true">&gt;</span>
+              <span aria-hidden="true">⌕</span>
               <input
                 id="theme"
                 name="theme"
@@ -631,7 +635,36 @@
                 required
               />
             </div>
-            <button class="button button--primary" data-generation-button type="submit">Scout pack · €20m</button>
+            <button class="button button--primary" data-generation-button type="submit">Scout · €20m</button>
+          </div>
+          <div class="scout-console__filters" aria-label="Target filters">
+            <label>
+              <span>Role</span>
+              <select id="scout-role-filter">
+                <option value="">All positions</option>
+                <option value="GK">Goalkeeper</option>
+                <option value="DEF">Defenders</option>
+                <option value="MID">Midfielders</option>
+                <option value="FWD">Forwards</option>
+              </select>
+            </label>
+            <label>
+              <span>Quality</span>
+              <select id="scout-quality-filter">
+                <option value="0">Any rating</option>
+                <option value="80">80+ OVR</option>
+                <option value="85">85+ OVR</option>
+                <option value="90">90+ OVR</option>
+              </select>
+            </label>
+            <label>
+              <span>Budget</span>
+              <select id="scout-budget-filter">
+                <option value="all">All targets</option>
+                <option value="affordable">Affordable</option>
+                <option value="free">Free picks</option>
+              </select>
+            </label>
           </div>
           <div class="turnstile-slot" id="manager-turnstile"></div>
           <p class="form-error" id="manager-error" role="alert"></p>
@@ -833,6 +866,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-    <script type="module" src="js/main.js?v=20260810-48"></script>
+    <script type="module" src="js/main.js?v=20260823-51"></script>
 </body>
 </html>
