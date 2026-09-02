@@ -8704,32 +8704,66 @@ select {
   --tier-ink: #101820;
   --tier-edge: #f4f8fa;
   --tier-ui-accent: #c8d3da;
-  --tier-surface: linear-gradient(135deg, #f7fafc 0%, #929da6 20%, #dce3e7 42%, #737f88 67%, #eef2f4 100%);
+  --tier-shine-opacity: 0.34;
+  --tier-shine-duration: 4.8s;
+  --tier-luster-animation: none;
+  --tier-animated-sheen: linear-gradient(108deg, transparent 0 39%, rgba(255, 255, 255, 0.08) 44%, rgba(255, 255, 255, 0.88) 50%, rgba(205, 245, 255, 0.18) 55%, transparent 62%);
+  --tier-surface:
+    radial-gradient(ellipse at 18% 27%, rgba(43, 52, 58, 0.13) 0 3%, transparent 11%),
+    radial-gradient(ellipse at 73% 68%, rgba(255, 255, 255, 0.16) 0 2%, transparent 10%),
+    radial-gradient(circle at 47% 84%, rgba(42, 52, 59, 0.1) 0 2%, transparent 8%),
+    linear-gradient(135deg, #eef2f4 0%, #929da6 20%, #d7dee2 42%, #78838b 67%, #e7ecef 100%);
   --tier-sheen: linear-gradient(108deg, transparent 0 35%, rgba(255, 255, 255, 0.76) 47%, rgba(205, 245, 255, 0.2) 52%, transparent 65%);
 }
 
 .card-tier--gold {
   --tier-ink: #241903;
-  --tier-edge: #ffe99e;
-  --tier-ui-accent: #e6bd4f;
-  --tier-surface: linear-gradient(135deg, #fff1a8 0%, #c69025 24%, #f1cf68 48%, #8d6113 73%, #f5dc86 100%);
-  --tier-sheen: linear-gradient(108deg, transparent 0 38%, rgba(255, 250, 218, 0.5) 50%, transparent 63%);
+  --tier-edge: #e8c866;
+  --tier-ui-accent: #cf9f32;
+  --tier-shine-opacity: 0.42;
+  --tier-shine-duration: 4.8s;
+  --tier-luster-animation: none;
+  --tier-animated-sheen: linear-gradient(108deg, transparent 0 39%, rgba(255, 225, 132, 0.08) 44%, rgba(255, 244, 200, 0.82) 50%, rgba(255, 211, 91, 0.15) 55%, transparent 62%);
+  --tier-surface:
+    radial-gradient(ellipse at 18% 28%, rgba(91, 57, 7, 0.18) 0 3%, transparent 12%),
+    radial-gradient(ellipse at 73% 67%, rgba(255, 235, 154, 0.15) 0 3%, transparent 11%),
+    radial-gradient(circle at 49% 84%, rgba(91, 57, 7, 0.12) 0 2%, transparent 9%),
+    linear-gradient(135deg, #e5c261 0%, #ad771f 24%, #d4a640 48%, #926117 73%, #dcba59 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 38%, rgba(255, 241, 190, 0.28) 50%, transparent 63%);
 }
 
 .card-tier--shiny-gold {
   --tier-ink: #201500;
-  --tier-edge: #fff5b9;
-  --tier-ui-accent: #ffe17a;
-  --tier-surface: linear-gradient(132deg, #fffbd2 0%, #d29512 15%, #ffe985 30%, #936003 45%, #fff2a5 61%, #b97806 79%, #ffedb5 100%);
-  --tier-sheen: linear-gradient(108deg, transparent 0 30%, rgba(255, 255, 255, 0.18) 39%, rgba(255, 255, 255, 0.92) 48%, rgba(255, 237, 171, 0.42) 55%, transparent 69%);
+  --tier-edge: #ffec93;
+  --tier-ui-accent: #ffd75e;
+  --tier-shine-opacity: 0.68;
+  --tier-shine-duration: 4.8s;
+  --tier-luster-animation: tier-card-luster-pulse 4.8s ease-in-out infinite;
+  --tier-animated-sheen: linear-gradient(108deg, transparent 0 32%, rgba(255, 220, 100, 0.14) 39%, rgba(255, 255, 235, 0.94) 47%, rgba(255, 225, 108, 0.38) 54%, rgba(255, 250, 214, 0.72) 59%, transparent 68%);
+  --tier-surface:
+    linear-gradient(112deg, transparent 0 32%, rgba(255, 246, 184, 0.38) 43%, transparent 55%),
+    radial-gradient(ellipse at 20% 29%, rgba(103, 61, 2, 0.12) 0 2%, transparent 10%),
+    radial-gradient(ellipse at 75% 68%, rgba(255, 246, 188, 0.18) 0 2%, transparent 9%),
+    radial-gradient(circle at 48% 84%, rgba(112, 67, 2, 0.09) 0 2%, transparent 8%),
+    linear-gradient(132deg, #ffe88a 0%, #c48710 16%, #f3c94e 31%, #9e6507 46%, #f8d565 61%, #ae7008 79%, #ffe68d 100%);
+  --tier-sheen: linear-gradient(108deg, transparent 0 30%, rgba(255, 249, 211, 0.12) 39%, rgba(255, 250, 216, 0.64) 48%, rgba(255, 225, 126, 0.3) 55%, transparent 69%);
 }
 
 .card-tier--chroma {
-  --tier-ink: #13140f;
-  --tier-edge: #fffef2;
-  --tier-ui-accent: #fff3b8;
-  --tier-surface: linear-gradient(130deg, #fffef2 0%, #ad995c 11%, #ffffff 23%, #806b2e 37%, #f5e6a3 49%, #ffffff 63%, #91803f 77%, #fff7d1 100%);
-  --tier-sheen: linear-gradient(108deg, transparent 0 27%, rgba(133, 239, 255, 0.24) 38%, rgba(255, 255, 255, 0.98) 47%, rgba(239, 199, 255, 0.42) 54%, rgba(255, 238, 145, 0.2) 61%, transparent 73%);
+  --tier-ink: #231503;
+  --tier-edge: #b9c8ff;
+  --tier-ui-accent: #aa83ef;
+  --tier-shine-opacity: 0.78;
+  --tier-shine-duration: 4.8s;
+  --tier-luster-animation: tier-card-luster-pulse 4.8s ease-in-out infinite;
+  --tier-animated-sheen: linear-gradient(108deg, transparent 0 27%, rgba(91, 201, 255, 0.2) 36%, rgba(225, 247, 255, 0.94) 44%, rgba(177, 118, 243, 0.62) 51%, rgba(255, 236, 149, 0.72) 58%, rgba(114, 209, 255, 0.28) 65%, transparent 74%);
+  --tier-surface:
+    linear-gradient(112deg, transparent 0 23%, rgba(255, 239, 170, 0.58) 33%, rgba(255, 249, 214, 0.28) 39%, transparent 49%),
+    radial-gradient(ellipse at 18% 28%, rgba(74, 145, 236, 0.18) 0 3%, transparent 12%),
+    radial-gradient(ellipse at 76% 70%, rgba(129, 69, 212, 0.2) 0 3%, transparent 11%),
+    linear-gradient(132deg, #cef1ff 0%, #7fc8fa 15%, #b187eb 30%, #ffe08a 45%, #8bd5ff 59%, #a674e3 73%, #efbd45 87%, #d4f3ff 100%);
+  --tier-sheen:
+    linear-gradient(108deg, transparent 0 18%, rgba(67, 181, 250, 0.58) 29%, rgba(151, 213, 255, 0.48) 40%, rgba(148, 82, 229, 0.62) 52%, rgba(91, 169, 245, 0.46) 61%, rgba(255, 218, 94, 0.42) 69%, transparent 81%);
 }
 
 .pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty) {
@@ -8992,6 +9026,50 @@ select {
     #030506;
 }
 
+@keyframes tier-card-shine-sweep {
+  0%, 17% {
+    opacity: 0;
+    transform: translateX(-72%);
+  }
+
+  30% {
+    opacity: var(--tier-shine-opacity, 0.44);
+  }
+
+  49%, 100% {
+    opacity: 0;
+    transform: translateX(72%);
+  }
+}
+
+@keyframes tier-card-luster-pulse {
+  0%, 53%, 100% {
+    filter: brightness(1) saturate(1);
+  }
+
+  67% {
+    filter: brightness(1.055) saturate(1.04);
+  }
+
+  79% {
+    filter: brightness(1.012) saturate(1.01);
+  }
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__visual::after,
+.pack-card[class*="card-tier--"] .pack-player__visual::after {
+  background: var(--tier-animated-sheen);
+  opacity: 0;
+  animation: tier-card-shine-sweep var(--tier-shine-duration, 4.5s) ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.collection-player.squad-card[class*="card-tier--"] .squad-card__visual,
+.pack-card[class*="card-tier--"] .pack-player__visual {
+  animation: var(--tier-luster-animation, none);
+  will-change: filter;
+}
+
 @media (max-width: 700px) {
   body::after { display: none; }
   .setup-pitch::after { opacity: 0.58; }
@@ -9002,9 +9080,13 @@ select {
 
 @media (prefers-reduced-motion: reduce) {
   .pitch-slot::after,
+  .squad-card__visual,
   .squad-card__visual::after,
   .squad-card__rating::before,
+  .pack-player__visual,
   .pack-player__visual::after {
+    animation: none !important;
+    opacity: 0 !important;
     transition: none !important;
     transform: none !important;
   }

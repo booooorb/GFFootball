@@ -23,8 +23,8 @@ export function playerCardTier(overall) {
     return {
       id: "chroma",
       className: "card-tier--chroma",
-      label: "Chroma Chromium Gold",
-      shortLabel: "Chroma",
+      label: "Prismatic",
+      shortLabel: "Prismatic",
     };
   }
   if (rating >= 85) {

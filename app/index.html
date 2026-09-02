@@ -15,7 +15,9 @@
     rel="stylesheet"
   />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="host-city.css?v=20260823-115" />
+    <link rel="stylesheet" href="host-city.css?v=20260902-137" />
+    <link rel="stylesheet" href="transfers.css?v=20260901-10" />
+    <!-- Remove this link and the body theme class to restore the legacy player cards. -->
 </head>
 <body>
   <div class="paper-noise" aria-hidden="true"></div>
@@ -192,6 +194,7 @@
         </div>
       </header>
 
+      <div class="manager-slide-layer">
       <div class="manager-grid">
         <section class="pitch-column" id="pitch-panel" aria-label="Squad tactics">
           <div class="tactics-commandbar">
@@ -271,6 +274,7 @@
         </section>
       </div>
       <aside class="selected-player-inspector" id="selected-player-inspector" aria-live="polite"></aside>
+      </div>
     </section>
   </main>
 
@@ -405,6 +409,7 @@
         </div>
       </header>
 
+      <div class="manager-slide-layer">
       <div class="season-window__heading-grid manager-grid">
       <div class="season-window__commandbar tactics-commandbar">
         <div class="season-window__title-block tactics-title-block">
@@ -466,6 +471,7 @@
         </div>
       </section>
       </div>
+      </div>
     </div>
   </dialog>
 
@@ -507,6 +513,7 @@
         </div>
       </header>
 
+      <div class="manager-slide-layer">
       <div class="dialog-header stats-window__heading">
         <div>
           <p class="eyebrow">Record book</p>
@@ -566,12 +573,13 @@
           <div id="stats-ballon-alltime"></div>
         </section>
       </div>
+      </div>
     </div>
   </dialog>
 
-  <dialog class="game-dialog pack-dialog transfer-window" id="pack-dialog" aria-labelledby="pack-title">
-    <div class="transfer-window__shell">
-      <header class="transfer-window__topbar manager-window-header">
+  <dialog class="game-dialog season-window transfers-rebuild" id="pack-dialog" aria-labelledby="pack-title">
+    <div class="season-window__shell transfers-rebuild__shell">
+      <header class="season-window__topbar manager-window-header">
         <div class="manager-game-brand" aria-label="GFFootball">
           <img class="manager-game-brand__logo" src="assets/branding/gffootball-logo.png" alt="GFFootball" />
         </div>
@@ -606,84 +614,105 @@
           <button class="icon-button" data-close-dialog="pack-dialog" type="button" aria-label="Return to tactics">×</button>
         </div>
       </header>
-      <div class="dialog-header transfer-window__heading">
-        <div>
-          <p class="eyebrow">Transfer desk</p>
-          <h2 class="manager-window-title">Transfer market</h2>
-          <strong class="transfer-theme-label" id="pack-title">Scouting report</strong>
-        </div>
-        <p>Open a scout pack and choose three concealed cards as free transfers; the remaining targets become paid signings.</p>
-      </div>
-      <section class="transfer-window__scout" aria-label="Scout a new transfer market">
-        <form class="theme-form theme-form--compact manager-tool manager-tool--scout" id="theme-form">
-          <div class="scout-console__heading">
-            <span class="scout-console__icon" aria-hidden="true">⌖</span>
-            <span><small>Scouting network</small><strong>Build a target list</strong></span>
+
+      <div class="manager-slide-layer">
+      <div class="season-window__heading-grid manager-grid">
+        <div class="season-window__commandbar tactics-commandbar transfers-rebuild__commandbar">
+          <div class="season-window__title-block tactics-title-block">
+            <h2 class="tactics-context-title manager-window-title" id="pack-title">Transfers</h2>
+            <span class="season-number-status transfers-rebuild__theme">Transfer market</span>
           </div>
-          <label class="visually-hidden" for="theme">Scout another theme</label>
-          <div class="compact-form-row">
-            <div class="prompt-field">
-              <span aria-hidden="true">⌕</span>
-              <input
-                id="theme"
-                name="theme"
-                type="text"
-                minlength="2"
-                maxlength="80"
-                placeholder="Greek mythology"
-                autocomplete="off"
-                required
-              />
+        </div>
+      </div>
+
+      <div class="season-window__body transfers-rebuild__body">
+        <div class="transfers-rebuild__loading" id="transfer-loading" hidden aria-live="assertive">
+          <div class="loading-ball" aria-hidden="true"></div>
+          <div>
+            <strong>Scouting transfer targets</strong>
+            <span id="transfer-loading-message">Reading the theme...</span>
+          </div>
+        </div>
+        <div id="pack-summary" hidden></div>
+        <section class="season-window__standings transfers-rebuild__workspace" aria-label="Transfer market workspace">
+          <div class="standings-panel season-standings-table transfers-rebuild__market" aria-labelledby="transfer-market-title">
+            <div class="subsection-heading transfers-rebuild__panel-heading">
+              <h3 id="transfer-market-title">Transfer market</h3>
+              <span><b data-transfer-count>0</b> available</span>
             </div>
-            <button class="button button--primary" data-generation-button type="submit">Scout · €20m</button>
+            <div class="transfers-rebuild__filters" aria-label="Target filters">
+              <label>
+                <span>Position</span>
+                <select id="scout-role-filter">
+                  <option value="">All positions</option>
+                  <option value="GK">Goalkeeper</option>
+                  <option value="DEF">Defenders</option>
+                  <option value="MID">Midfielders</option>
+                  <option value="FWD">Forwards</option>
+                </select>
+              </label>
+              <label>
+                <span>Quality</span>
+                <select id="scout-quality-filter">
+                  <option value="0">Any rating</option>
+                  <option value="80">80+ OVR</option>
+                  <option value="85">85+ OVR</option>
+                  <option value="90">90+ OVR</option>
+                </select>
+              </label>
+              <label>
+                <span>Budget</span>
+                <select id="scout-budget-filter">
+                  <option value="all">All targets</option>
+                  <option value="affordable">Affordable</option>
+                  <option value="free">Free picks</option>
+                </select>
+              </label>
+            </div>
+            <div class="transfers-rebuild__list" id="pack-grid"></div>
           </div>
-          <div class="scout-console__filters" aria-label="Target filters">
-            <label>
-              <span>Role</span>
-              <select id="scout-role-filter">
-                <option value="">All positions</option>
-                <option value="GK">Goalkeeper</option>
-                <option value="DEF">Defenders</option>
-                <option value="MID">Midfielders</option>
-                <option value="FWD">Forwards</option>
-              </select>
-            </label>
-            <label>
-              <span>Quality</span>
-              <select id="scout-quality-filter">
-                <option value="0">Any rating</option>
-                <option value="80">80+ OVR</option>
-                <option value="85">85+ OVR</option>
-                <option value="90">90+ OVR</option>
-              </select>
-            </label>
-            <label>
-              <span>Budget</span>
-              <select id="scout-budget-filter">
-                <option value="all">All targets</option>
-                <option value="affordable">Affordable</option>
-                <option value="free">Free picks</option>
-              </select>
-            </label>
+          <div class="season-team-detail transfers-rebuild__detail">
+            <aside class="season-enemy-preview transfers-rebuild__scouting" aria-labelledby="transfer-scouting-title">
+              <header class="season-enemy-preview__header">
+                <div>
+                  <h3 id="transfer-scouting-title">Scouting</h3>
+                </div>
+                <strong>€20M</strong>
+              </header>
+              <div class="transfers-rebuild__scouting-body">
+                <form class="transfers-rebuild__search" id="theme-form" aria-label="Scout a new transfer market">
+                  <label class="transfers-rebuild__field-label" for="theme">Market theme</label>
+                  <div class="transfers-rebuild__prompt">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+                    <input
+                      id="theme"
+                      name="theme"
+                      type="text"
+                      minlength="2"
+                      maxlength="80"
+                      placeholder="e.g. young Spanish midfielders"
+                      autocomplete="off"
+                      required
+                    />
+                  </div>
+                  <div class="transfers-rebuild__verification">
+                    <span>Verification</span>
+                    <div class="turnstile-slot" id="manager-turnstile"></div>
+                  </div>
+                  <button class="button button--primary transfers-rebuild__search-button" data-generation-button type="submit">
+                    Scout market <span>€20M</span>
+                  </button>
+                  <div class="transfers-rebuild__response">
+                    <span>Response</span>
+                    <p class="form-error transfers-rebuild__error" id="manager-error" role="alert"></p>
+                  </div>
+                </form>
+              </div>
+            </aside>
           </div>
-          <div class="turnstile-slot" id="manager-turnstile"></div>
-          <p class="form-error" id="manager-error" role="alert"></p>
-        </form>
-      </section>
-      <div class="transfer-loading" id="transfer-loading" hidden aria-live="assertive">
-        <div class="loading-ball" aria-hidden="true"></div>
-        <div>
-          <strong>Scouting transfer targets</strong>
-          <span id="transfer-loading-message">Reading the theme...</span>
-        </div>
+        </section>
       </div>
-      <div class="pack-summary" id="pack-summary"></div>
-      <div class="pack-grid" id="pack-grid"></div>
-      <footer class="transfer-window__footer">
-        <button class="button button--primary" data-close-dialog="pack-dialog" type="button">
-          Return to tactics
-        </button>
-      </footer>
+      </div>
     </div>
   </dialog>
 
@@ -866,6 +895,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
-    <script type="module" src="js/main.js?v=20260823-51"></script>
+    <script type="module" src="js/main.js?v=20260829-52"></script>
 </body>
 </html>

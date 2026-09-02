@@ -90,7 +90,7 @@ test("player cards map every rating to a complete material tier", () => {
   assert.equal(playerCardTier(85).id, "shiny-gold");
   assert.equal(playerCardTier(89).id, "shiny-gold");
   assert.equal(playerCardTier(90).id, "chroma");
-  assert.equal(playerCardTier(100).label, "Chroma Chromium Gold");
+  assert.equal(playerCardTier(100).label, "Prismatic");
 });
 
 test("formation catalog includes all seven playable tactical shapes", () => {

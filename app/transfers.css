@@ -1,0 +1,572 @@
+/* Transfers is deliberately built from the Season window primitives.
+   No legacy transfer-window selectors are used by this screen. */
+
+.transfers-rebuild__commandbar {
+  grid-template-columns: 1fr;
+}
+
+.transfers-rebuild__search {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.transfers-rebuild__field-label,
+.transfers-rebuild__verification > span,
+.transfers-rebuild__response > span {
+  color: rgba(244, 239, 223, .68);
+  font: 700 .66rem/1 var(--smooth);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__prompt {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  color: var(--host-ink);
+  border: 2px solid var(--host-ink);
+  border-radius: 4px;
+  background: rgba(247, 243, 234, .96);
+}
+
+.transfers-rebuild__prompt svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+.transfers-rebuild__prompt input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  color: var(--host-ink);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 600 .9rem/1 var(--smooth);
+}
+
+.transfers-rebuild__prompt input::placeholder {
+  color: rgba(3, 20, 38, .58);
+}
+
+.transfers-rebuild__search-button.button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  color: var(--host-ink);
+  border: 2px solid var(--host-ink);
+  border-radius: 4px;
+  background: var(--host-mint);
+  box-shadow: none;
+  font: 600 1rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__search-button span {
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(3, 20, 38, .3);
+  font-size: 1.12rem;
+}
+
+.transfers-rebuild__search-button.button:hover,
+.transfers-rebuild__search-button.button:focus-visible {
+  color: var(--host-paper);
+  background: var(--host-ink);
+}
+
+.transfers-rebuild__verification {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  padding: 9px 10px;
+  border: 1px solid rgba(244, 239, 223, .2);
+  background: rgba(244, 239, 223, .055);
+}
+
+.transfers-rebuild__verification .turnstile-slot {
+  display: flex !important;
+  width: 100%;
+  min-height: 54px;
+  align-items: center;
+  overflow: visible;
+}
+
+.transfers-rebuild__verification .turnstile-slot > div,
+.transfers-rebuild__verification .turnstile-slot iframe {
+  max-width: 100%;
+  transform: scale(.82);
+  transform-origin: left top;
+}
+
+.transfers-rebuild__response {
+  min-height: 56px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--host-mint);
+  background: rgba(244, 239, 223, .07);
+}
+
+.transfers-rebuild__error {
+  margin: 6px 0 0;
+  color: var(--host-paper);
+  font: 600 .76rem/1.35 var(--smooth);
+}
+
+.transfers-rebuild__error:empty::before {
+  content: "";
+}
+
+.transfers-rebuild__error:not(:empty) {
+  color: #ffb5b5;
+}
+
+.transfers-rebuild__response:has(.transfers-rebuild__error:empty) {
+  display: none;
+}
+
+.transfers-rebuild__body {
+  position: relative;
+}
+
+.transfers-rebuild__workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(430px, .64fr);
+}
+
+.transfers-rebuild__market {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.transfers-rebuild__panel-heading {
+  min-height: 64px;
+  flex: 0 0 64px;
+  padding: .7rem 1rem .5rem;
+  color: var(--host-paper);
+  border-bottom: 1px solid rgba(244, 239, 223, .16);
+  background: var(--host-ink);
+}
+
+.transfers-rebuild__panel-heading h3 {
+  color: var(--host-paper);
+  font: 600 2rem/.8 var(--display);
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__panel-heading span {
+  color: rgba(244, 239, 223, .68);
+  font: 600 .66rem/1 var(--smooth);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__panel-heading b {
+  color: var(--host-mint);
+}
+
+.transfers-rebuild__filters {
+  display: grid;
+  min-height: 62px;
+  flex: 0 0 62px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(244, 239, 223, .16);
+  background: var(--host-ink);
+}
+
+.transfers-rebuild__filters label {
+  display: block;
+  min-width: 0;
+}
+
+.transfers-rebuild__filters label > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--host-mint);
+  font: 600 .68rem/1 var(--smooth);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__filters select {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 28px 0 10px;
+  color: var(--host-paper);
+  border: 1px solid rgba(244, 239, 223, .3);
+  border-radius: 4px;
+  background-color: var(--host-ink);
+  font: 600 .84rem/1 var(--smooth);
+}
+
+.transfers-rebuild__list {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  padding: 10px;
+  overflow: auto;
+  color: var(--host-paper);
+  background: var(--host-ink);
+  scrollbar-color: rgba(69, 216, 173, .55) transparent;
+  scrollbar-width: thin;
+}
+
+.transfer-card-menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  align-content: start;
+  gap: 8px;
+}
+
+.transfer-menu-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 124px;
+  grid-template-columns: 86px minmax(0, 1fr) 110px;
+  grid-template-rows: 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  overflow: hidden;
+  color: var(--host-paper);
+  border: 1px solid rgba(244, 239, 223, .16);
+  border-left: 3px solid var(--tier-ui-accent, var(--host-mint));
+  border-radius: 4px;
+  background: rgba(10, 31, 48, .9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+  animation: hostPanelEnter 260ms both;
+  animation-delay: calc(var(--order) * 35ms);
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.transfer-menu-card::after {
+  position: absolute;
+  right: -36px;
+  bottom: -52px;
+  width: 120px;
+  height: 90px;
+  border: 1px solid color-mix(in srgb, var(--tier-ui-accent, var(--host-mint)) 30%, transparent);
+  content: "";
+  opacity: .55;
+  pointer-events: none;
+  transform: rotate(-28deg);
+}
+
+.transfer-menu-card:hover,
+.transfer-menu-card:focus-within {
+  border-color: color-mix(in srgb, var(--tier-ui-accent, var(--host-mint)) 78%, white 8%);
+  background: rgba(15, 43, 61, .98);
+  transform: translateY(-1px);
+}
+
+.transfer-menu-card.is-free-transfer {
+  background: linear-gradient(100deg, rgba(69, 216, 173, .13), rgba(10, 31, 48, .94) 42%);
+}
+
+.transfer-menu-card.is-concealed {
+  border-left-color: rgba(244, 239, 223, .35);
+  background:
+    linear-gradient(110deg, rgba(244, 239, 223, .04), transparent 48%),
+    rgba(7, 25, 42, .96);
+}
+
+.transfer-menu-card__portrait {
+  position: relative;
+  display: flex;
+  width: 86px;
+  height: 104px;
+  align-items: center;
+  justify-content: center;
+}
+
+.transfer-player-card-stage {
+  position: relative;
+  display: block;
+  width: 86px;
+  height: 104px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.transfer-player-card-stage > .pitch-slot.transfer-player-card {
+  position: absolute;
+  top: 50% !important;
+  left: 50% !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, -50%) scale(.8) !important;
+  transform-origin: center !important;
+}
+
+.transfer-menu-card.is-concealed .transfer-player-card-stage {
+  filter: grayscale(1) brightness(.38) contrast(1.15);
+}
+
+.transfer-menu-card__body {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 10px;
+}
+
+.transfer-menu-card__body header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.transfer-menu-card__body header > div {
+  min-width: 0;
+}
+
+.transfer-menu-card__body strong,
+.transfer-menu-card__body span,
+.transfer-menu-card__body small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfer-menu-card__body strong {
+  color: var(--host-paper);
+  font: 700 1.12rem/1 var(--smooth);
+}
+
+.transfer-menu-card__body span {
+  margin-top: 6px;
+  color: var(--tier-ui-accent, var(--host-mint));
+  font: 700 .72rem/1 var(--smooth);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.transfer-menu-card__body b {
+  flex: 0 0 auto;
+  color: var(--host-gold);
+  padding: 5px 7px;
+  border-left: 3px solid var(--host-gold);
+  background: rgba(224, 170, 62, .1);
+  font: 700 1.28rem/1 var(--display);
+}
+
+.transfer-menu-card__body > small {
+  color: rgba(244, 239, 223, .58);
+  font: 600 .7rem/1 var(--smooth);
+}
+
+.transfer-menu-card > .button {
+  position: relative;
+  z-index: 1;
+  width: 110px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 8px;
+  color: var(--host-ink);
+  border: 0;
+  border-radius: 4px;
+  background: var(--host-mint);
+  box-shadow: none;
+  font: 700 .9rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.transfer-menu-card > .button--transfer {
+  background: var(--host-gold);
+}
+
+.transfer-menu-card > .button--free {
+  background: var(--host-mint);
+}
+
+.transfer-menu-card > .button:hover,
+.transfer-menu-card > .button:focus-visible {
+  color: var(--host-paper);
+  background: var(--host-ink);
+  outline: 1px solid var(--host-mint);
+}
+
+.transfer-menu-card > .button:disabled {
+  color: rgba(244, 239, 223, .55);
+  background: rgba(244, 239, 223, .12);
+  outline: 0;
+}
+
+.transfers-rebuild__detail,
+.transfers-rebuild__scouting {
+  min-width: 0;
+  min-height: 0;
+}
+
+.transfers-rebuild__scouting {
+  display: flex;
+  flex-direction: column;
+  color: var(--host-paper);
+  background: var(--host-ink);
+}
+
+.transfers-rebuild__scouting .season-enemy-preview__header > strong {
+  display: block;
+  width: auto;
+  height: auto;
+  color: var(--host-paper);
+  background: transparent;
+  font-size: 1.55rem;
+  clip-path: none;
+}
+
+.transfers-rebuild__scouting-body {
+  min-height: 0;
+  flex: 1;
+  padding: 12px;
+  overflow: auto;
+}
+
+.transfers-rebuild__empty {
+  display: flex;
+  width: min(520px, calc(100% - 36px));
+  min-height: 170px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  margin: clamp(48px, 11vh, 105px) auto 0;
+  padding: 24px;
+  color: rgba(244, 239, 223, .62);
+  border: 1px solid rgba(244, 239, 223, .16);
+  font: 500 .72rem/1.35 var(--smooth);
+  text-align: center;
+}
+
+.transfers-rebuild__empty strong {
+  color: var(--host-paper);
+  font: 600 1.25rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.transfers-rebuild__loading {
+  position: absolute;
+  inset: 0 0 1.25rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--host-paper);
+  border-radius: 8px;
+  background: rgba(3, 20, 38, .96);
+}
+
+.transfers-rebuild__loading[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .transfers-rebuild__workspace {
+    grid-template-columns: minmax(0, 1.2fr) minmax(310px, .8fr);
+  }
+
+  .transfer-card-menu {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .transfers-rebuild__shell.season-window__shell {
+    display: grid;
+    height: 100svh;
+    grid-template-rows: 96px 122px minmax(1040px, 1fr) !important;
+    padding: 0 .55rem;
+    overflow: auto;
+  }
+
+  .transfers-rebuild__shell .season-window__topbar.manager-window-header {
+    min-height: 96px;
+    margin: 0 -.55rem;
+  }
+
+  .transfers-rebuild__shell .season-window__commandbar {
+    min-height: 122px;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: .6rem;
+  }
+
+  .transfers-rebuild__shell .season-window__title-block h2 {
+    font-size: 3rem;
+  }
+
+  .transfers-rebuild__prompt,
+  .transfers-rebuild__search-button.button {
+    min-height: 48px;
+  }
+
+  .transfers-rebuild__body.season-window__body {
+    padding-bottom: .55rem !important;
+    overflow: visible;
+  }
+
+  .transfers-rebuild__workspace.season-window__standings {
+    min-height: 1020px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(520px, 1fr) 470px;
+    overflow: visible;
+  }
+
+}
+
+@media (max-width: 680px) {
+  .transfer-card-menu {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .transfer-menu-card {
+    grid-template-columns: 68px minmax(0, 1fr) 74px;
+    gap: 8px;
+  }
+
+  .transfer-menu-card__portrait {
+    width: 68px;
+  }
+
+  .transfer-menu-card__portrait .transfer-player-card-stage > .pitch-slot.transfer-player-card {
+    transform: translate(-50%, -50%) scale(.72) !important;
+  }
+
+  .transfer-menu-card > .button {
+    width: 74px;
+    font-size: .64rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .transfers-rebuild__shell.season-window__shell {
+    grid-template-rows: 96px 122px minmax(1040px, 1fr) !important;
+  }
+
+  .transfers-rebuild__filters {
+    gap: 5px;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .transfers-rebuild__filters select {
+    padding-left: 6px;
+    font-size: .64rem;
+  }
+}

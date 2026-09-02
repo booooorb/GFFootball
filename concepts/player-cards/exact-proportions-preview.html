@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GFFootball Player Card Concepts</title>
+  <style>
+    :root {
+      --card-width: 96px;
+      --card-ratio: 96 / 124;
+      --ink: #061016;
+      --paper: #f7f9fa;
+      --bg: #050708;
+      --muted: #8d999e;
+      --line: rgba(255, 255, 255, .12);
+      font-family: "Arial Narrow", "Helvetica Neue", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 820px;
+      color: var(--paper);
+      background:
+        radial-gradient(circle at 12% 2%, rgba(89, 240, 208, .06), transparent 28rem),
+        radial-gradient(circle at 88% 18%, rgba(124, 70, 255, .07), transparent 30rem),
+        var(--bg);
+    }
+
+    main {
+      width: 820px;
+      margin: 0 auto;
+      padding: 28px 34px 36px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1, h2, p { margin: 0; }
+
+    h1 {
+      max-width: 680px;
+      font-size: 27px;
+      line-height: .95;
+      letter-spacing: -.045em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      max-width: 230px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    .direction {
+      display: grid;
+      grid-template-columns: 145px 1fr;
+      gap: 22px;
+      align-items: center;
+      min-height: 174px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .direction:last-child { border-bottom: 0; }
+
+    .direction-copy small {
+      display: block;
+      margin-bottom: 7px;
+      color: #59f0d0;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .direction-copy h2 {
+      font-size: 20px;
+      line-height: .95;
+      letter-spacing: -.035em;
+      text-transform: uppercase;
+    }
+
+    .direction-copy p {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.45;
+    }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(4, var(--card-width));
+      gap: 22px;
+      align-items: end;
+    }
+
+    .card-preview {
+      display: grid;
+      gap: 7px;
+      justify-items: center;
+    }
+
+    .tier-caption {
+      color: #aeb7bb;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .player-card {
+      position: relative;
+      isolation: isolate;
+      width: var(--card-width);
+      aspect-ratio: var(--card-ratio);
+      overflow: hidden;
+      color: var(--card-ink);
+      clip-path: polygon(9% 7%, 21% 0, 84% 3%, 96% 10%, 100% 20%, 96% 82%, 82% 91%, 50% 100%, 18% 91%, 4% 82%, 0 18%);
+      background: var(--card-edge);
+      filter: drop-shadow(0 12px 9px rgba(0, 0, 0, .42));
+    }
+
+    .player-card::before {
+      position: absolute;
+      inset: 3px;
+      z-index: -2;
+      clip-path: polygon(8% 5%, 22% 0, 82% 2%, 96% 9%, 100% 20%, 96% 81%, 82% 91%, 50% 100%, 18% 91%, 4% 81%, 0 18%);
+      background: var(--card-surface);
+      box-shadow: inset 0 0 0 1px rgba(6, 16, 22, .28);
+      content: "";
+    }
+
+    .player-card::after {
+      position: absolute;
+      inset: -30% -90%;
+      z-index: -1;
+      background: var(--card-sheen);
+      content: "";
+      opacity: var(--sheen-opacity, .38);
+      transform: translateX(-22%) rotate(4deg);
+    }
+
+    .rating {
+      position: absolute;
+      top: 10px;
+      left: 11px;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: .78;
+      letter-spacing: -.07em;
+    }
+
+    .position {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      min-width: 20px;
+      padding: 2px 3px;
+      color: var(--position-ink, var(--card-ink));
+      border: 1px solid color-mix(in srgb, var(--card-ink) 32%, transparent);
+      font-size: 8px;
+      font-weight: 900;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .portrait {
+      position: absolute;
+      top: 31px;
+      left: 50%;
+      width: 64px;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 2px solid var(--portrait-edge);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.055), transparent 45%),
+        #111719;
+      box-shadow:
+        0 0 0 1px rgba(3, 12, 16, .38),
+        0 7px 14px rgba(0, 0, 0, .22);
+      transform: translateX(-50%);
+    }
+
+    .portrait::before,
+    .portrait::after {
+      position: absolute;
+      background: rgba(255,255,255,.07);
+      content: "";
+    }
+
+    .portrait::before { inset: 50% 10px auto; height: 1px; }
+    .portrait::after { inset: 10px auto 10px 50%; width: 1px; }
+
+    .name {
+      position: absolute;
+      right: 9px;
+      bottom: 9px;
+      left: 9px;
+      overflow: hidden;
+      padding: 3px 4px 2px;
+      color: var(--name-ink);
+      border: 1px solid var(--name-border);
+      background: var(--name-surface);
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: .015em;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .silver {
+      --card-ink: #11191e;
+      --card-edge: linear-gradient(135deg, #ffffff, #69757c 43%, #ecf2f4 72%, #87939a);
+      --card-surface: linear-gradient(135deg, #f5f8f9, #87939a 40%, #dce3e6 70%, #a2adb2);
+      --card-sheen: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.85) 49%, transparent 58%);
+      --portrait-edge: #eef3f4;
+      --name-surface: rgba(9, 15, 18, .92);
+      --name-border: rgba(255,255,255,.52);
+      --name-ink: #f4f7f8;
+    }
+
+    .gold,
+    .shiny {
+      --card-ink: #231803;
+      --card-edge: linear-gradient(135deg, #fff3a7, #8e5b06 42%, #ffe083 68%, #9a6610);
+      --card-surface: linear-gradient(135deg, #f8dc7a, #b87d16 42%, #eed072 72%, #9f6910);
+      --card-sheen: linear-gradient(105deg, transparent 40%, rgba(255,255,230,.92) 49%, rgba(255,231,155,.35) 54%, transparent 62%);
+      --portrait-edge: #ffe99b;
+      --name-surface: rgba(29, 20, 4, .9);
+      --name-border: rgba(255,231,145,.62);
+      --name-ink: #fff0b1;
+    }
+
+    .gold { --sheen-opacity: .16; }
+    .shiny { --sheen-opacity: .78; }
+
+    .prismatic {
+      --card-ink: #10151a;
+      --card-edge: linear-gradient(135deg, #fefcd8, #4de7f1 19%, #9c72ff 39%, #ff88c7 58%, #ffe180 77%, #70f2e0);
+      --card-surface:
+        linear-gradient(125deg, rgba(255,255,255,.72), transparent 22% 76%, rgba(255,255,255,.58)),
+        linear-gradient(135deg, #f6eaa4, #62e5e0 24%, #8a70eb 46%, #f28ebd 66%, #ffe38a 84%, #69eacb);
+      --card-sheen: linear-gradient(105deg, transparent 32%, rgba(255,255,255,.92) 47%, rgba(196,246,255,.48) 55%, transparent 68%);
+      --sheen-opacity: .62;
+      --portrait-edge: #faffff;
+      --name-surface: rgba(7, 13, 17, .9);
+      --name-border: rgba(255,255,255,.72);
+      --name-ink: #f9fcff;
+    }
+
+    .chiseled .player-card {
+      clip-path: polygon(8% 8%, 21% 0, 78% 2%, 96% 9%, 100% 22%, 94% 80%, 82% 91%, 52% 100%, 17% 92%, 3% 79%, 0 20%);
+    }
+
+    .chiseled .player-card::before {
+      background:
+        repeating-linear-gradient(127deg, rgba(255,255,255,.12) 0 1px, transparent 1px 8px),
+        linear-gradient(42deg, transparent 0 31%, rgba(5,12,17,.18) 31% 35%, transparent 35% 68%, rgba(255,255,255,.16) 68% 72%, transparent 72%),
+        var(--card-surface);
+      clip-path: polygon(8% 7%, 23% 0, 79% 3%, 96% 10%, 100% 22%, 94% 79%, 82% 90%, 52% 100%, 17% 91%, 3% 79%, 0 20%);
+    }
+
+    .matte .player-card,
+    .matte .player-card::before {
+      clip-path: polygon(10% 0, 90% 0, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0 90%, 0 10%);
+    }
+
+    .matte .player-card::before {
+      background:
+        linear-gradient(rgba(6,16,22,.09), rgba(6,16,22,.09)),
+        var(--card-surface);
+    }
+
+    .matte .gold::after { opacity: .06; }
+    .matte .shiny::after { opacity: .58; }
+
+    .vault .player-card,
+    .vault .player-card::before {
+      clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
+    }
+
+    .vault .player-card::before {
+      inset: 3px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.18), transparent 24% 76%, rgba(3,12,17,.22)),
+        var(--card-surface);
+      box-shadow:
+        inset 0 0 0 1px rgba(6,16,22,.34),
+        inset 0 0 0 4px rgba(255,255,255,.12);
+    }
+
+    .vault .portrait {
+      border-width: 3px;
+      box-shadow: 0 0 0 2px rgba(5,12,16,.26), 0 5px 10px rgba(0,0,0,.25);
+    }
+
+    .halo .player-card,
+    .halo .player-card::before {
+      clip-path: polygon(18% 0, 82% 0, 100% 12%, 100% 88%, 82% 100%, 18% 100%, 0 88%, 0 12%);
+    }
+
+    .halo .player-card::before {
+      background:
+        radial-gradient(ellipse at 50% 45%, transparent 0 40%, rgba(255,255,255,.22) 41% 43%, transparent 44% 50%, rgba(5,12,17,.14) 51% 53%, transparent 54%),
+        var(--card-surface);
+    }
+
+    .halo .name { border-left-width: 3px; border-right-width: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Exact-proportion player card concepts</h1>
+      <p>Actual-size preview: 96 × 124 px. Card content is limited to rating, position, square image, and name.</p>
+    </header>
+
+    <section class="direction chiseled">
+      <div class="direction-copy">
+        <small>Direction A</small>
+        <h2>Chiseled ore</h2>
+        <p>Raw mineral edges and hammered facets. Deliberately irregular, compact, and weighty.</p>
+      </div>
+      <div class="card-row"></div>
+    </section>
+
+    <section class="direction matte">
+      <div class="direction-copy">
+        <small>Direction B</small>
+        <h2>Matte monolith</h2>
+        <p>Perfectly symmetric chamfers, low-glare metal, and a calm architectural frame.</p>
+      </div>
+      <div class="card-row"></div>
+    </section>
+
+    <section class="direction vault">
+      <div class="direction-copy">
+        <small>Direction C</small>
+        <h2>Beveled vault</h2>
+        <p>Symmetric stepped corners and a double machined bezel around the image.</p>
+      </div>
+      <div class="card-row"></div>
+    </section>
+
+    <section class="direction halo">
+      <div class="direction-copy">
+        <small>Direction D</small>
+        <h2>Faceted halo</h2>
+        <p>Symmetric diamond-cut shoulders with restrained concentric detailing.</p>
+      </div>
+      <div class="card-row"></div>
+    </section>
+  </main>
+
+  <template id="card-template">
+    <div class="card-preview">
+      <article class="player-card">
+        <span class="rating">87</span>
+        <span class="position">CM</span>
+        <span class="portrait" aria-label="Square player image slot"></span>
+        <span class="name">Player Name</span>
+      </article>
+      <span class="tier-caption"></span>
+    </div>
+  </template>
+
+  <script>
+    const tiers = [
+      ["silver", "Silver"],
+      ["gold", "Gold"],
+      ["shiny", "Shiny Gold"],
+      ["prismatic", "Prismatic"],
+    ];
+
+    document.querySelectorAll(".card-row").forEach((row) => {
+      tiers.forEach(([className, label]) => {
+        const fragment = document.querySelector("#card-template").content.cloneNode(true);
+        fragment.querySelector(".player-card").classList.add(className);
+        fragment.querySelector(".tier-caption").textContent = label;
+        row.append(fragment);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -63,6 +63,18 @@
   font-family: var(--body);
 }
 
+/* The header and background are fixed. Everything below the navigation sits
+   in one equal-height layer, which guarantees a strictly horizontal slide. */
+.manager-slide-layer {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-row: 2 / -1;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+}
+
 .manager-animated-bg {
   position: absolute;
   inset: 0;
@@ -212,7 +224,9 @@
 .collection-column .icon-button { color: var(--host-paper); border-color: rgba(244,239,223,.3); background: transparent; }
 .collection-filters { min-height: 62px; grid-template-columns: minmax(0,1.4fr) .8fr .8fr; gap: .45rem; padding: .45rem .8rem; border-color: rgba(244,239,223,.16); background: transparent; }
 .collection-filters input,.collection-filters select { min-height: 36px; color: var(--host-paper); border: 1px solid rgba(244,239,223,.3); border-radius: 4px; background: var(--host-ink); font-family: var(--body); }
-.collection-list.squad-gallery { display: flex; min-height: 0; max-height: none; flex: 1; padding: 0 .65rem .4rem; overflow: hidden; background: transparent; }
+.collection-list.squad-gallery { display: flex; width: 100%; min-height: 0; max-height: none; flex: 1; flex-direction: column; align-items: stretch; padding: 0 .65rem .4rem; overflow: hidden; background: transparent; }
+.collection-list.squad-gallery > .squad-table-heading,
+.collection-list.squad-gallery > .squad-grid { width: 100%; }
 .squad-group { display: flex; width: 100%; min-height: 0; flex-direction: column; }
 .squad-grid { display: grid; min-height: 0; flex: 1; grid-template-columns: minmax(0,1fr); grid-auto-rows: 29px; gap: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: rgba(69,216,173,.55) transparent; scrollbar-width: thin; }
 .squad-group__heading { min-height: 24px; padding: .2rem .35rem; color: var(--host-paper); background: transparent; }
@@ -361,23 +375,31 @@ body:has(.manager-screen:not([hidden])) main {
 
 .collection-column .section-heading { min-height: 58px; }
 .collection-column .section-heading .eyebrow { display:none; }
-.collection-column .section-heading h2 { font-size:2rem; }
-.collection-filters { min-height:50px; grid-template-columns:minmax(0,1.5fr) .72fr .72fr; }
-.collection-filters input,.collection-filters select { min-height:32px; }
-.squad-table-heading { display:grid; grid-template-columns:minmax(0,1fr) 82px 50px; padding:.25rem .6rem; color:rgba(244,239,223,.7); font:600 .62rem/1 var(--display); letter-spacing:.1em; text-transform:uppercase; }
-.squad-grid { grid-auto-rows:clamp(48px,6.1svh,62px); gap:2px; }
+.collection-column .section-heading h2 { font-size:2.5rem; }
+.collection-filters { min-height:64px; grid-template-columns:minmax(0,1.5fr) .72fr .72fr; }
+.collection-filters input,.collection-filters select { min-height:46px; padding-right:.8rem; padding-left:.8rem; color:var(--host-paper); font-size:1rem; }
+.collection-filters input::placeholder { color:rgba(244,239,223,.72); opacity:1; }
+.squad-table-heading { display:grid; grid-template-columns:minmax(0,1fr) 150px 82px; padding:.45rem .8rem; color:rgba(244,239,223,.7); font:600 .78rem/1 var(--display); letter-spacing:.1em; text-transform:uppercase; }
+.squad-grid { grid-auto-rows:clamp(78px,9.4svh,96px); gap:4px; padding-bottom:.85rem; scroll-padding-bottom:.85rem; scrollbar-gutter:stable; }
 .collection-player.squad-card,.squad-card__select { height:100%; min-height:0; }
-.squad-card__select { grid-template-columns:clamp(46px,5.6svh,58px) minmax(0,1fr) 50px; color:var(--host-paper); border:0; border-left:4px solid var(--host-card-accent,var(--host-mint)); background:transparent; }
-.squad-card__visual { width:clamp(46px,5.6svh,58px); height:100%; background:#efe8d6; }
+.squad-card__select { grid-template-columns:clamp(78px,9.4svh,96px) minmax(0,1fr) 82px; color:var(--host-paper); border:0; border-left:5px solid var(--host-card-accent,var(--host-mint)); background:transparent; }
+.squad-card__visual { width:clamp(78px,9.4svh,96px); height:100%; background:#efe8d6; }
 .squad-card__photo { object-fit:cover; object-position:center 16%; filter:none; }
-.squad-card__identity { padding-left:.65rem; }
-.squad-card__name { font-size:clamp(.85rem,1.6svh,1.08rem); }
-.squad-card__tier { color:rgba(244,239,223,.58); font-size:.62rem; }
+.squad-card__identity { justify-content:center; padding:.65rem 3.25rem .65rem 1rem; overflow:hidden; }
+.squad-card__name { display:-webkit-box; max-height:2em; overflow:hidden; font-size:clamp(1.25rem,2.35svh,1.6rem); line-height:1; text-overflow:clip; white-space:normal; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.squad-card__tier { display:none; }
 .squad-card__starter { color:var(--host-mint); }
-.squad-card__stats { display:flex; gap:.45rem; justify-content:flex-end; padding-right:.5rem; color:var(--host-mint); }
+.squad-card__stats { display:flex; gap:clamp(.75rem,1.25vw,1.25rem); justify-content:flex-start; margin-top:.65rem; padding-right:.5rem; color:var(--host-mint); }
+.squad-card__stat { gap:.2rem; }
+.squad-card__stat b { color:var(--host-paper); font-size:clamp(1.05rem,1.9svh,1.25rem); }
+.squad-card__stat small { color:rgba(244,239,223,.78); font-size:.7rem; }
 .squad-card__rating { min-height:100%; }
-.squad-card__rating strong { font-size:1.25rem; }
-.collection-player.squad-card.is-selected .squad-card__name,.collection-player.squad-card.is-selected .squad-card__tier,.collection-player.squad-card.is-selected .squad-card__rating { color:var(--host-ink); }
+.squad-card__rating strong { font-size:clamp(2rem,3.5svh,2.35rem); }
+.squad-card__rating small { max-width:64px; margin-top:.3rem; font-size:.72rem; }
+.squad-card .squad-card__actions { right:82px; }
+.squad-card .squad-card__actions summary { width:36px; height:36px; color:var(--host-paper); border-color:rgba(244,239,223,.42); background:rgba(3,20,38,.35); font-size:.9rem; }
+.collection-player.squad-card.is-selected .squad-card__name { color:var(--host-paper); }
+.collection-player.squad-card.is-selected .squad-card__rating { color:var(--host-ink); }
 
 .selected-player-inspector { width:auto; min-height:calc(19.9svh + 1.25rem); margin-top:-1.25rem; margin-right:-5.2vw; margin-left:-5.2vw; padding-left:2.5vw; background:linear-gradient(105deg,#031426 0 86%,transparent 86%); }
 .selected-player-inspector__portrait { position:relative; border:3px solid var(--host-gold); background:#f4efdf; clip-path:polygon(8% 0,92% 0,100% 7%,100% 93%,92% 100%,8% 100%,0 93%,0 7%); }
@@ -635,6 +657,1425 @@ body:has(.manager-screen:not([hidden])) main {
   .selected-player-inspector__identity strong {
     font-size: clamp(40px, 3vw, 52px);
     line-height: .78;
+  }
+}
+
+/* Transfers v2 — structural market desk, intentionally isolated from legacy card styling. */
+.transfer-window[open] {
+  width: 100vw;
+  max-width: none;
+  height: 100svh;
+  max-height: none;
+  padding: 0;
+  color: #f3efe7;
+  border: 0;
+  border-radius: 0;
+  background: #020b14 !important;
+}
+
+.transfer-window::backdrop {
+  background: #020b14;
+}
+
+.transfer-window__shell {
+  display: grid !important;
+  width: 100vw;
+  height: 100svh;
+  min-height: 0;
+  grid-template-rows: 72px 148px minmax(132px, auto) minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 30px 24px !important;
+  overflow: hidden !important;
+  color: #f3efe7;
+  background:
+    radial-gradient(circle at 94% 8%, rgba(88, 223, 186, .045), transparent 23%),
+    #020b14 !important;
+}
+
+.transfer-window__shell::before,
+.transfer-window__shell::after,
+.transfer-window__shell > .manager-animated-bg {
+  display: none !important;
+}
+
+.transfer-window__topbar.manager-window-header {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  min-height: 72px;
+  grid-template-columns: 250px minmax(420px, 1fr) auto !important;
+  align-items: stretch;
+  margin: 0 -30px !important;
+  padding: 0 30px !important;
+  color: #07111e;
+  border: 0 !important;
+  background: #f4f0e8 !important;
+  box-shadow: 0 1px rgba(255, 255, 255, .08) !important;
+}
+
+.transfer-window .manager-window-header > .manager-game-brand {
+  display: flex !important;
+  width: 190px !important;
+  height: 72px !important;
+  align-items: center;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.transfer-window .manager-window-header .manager-game-brand__logo {
+  width: 180px !important;
+  max-height: 42px !important;
+  object-fit: contain;
+}
+
+.transfer-window .manager-window-nav {
+  display: flex;
+  height: 72px;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+}
+
+.transfer-window .manager-window-nav button {
+  position: relative;
+  width: auto !important;
+  min-width: 116px;
+  height: 72px !important;
+  padding: 0 24px !important;
+  color: #0a1119 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font: 700 1rem/1 var(--body) !important;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  transform: none !important;
+  clip-path: none !important;
+}
+
+.transfer-window .manager-window-nav button::before {
+  display: none !important;
+}
+
+.transfer-window .manager-window-nav button.is-active,
+.transfer-window .manager-window-nav button[aria-current="page"] {
+  color: #f3efe7 !important;
+  background: #061424 !important;
+}
+
+.transfer-window .manager-window-nav button.is-active::after,
+.transfer-window .manager-window-nav button[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  right: 20px;
+  bottom: 0;
+  left: 20px;
+  height: 4px;
+  background: #58dfba;
+}
+
+.transfer-window .manager-window-nav button span,
+.transfer-window .manager-status--points,
+.transfer-window .manager-status--placement,
+.transfer-window .manager-team-summary,
+.transfer-window .manager-team-settings,
+.transfer-window .manager-header-end > .icon-button:last-child {
+  display: none !important;
+}
+
+.transfer-window .manager-header-end {
+  display: flex;
+  min-width: 220px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.transfer-window .manager-window-status {
+  display: flex !important;
+  width: auto !important;
+  height: auto !important;
+  align-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.transfer-window .manager-status--balance {
+  display: flex !important;
+  width: auto !important;
+  height: 44px !important;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px !important;
+  color: #f3efe7 !important;
+  border: 0 !important;
+  border-radius: 2px !important;
+  background: #061424 !important;
+}
+
+.transfer-window .manager-status--balance::after {
+  display: none !important;
+}
+
+.transfer-window .manager-status--balance::before {
+  content: "Budget";
+  color: rgba(243, 239, 231, .68);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.transfer-window .manager-status--balance .manager-status__icon,
+.transfer-window .manager-status--balance small {
+  display: none !important;
+}
+
+.transfer-window .manager-status--balance strong {
+  color: #58dfba !important;
+  font-size: 1.05rem !important;
+}
+
+.dialog-header.transfer-window__heading {
+  position: relative;
+  z-index: 2;
+  display: flex !important;
+  min-height: 0 !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 22px 2px 0 !important;
+  color: #f3efe7;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dialog-header.transfer-window__heading h2 {
+  margin: 0 !important;
+  color: #f3efe7 !important;
+  font: 700 clamp(3.7rem, 6.2vw, 5.4rem)/.78 var(--display) !important;
+  letter-spacing: -.035em !important;
+  text-transform: uppercase;
+  opacity: 1 !important;
+}
+
+.transfer-window .transfer-theme-label,
+.transfer-window__heading > p,
+.transfer-window .pack-summary {
+  display: none !important;
+}
+
+.transfer-window__tabs {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  width: 100%;
+  height: 34px;
+  border-bottom: 1px solid rgba(243, 239, 231, .14);
+}
+
+.transfer-window__tabs button {
+  position: relative;
+  height: 34px;
+  padding: 0 2px;
+  color: #8794a3;
+  border: 0;
+  background: transparent;
+  font: 700 .78rem/1 var(--body);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.transfer-window__tabs button:hover,
+.transfer-window__tabs button:focus-visible,
+.transfer-window__tabs button.is-active {
+  color: #58dfba;
+}
+
+.transfer-window__tabs button.is-active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: #58dfba;
+}
+
+.transfer-window__scout {
+  position: relative;
+  z-index: 2;
+  display: block !important;
+  min-height: 0 !important;
+  margin: 16px 0 !important;
+  padding: 12px 14px !important;
+  color: #f3efe7 !important;
+  border: 1px solid rgba(88, 223, 186, .2) !important;
+  border-radius: 3px !important;
+  background: #061424 !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__scout .theme-form {
+  display: grid !important;
+  width: 100%;
+  min-height: 0;
+  grid-template-columns: 150px minmax(280px, 1fr) minmax(360px, 430px) !important;
+  align-items: center;
+  gap: 10px 14px !important;
+}
+
+.transfer-window__scout .scout-console__heading {
+  display: flex !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  align-items: center;
+}
+
+.transfer-window__scout .scout-console__heading small {
+  display: block;
+  color: #58dfba;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.transfer-window__scout .scout-console__heading strong {
+  display: block;
+  margin-top: 3px;
+  color: #f3efe7;
+  font-size: .92rem;
+}
+
+.transfer-window__scout .compact-form-row {
+  display: grid !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  grid-template-columns: minmax(180px, 1fr) 154px !important;
+  gap: 10px !important;
+}
+
+.transfer-window__scout .prompt-field {
+  display: flex;
+  height: 44px !important;
+  min-height: 44px !important;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px !important;
+  border: 1px solid rgba(243, 239, 231, .16) !important;
+  border-radius: 2px !important;
+  background: #020b14 !important;
+}
+
+.transfer-window__scout .prompt-field svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: #8794a3;
+  stroke-linecap: round;
+  stroke-width: 1.7;
+}
+
+.transfer-window__scout .prompt-field input {
+  width: 100%;
+  height: 42px;
+  padding: 0 !important;
+  color: #f3efe7 !important;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  font: 500 .82rem/1 var(--body) !important;
+}
+
+.transfer-window__scout .prompt-field input::placeholder {
+  color: #778596;
+}
+
+.transfer-window__scout .compact-form-row .button,
+.transfer-window .transfer-row .button {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  border: 1px solid #58dfba !important;
+  border-radius: 2px !important;
+  background: #58dfba !important;
+  color: #03101d !important;
+  box-shadow: none !important;
+  font: 800 .72rem/1 var(--body) !important;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  transform: none !important;
+}
+
+.transfer-window__scout .scout-console__filters {
+  display: grid !important;
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.transfer-window__scout .scout-console__filters label {
+  display: block;
+  min-width: 0;
+}
+
+.transfer-window__scout .scout-console__filters label > span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8794a3;
+  font-size: .54rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.transfer-window__scout .scout-console__filters select {
+  width: 100%;
+  height: 29px !important;
+  min-height: 29px !important;
+  padding: 0 22px 0 9px !important;
+  color: #f3efe7 !important;
+  border: 1px solid rgba(243, 239, 231, .14) !important;
+  border-radius: 2px !important;
+  background-color: #020b14 !important;
+  font: 600 .65rem/1 var(--body) !important;
+}
+
+.transfer-window__scout .scout-console__verification {
+  display: flex;
+  min-height: 30px;
+  grid-column: 2 / 4;
+  grid-row: 2;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.transfer-window__scout .scout-console__verification > span {
+  color: #8794a3;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.transfer-window__scout .turnstile-slot {
+  display: block !important;
+  width: 184px !important;
+  height: 42px !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  overflow: hidden !important;
+}
+
+.transfer-window__scout .turnstile-slot > div,
+.transfer-window__scout .turnstile-slot iframe {
+  transform: scale(.59);
+  transform-origin: left top;
+}
+
+.transfer-window__scout .form-error:empty {
+  display: none !important;
+}
+
+.transfer-window__scout .form-error:not(:empty) {
+  display: block !important;
+  grid-column: 1 / -1 !important;
+  margin: 0;
+  color: #f1a08a;
+  font-size: .7rem;
+}
+
+.transfer-window__market-layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 300px);
+  gap: 14px;
+}
+
+.transfer-window__market,
+.transfer-window__shortlist {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  border: 1px solid rgba(243, 239, 231, .14);
+  border-radius: 3px;
+  background: #04111f;
+  overflow: hidden;
+}
+
+.transfer-window__market > header,
+.transfer-window__shortlist > header {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(243, 239, 231, .12);
+  background: #061424;
+}
+
+.transfer-window__market > header small,
+.transfer-window__shortlist > header small {
+  display: block;
+  color: #58dfba;
+  font-size: .52rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.transfer-window__market > header h3,
+.transfer-window__shortlist > header h3 {
+  margin: 2px 0 0;
+  color: #f3efe7;
+  font: 700 1.1rem/1 var(--display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.transfer-window__market-count {
+  color: #8794a3;
+  font-size: .68rem;
+  text-transform: uppercase;
+}
+
+.transfer-window__market-count b {
+  color: #58dfba;
+}
+
+.transfer-window .pack-grid {
+  display: block !important;
+  min-height: 0 !important;
+  flex: 1;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  margin: 0 !important;
+  padding: 0 8px 8px !important;
+  overflow: auto !important;
+  background: #04111f !important;
+  scrollbar-color: rgba(88, 223, 186, .42) transparent;
+  scrollbar-width: thin;
+}
+
+.transfer-table-head,
+.transfer-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 2fr) 52px minmax(90px, 1fr) 54px 84px minmax(116px, 1fr) 102px;
+  align-items: center;
+  column-gap: 12px;
+}
+
+.transfer-table-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 38px;
+  padding: 0 10px;
+  color: #7f8b99;
+  border-bottom: 1px solid rgba(243, 239, 231, .1);
+  background: #04111f;
+  font-size: .55rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.transfer-row {
+  min-height: 58px;
+  padding: 7px 10px;
+  color: #f3efe7;
+  border-bottom: 1px solid rgba(243, 239, 231, .09);
+  animation: transferRowIn 260ms both;
+  animation-delay: calc(var(--order) * 35ms);
+}
+
+.transfer-row:hover {
+  background: rgba(88, 223, 186, .035);
+}
+
+.transfer-row__player {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.transfer-row__player img,
+.shortlist-row img {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 1px solid rgba(88, 223, 186, .28);
+  border-radius: 50%;
+  background: #0a1c2b;
+  object-fit: cover;
+}
+
+.transfer-row__player span,
+.shortlist-row span {
+  min-width: 0;
+}
+
+.transfer-row__player strong,
+.shortlist-row strong {
+  display: block;
+  overflow: hidden;
+  color: #f3efe7;
+  font-size: .76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfer-row__player small,
+.shortlist-row small {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #778596;
+  font-size: .58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfer-row__position,
+.transfer-row__theme,
+.transfer-row__status {
+  overflow: hidden;
+  color: #a2abb5;
+  font-size: .66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transfer-row__position,
+.transfer-row__overall {
+  color: #f3efe7;
+}
+
+.transfer-row__overall,
+.transfer-row__value {
+  font-size: .78rem;
+}
+
+.transfer-row__value {
+  color: #d8a53f;
+}
+
+.transfer-window .transfer-row .button {
+  height: 30px !important;
+  min-height: 30px !important;
+  color: #58dfba !important;
+  background: transparent !important;
+  font-size: .62rem !important;
+}
+
+.transfer-window .transfer-row .button:hover:not(:disabled),
+.transfer-window .transfer-row .button:focus-visible {
+  color: #03101d !important;
+  background: #58dfba !important;
+}
+
+.transfer-window .transfer-row .button:disabled {
+  color: #687482 !important;
+  border-color: rgba(104, 116, 130, .35) !important;
+  opacity: 1 !important;
+}
+
+.transfer-window .pack-grid > .market-empty {
+  display: flex;
+  width: min(520px, calc(100% - 40px)) !important;
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  margin: clamp(48px, 12vh, 110px) auto 0 !important;
+  padding: 24px !important;
+  color: #8794a3 !important;
+  border: 1px solid rgba(88, 223, 186, .14) !important;
+  border-radius: 2px !important;
+  background: #020b14 !important;
+  font-size: .7rem !important;
+  text-align: center;
+}
+
+.transfer-window .pack-grid > .market-empty strong {
+  color: #f3efe7;
+  font: 700 1.1rem/1 var(--display);
+  text-transform: uppercase;
+}
+
+.transfer-window__shortlist-list {
+  min-height: 0;
+  flex: 1;
+  padding: 6px 12px 12px;
+}
+
+.shortlist-row {
+  display: grid;
+  min-height: 62px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(243, 239, 231, .09);
+}
+
+.shortlist-row b {
+  color: #d8a53f;
+  font-size: .66rem;
+}
+
+.shortlist-empty {
+  display: flex;
+  height: 100%;
+  min-height: 170px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  color: #778596;
+  text-align: center;
+}
+
+.shortlist-empty strong {
+  color: #f3efe7;
+  font-size: .76rem;
+}
+
+.shortlist-empty span {
+  max-width: 170px;
+  font-size: .62rem;
+  line-height: 1.45;
+}
+
+.transfer-window .transfer-loading {
+  z-index: 8;
+  color: #f3efe7;
+  background: rgba(2, 11, 20, .92);
+}
+
+@keyframes transferRowIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1080px) {
+  .transfer-window__shell {
+    grid-template-rows: 68px 124px minmax(190px, auto) minmax(0, 1fr) !important;
+    padding: 0 20px 18px !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    grid-template-columns: 190px minmax(380px, 1fr) auto !important;
+    min-height: 68px;
+    margin: 0 -20px !important;
+    padding: 0 20px !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand,
+  .transfer-window .manager-window-nav,
+  .transfer-window .manager-window-nav button {
+    height: 68px !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    min-width: 92px;
+    padding: 0 14px !important;
+    font-size: .82rem !important;
+  }
+
+  .transfer-window__scout .theme-form {
+    grid-template-columns: 150px minmax(0, 1fr) !important;
+  }
+
+  .transfer-window__scout .scout-console__filters {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+  }
+
+  .transfer-window__scout .scout-console__verification {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    align-self: end;
+  }
+
+  .transfer-window__scout .scout-console__verification > span {
+    display: none;
+  }
+
+  .transfer-window__market-layout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+
+  .transfer-table-head,
+  .transfer-row {
+    grid-template-columns: minmax(180px, 2fr) 44px minmax(70px, 1fr) 44px 70px 94px;
+  }
+
+  .transfer-table-head > :nth-child(6),
+  .transfer-row__status {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .transfer-window__shell {
+    display: block !important;
+    height: 100svh;
+    padding: 0 12px 16px !important;
+    overflow: auto !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    min-height: 62px;
+    justify-content: space-between;
+    margin: 0 -12px !important;
+    padding: 0 12px !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    width: 142px !important;
+    height: 62px !important;
+  }
+
+  .transfer-window .manager-window-header .manager-game-brand__logo {
+    width: 136px !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    height: 62px;
+    margin-left: auto;
+  }
+
+  .transfer-window .manager-window-nav button {
+    display: none;
+  }
+
+  .transfer-window .manager-window-nav button.is-active {
+    display: block;
+    min-width: 96px;
+    height: 62px !important;
+  }
+
+  .transfer-window .manager-header-end {
+    min-width: 0;
+  }
+
+  .transfer-window .manager-status--balance {
+    height: 36px !important;
+    padding: 0 10px !important;
+  }
+
+  .transfer-window .manager-status--balance::before {
+    display: none;
+  }
+
+  .dialog-header.transfer-window__heading {
+    min-height: 120px !important;
+    padding-top: 28px !important;
+  }
+
+  .dialog-header.transfer-window__heading h2 {
+    font-size: 3.45rem !important;
+  }
+
+  .transfer-window__tabs {
+    gap: 22px;
+    overflow-x: auto;
+  }
+
+  .transfer-window__scout {
+    margin: 14px 0 !important;
+  }
+
+  .transfer-window__scout .theme-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .transfer-window__scout .scout-console__heading,
+  .transfer-window__scout .compact-form-row,
+  .transfer-window__scout .scout-console__filters,
+  .transfer-window__scout .scout-console__verification,
+  .transfer-window__scout .form-error:not(:empty) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  .transfer-window__scout .scout-console__heading {
+    display: none !important;
+  }
+
+  .transfer-window__scout .compact-form-row {
+    grid-template-columns: minmax(0, 1fr) 124px !important;
+  }
+
+  .transfer-window__scout .scout-console__verification {
+    display: none;
+  }
+
+  .transfer-window__market-layout {
+    display: block;
+  }
+
+  .transfer-window__market {
+    min-height: 520px;
+  }
+
+  .transfer-window__shortlist {
+    min-height: 260px;
+    margin-top: 14px;
+  }
+
+  .transfer-table-head,
+  .transfer-row {
+    grid-template-columns: minmax(160px, 1fr) 44px 48px 84px;
+  }
+
+  .transfer-table-head > :nth-child(3),
+  .transfer-table-head > :nth-child(5),
+  .transfer-table-head > :nth-child(6),
+  .transfer-row__theme,
+  .transfer-row__value,
+  .transfer-row__status {
+    display: none;
+  }
+}
+
+/* Final bench readability lock. Keep this after every responsive artboard rule. */
+.manager-screen .selected-player-inspector {
+  margin-top: 0 !important;
+}
+
+.manager-grid > .collection-column .section-heading {
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 8px 12px 4px !important;
+}
+
+.manager-grid > .collection-column .collection-filters input,
+.manager-grid > .collection-column .collection-filters select {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding-top: 0 !important;
+  padding-right: .4rem !important;
+  padding-bottom: 0 !important;
+  padding-left: .4rem !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+}
+
+.manager-grid > .collection-column .collection-filters {
+  min-height: 32px !important;
+  grid-template-columns: minmax(128px, 1.05fr) repeat(2, minmax(124px, 1fr)) !important;
+  gap: 4px !important;
+  margin: 0 !important;
+  padding-top: 1px !important;
+  padding-right: 4px !important;
+  padding-bottom: 1px !important;
+  padding-left: 4px !important;
+}
+
+.manager-grid > .collection-column .collection-filters input::placeholder {
+  color: rgba(244, 239, 223, .82) !important;
+}
+
+.manager-grid > .collection-column .squad-table-heading {
+  min-height: 24px;
+  align-items: center;
+  padding-top: .2rem !important;
+  padding-bottom: .2rem !important;
+  font-size: .9rem !important;
+}
+
+.manager-grid > .collection-column .collection-list.squad-gallery {
+  padding: 0 4px !important;
+}
+
+@media (min-width: 901px) {
+  .manager-grid > .collection-column .collection-list.squad-gallery {
+    margin-bottom: 131px !important;
+  }
+}
+
+/* Transfers v3 — share the exact Tactics / Season product shell. */
+.transfer-window[open] {
+  color: var(--host-ink);
+  background: var(--host-paper) !important;
+}
+
+.transfer-window__shell {
+  position: relative;
+  isolation: isolate;
+  display: grid !important;
+  height: 100svh;
+  grid-template-rows: 84px 110px 142px minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 5.7vw 28px !important;
+  overflow: hidden !important;
+  color: var(--host-ink);
+  background: transparent !important;
+}
+
+.transfer-window__shell > .manager-animated-bg {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -2 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 1 !important;
+  object-fit: cover;
+  filter: saturate(1.25) contrast(1.04);
+}
+
+.transfer-window__shell::before {
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  z-index: 30 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 5px !important;
+  background: linear-gradient(90deg, var(--host-mint) 0 20%, var(--host-blue) 20% 40%, var(--host-violet) 40% 54%, var(--host-red) 54% 68%, var(--host-orange) 68% 84%, var(--host-lime) 84%) !important;
+  content: "" !important;
+}
+
+.transfer-window__shell::after {
+  display: none !important;
+  content: none !important;
+}
+
+.transfer-window__topbar.manager-window-header {
+  position: relative;
+  z-index: 20;
+  display: grid !important;
+  width: 100vw !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  grid-template-columns: 320px 600px minmax(0, 1fr) !important;
+  margin: 0 calc(50% - 50vw) !important;
+  padding: 0 32px !important;
+  overflow: visible !important;
+  color: var(--host-paper) !important;
+  border: 0 !important;
+  background: var(--host-ink) !important;
+  box-shadow: none !important;
+}
+
+.transfer-window .manager-window-header::before,
+.transfer-window .manager-window-header::after {
+  display: none !important;
+  content: none !important;
+}
+
+.transfer-window .manager-window-header > .manager-game-brand {
+  display: flex !important;
+  width: 300px !important;
+  height: 84px !important;
+  align-items: center;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+.transfer-window .manager-window-header .manager-game-brand__logo {
+  width: 244px !important;
+  max-height: 60px !important;
+}
+
+.transfer-window .manager-window-nav {
+  position: relative;
+  z-index: 0;
+  display: grid !important;
+  width: 600px !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  grid-template-columns: repeat(4, 150px) !important;
+  overflow: visible !important;
+}
+
+.transfer-window .manager-window-nav::before {
+  position: absolute !important;
+  top: 0;
+  bottom: 0;
+  left: var(--manager-nav-to-left, 25%) !important;
+  z-index: -1;
+  display: block !important;
+  width: var(--manager-nav-to-width, 25%) !important;
+  background: linear-gradient(135deg, #52e5ba, #3cc99f) !important;
+  clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%) !important;
+  content: "" !important;
+}
+
+.transfer-window .manager-window-nav button,
+.transfer-window .manager-window-nav button:hover,
+.transfer-window .manager-window-nav button:focus-visible {
+  display: inline-flex !important;
+  width: 150px !important;
+  min-width: 150px !important;
+  height: 84px !important;
+  min-height: 84px !important;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  padding: 0 14px !important;
+  color: var(--host-paper) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  font: 700 1.05rem/1 var(--body) !important;
+  letter-spacing: .01em;
+  text-transform: none;
+}
+
+.transfer-window .manager-window-nav button.is-active,
+.transfer-window .manager-window-nav button[aria-current="page"] {
+  color: var(--host-ink) !important;
+  background: transparent !important;
+}
+
+.transfer-window .manager-window-nav button.is-active::after,
+.transfer-window .manager-window-nav button[aria-current="page"]::after {
+  display: none !important;
+  content: none !important;
+}
+
+.transfer-window .manager-window-nav button span {
+  display: inline-grid !important;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  margin: 0 !important;
+  color: var(--host-ink);
+  border-radius: 50%;
+  background: var(--host-mint);
+  font-size: .72rem;
+}
+
+.transfer-window .manager-header-end {
+  display: flex !important;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: visible !important;
+}
+
+.transfer-window .manager-window-status {
+  display: flex !important;
+  width: auto !important;
+  height: 54px !important;
+  align-items: center;
+  padding: 0 !important;
+  color: var(--host-paper);
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.transfer-window .manager-status,
+.transfer-window .manager-status--balance,
+.transfer-window .manager-status--points,
+.transfer-window .manager-status--placement {
+  display: flex !important;
+  width: auto !important;
+  min-width: 92px !important;
+  height: 54px !important;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px !important;
+  color: var(--host-paper) !important;
+  border: 0 !important;
+  border-left: 1px solid rgba(244, 239, 223, .25) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.transfer-window .manager-status--balance::before,
+.transfer-window .manager-status--balance::after {
+  display: none !important;
+  content: none !important;
+}
+
+.transfer-window .manager-status .manager-status__icon,
+.transfer-window .manager-status small,
+.transfer-window .manager-status strong {
+  display: block !important;
+}
+
+.transfer-window .manager-status .manager-status__icon {
+  width: 18px !important;
+  height: 18px !important;
+  color: var(--host-mint) !important;
+  font-size: .78rem !important;
+}
+
+.transfer-window .manager-status small,
+.transfer-window .manager-team-summary small {
+  color: rgba(244, 239, 223, .62) !important;
+  font-size: .54rem !important;
+  letter-spacing: .14em;
+}
+
+.transfer-window .manager-status strong,
+.transfer-window .manager-team-summary strong {
+  color: var(--host-paper) !important;
+  font-size: 1rem !important;
+  white-space: nowrap;
+}
+
+.transfer-window .manager-team-summary {
+  display: flex !important;
+  min-width: 188px;
+  height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px !important;
+  color: var(--host-paper);
+  border-left: 1px solid rgba(244, 239, 223, .25);
+}
+
+.transfer-window .manager-team-icon {
+  display: inline-grid !important;
+  width: 42px !important;
+  height: 42px !important;
+  place-items: center;
+  font-size: .65rem !important;
+}
+
+.transfer-window .manager-team-settings,
+.transfer-window .manager-header-end > .icon-button:last-child {
+  display: none !important;
+}
+
+.dialog-header.transfer-window__heading {
+  position: relative;
+  z-index: 2;
+  display: grid !important;
+  min-height: 0 !important;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  align-items: center !important;
+  gap: 24px;
+  padding: 12px 0 8px !important;
+  color: var(--host-ink) !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.dialog-header.transfer-window__heading h2 {
+  color: var(--host-ink) !important;
+  font: 700 clamp(3rem, 4.3vw, 4.5rem)/.8 var(--display) !important;
+  letter-spacing: -.035em !important;
+}
+
+.transfer-window__tabs {
+  display: grid;
+  width: 440px;
+  height: 62px;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
+  gap: 4px;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--host-ink);
+}
+
+.transfer-window__tabs button {
+  height: 50px;
+  padding: 0 12px;
+  color: var(--host-paper);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font: 700 .72rem/1 var(--body);
+  letter-spacing: .045em;
+}
+
+.transfer-window__tabs button.is-active,
+.transfer-window__tabs button:hover,
+.transfer-window__tabs button:focus-visible {
+  color: var(--host-ink);
+  background: var(--host-mint);
+}
+
+.transfer-window__tabs button.is-active::after {
+  display: none;
+}
+
+.transfer-window__scout {
+  margin: 0 0 14px !important;
+  padding: 12px 16px !important;
+  color: var(--host-paper) !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--host-ink) !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__scout .prompt-field,
+.transfer-window__scout .scout-console__filters select {
+  border-color: rgba(244, 239, 223, .25) !important;
+  background-color: #07111f !important;
+}
+
+.transfer-window__market-layout {
+  gap: 14px;
+}
+
+.transfer-window__market,
+.transfer-window__shortlist {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--host-ink) !important;
+  box-shadow: none;
+}
+
+.transfer-window__market > header,
+.transfer-window__shortlist > header {
+  min-height: 62px;
+  border-bottom-color: rgba(244, 239, 223, .2);
+  background: var(--host-ink);
+}
+
+.transfer-window .pack-grid {
+  background: var(--host-ink) !important;
+}
+
+.transfer-window .pack-grid > .market-empty {
+  color: rgba(244, 239, 223, .66) !important;
+  border-color: rgba(244, 239, 223, .16) !important;
+  background: rgba(2, 14, 29, .62) !important;
+}
+
+@media (max-width: 1180px) {
+  .transfer-window__shell {
+    grid-template-rows: 72px 104px 190px minmax(0, 1fr) !important;
+    padding: 0 24px 20px !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    width: calc(100% + 48px) !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    grid-template-columns: 210px minmax(360px, 1fr) auto !important;
+    margin: 0 -24px !important;
+    padding: 0 24px !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand,
+  .transfer-window .manager-window-nav,
+  .transfer-window .manager-window-nav button {
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    width: 200px !important;
+  }
+
+  .transfer-window .manager-window-header .manager-game-brand__logo {
+    width: 184px !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    width: 100% !important;
+    grid-template-columns: repeat(4, minmax(82px, 1fr)) !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    width: auto !important;
+    min-width: 82px !important;
+    padding: 0 9px !important;
+    font-size: .82rem !important;
+  }
+
+  .transfer-window .manager-status--points,
+  .transfer-window .manager-status--placement,
+  .transfer-window .manager-team-summary {
+    display: none !important;
+  }
+
+  .dialog-header.transfer-window__heading {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+
+  .transfer-window__tabs {
+    width: 360px;
+    height: 56px;
+  }
+
+  .transfer-window__tabs button {
+    height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  .transfer-window__shell {
+    display: block !important;
+    padding: 0 12px 18px !important;
+    overflow-y: auto !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    position: sticky;
+    top: 0;
+    width: calc(100% + 24px) !important;
+    margin: 0 -12px !important;
+  }
+
+  .dialog-header.transfer-window__heading {
+    display: block !important;
+    min-height: 150px !important;
+    padding-top: 28px !important;
+  }
+
+  .transfer-window__tabs {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+.manager-grid > .collection-column .squad-grid {
+  grid-auto-rows: 78px !important;
+  gap: 4px !important;
+  padding-bottom: 4px !important;
+  overflow-y: auto !important;
+  scroll-padding-bottom: 4px;
+}
+
+.manager-grid > .collection-column .squad-card__select {
+  min-height: 78px !important;
+}
+
+.manager-grid > .collection-column .squad-card__name {
+  font-size: 1.55rem !important;
+}
+
+.manager-grid > .collection-column .squad-card__stat b {
+  font-size: 1.25rem !important;
+}
+
+.manager-grid > .collection-column .squad-card__stat small {
+  color: rgba(244, 239, 223, .88) !important;
+  font-size: .78rem !important;
+}
+
+@media (max-width: 520px) {
+  .manager-grid > .collection-column .collection-filters {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -5982,5 +7423,1444 @@ body.is-manager-nav-sliding .manager-window-nav::before {
     line-height: 1;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+/* Transfers window overhaul: one dark system, compact icons, zero shared rows. */
+.transfer-window {
+  --tw-bg: #020e1d;
+  --tw-panel: #06182a;
+  --tw-panel-deep: #031426;
+  --tw-line: rgba(102, 226, 194, .2);
+  --tw-muted: rgba(247, 243, 234, .66);
+  --tw-gutter: clamp(22px, 3.3vw, 52px);
+  color: var(--host-paper);
+  background: var(--tw-bg);
+}
+
+.transfer-window__shell {
+  display: grid;
+  width: 100vw;
+  height: 100svh;
+  min-height: 0;
+  grid-template-rows:
+    clamp(82px, 9.5svh, 96px)
+    clamp(106px, 13svh, 126px)
+    minmax(164px, max-content)
+    minmax(330px, 1fr)
+    clamp(82px, 9.5svh, 94px);
+  align-content: stretch;
+  gap: 12px;
+  padding: 0 var(--tw-gutter);
+  overflow: hidden;
+  color: var(--host-paper);
+  background:
+    radial-gradient(circle at 14% 95%, rgba(69, 216, 173, .055), transparent 29rem),
+    linear-gradient(120deg, transparent 0 77%, rgba(37, 86, 219, .045) 77% 81%, transparent 81%),
+    var(--tw-bg);
+}
+
+.transfer-window__shell > .manager-animated-bg {
+  opacity: .05;
+}
+
+.transfer-window__topbar.manager-window-header {
+  min-height: 0;
+  margin-right: calc(var(--tw-gutter) * -1);
+  margin-left: calc(var(--tw-gutter) * -1);
+  padding-right: var(--tw-gutter);
+  padding-left: var(--tw-gutter);
+  background: #020c19;
+}
+
+.transfer-window .manager-window-header > .manager-game-brand {
+  width: 224px !important;
+  height: 66px !important;
+  margin-left: 0 !important;
+}
+
+.transfer-window .manager-window-header .manager-game-brand__logo {
+  left: 43% !important;
+}
+
+.transfer-window .manager-window-nav button {
+  min-height: clamp(82px, 9.5svh, 96px);
+  font-size: clamp(1rem, 1.35vw, 1.3rem);
+}
+
+.transfer-window .manager-window-nav button span {
+  min-width: 18px;
+  width: 18px;
+  height: 18px;
+  font-size: .65rem;
+}
+
+.transfer-window .manager-window-status .manager-status {
+  min-width: 78px;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: .32rem;
+  padding-right: .48rem;
+  padding-left: .48rem;
+}
+
+.transfer-window .manager-window-status .manager-status--balance {
+  min-width: 98px;
+}
+
+.transfer-window .manager-window-status .manager-status__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.transfer-window .manager-window-status .manager-status small {
+  margin-bottom: .12rem;
+  font-size: .55rem;
+}
+
+.transfer-window .manager-window-status .manager-status strong {
+  font-size: 1.25rem;
+}
+
+.transfer-window .manager-team-icon,
+.transfer-window .manager-team-settings,
+.transfer-window .manager-header-end > .icon-button:last-child {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  font-size: .8rem;
+}
+
+.dialog-header.transfer-window__heading {
+  min-height: 0;
+  align-items: center;
+  padding: 14px 14px 8px;
+  color: var(--host-paper);
+}
+
+.dialog-header.transfer-window__heading .eyebrow {
+  color: var(--host-mint);
+  font-size: .66rem;
+  letter-spacing: .17em;
+}
+
+.dialog-header.transfer-window__heading h2 {
+  margin-top: 4px;
+  color: rgba(247, 243, 234, .095);
+  font-size: clamp(3.8rem, 6vw, 5.8rem);
+  line-height: .65;
+}
+
+.transfer-theme-label {
+  display: block;
+  margin-top: 12px;
+  color: var(--host-mint);
+  font: 600 .8rem/1 var(--smooth);
+  letter-spacing: .15em;
+}
+
+.transfer-window__heading > p,
+.transfer-window .pack-summary {
+  display: none !important;
+}
+
+.transfer-window__scout {
+  display: block;
+  min-height: 164px;
+  margin: 0;
+  padding: 16px 18px;
+  overflow: visible;
+  color: var(--host-paper);
+  border: 1px solid var(--tw-line);
+  border-radius: 10px;
+  background:
+    linear-gradient(110deg, rgba(69, 216, 173, .055), transparent 33%),
+    linear-gradient(180deg, var(--tw-panel) 0%, var(--tw-panel-deep) 100%);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+}
+
+.transfer-window__scout .theme-form {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 290px minmax(320px, 1fr) minmax(300px, 390px);
+  align-items: end;
+  gap: 10px 16px;
+}
+
+.transfer-window__scout .scout-console__heading {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.transfer-window__scout .compact-form-row {
+  grid-column: 2 !important;
+  grid-row: 1;
+  grid-template-columns: minmax(190px, 1fr) 150px;
+  gap: 10px;
+}
+
+.transfer-window__scout .compact-form-row .button {
+  font-size: .9rem;
+}
+
+.transfer-window__scout .scout-console__filters {
+  grid-column: 3 !important;
+  grid-row: 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.transfer-window__scout .turnstile-slot {
+  position: static;
+  display: block !important;
+  min-width: 0;
+  min-height: 0;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: start;
+  overflow: visible;
+}
+
+.transfer-window__scout .form-error:not(:empty) {
+  position: static;
+  width: auto;
+  grid-column: 2 / -1 !important;
+  grid-row: 2 !important;
+}
+
+.scout-console__icon {
+  width: 28px;
+  height: 28px;
+  flex-basis: 28px;
+  border-radius: 4px;
+  font-size: .9rem;
+}
+
+.scout-console__heading {
+  gap: 10px;
+}
+
+.scout-console__heading small,
+.scout-console__filters label > span {
+  font-size: .56rem;
+}
+
+.scout-console__heading strong {
+  font-size: .98rem;
+}
+
+.transfer-window__scout .prompt-field,
+.transfer-window__scout .compact-form-row .button {
+  min-height: 52px;
+  height: 52px;
+}
+
+.transfer-window__scout .prompt-field {
+  border: 1px solid rgba(247, 243, 234, .27);
+  border-radius: 5px;
+  background: #08111d;
+}
+
+.transfer-window__scout .prompt-field > span {
+  color: var(--host-mint);
+  font-size: .8rem;
+}
+
+.transfer-window__scout .prompt-field input {
+  color: var(--host-paper);
+  background: transparent;
+  font-size: .95rem;
+}
+
+.transfer-window__scout .scout-console__filters select {
+  min-height: 40px;
+  color: var(--host-paper);
+  border-color: rgba(247, 243, 234, .2);
+  background-color: #08111d;
+  font-size: .72rem;
+}
+
+.transfer-window .button--primary,
+.transfer-window .button--free,
+.transfer-window .button--transfer {
+  color: var(--host-ink);
+  border: 1px solid var(--host-mint);
+  border-radius: 5px;
+  background: var(--host-mint);
+  box-shadow: none;
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.transfer-window .button--primary:not(:disabled):hover,
+.transfer-window .button--free:not(:disabled):hover,
+.transfer-window .button--transfer:not(:disabled):hover {
+  border-color: #77e8c6;
+  background: #77e8c6;
+  transform: translateY(-1px);
+}
+
+.transfer-window .button:disabled {
+  color: rgba(3, 20, 38, .55);
+  border-color: rgba(69, 216, 173, .4);
+  background: rgba(69, 216, 173, .46);
+}
+
+.transfer-window .pack-grid {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  gap: clamp(10px, 1vw, 16px);
+  margin: 0;
+  padding: clamp(14px, 1.2vw, 20px);
+  overflow: hidden;
+  color: var(--host-paper);
+  border: 1px solid var(--tw-line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(6, 24, 42, .94), rgba(3, 20, 38, .98));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .03);
+}
+
+.transfer-window .pack-card {
+  min-width: 0;
+  height: 100%;
+}
+
+.transfer-window .pack-card__inner,
+.transfer-window .pack-card__front,
+.transfer-window .pack-card__back,
+.transfer-window .pack-card__reveal {
+  min-height: 0;
+  height: 100%;
+}
+
+.transfer-window .pack-card__front,
+.transfer-window .pack-card__back {
+  overflow: hidden;
+  color: var(--host-paper);
+  border: 1px solid rgba(213, 170, 67, .7);
+  background:
+    linear-gradient(145deg, rgba(69, 216, 173, .045), transparent 40%),
+    #061425;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03), 0 14px 28px rgba(0, 0, 0, .24);
+}
+
+.transfer-window .pack-card__back::after {
+  inset: 8px;
+  border-color: rgba(213, 170, 67, .38);
+}
+
+.transfer-window .pack-card__reveal {
+  color: var(--host-mint);
+  background: transparent;
+}
+
+.transfer-window .pack-card__mark {
+  color: var(--host-mint);
+  font-size: clamp(1.4rem, 2.2vw, 2.1rem);
+  text-shadow: none;
+}
+
+.transfer-window .pack-card__reveal strong {
+  font-size: .7rem;
+}
+
+.transfer-window .pack-card__reveal small {
+  color: var(--tw-muted);
+  font-size: .52rem;
+}
+
+.transfer-window .pack-player__visual,
+.transfer-window .pack-card[class*="card-tier--"] .pack-player__visual,
+.transfer-window .pack-card[class*="card-tier--"] .pack-player__poster {
+  background-color: #091a2c;
+}
+
+.transfer-window .pack-card[class*="card-tier--"] .pack-player__identity,
+.transfer-window .pack-card[class*="card-tier--"] .pack-player__finance,
+.transfer-window .pack-player__identity,
+.transfer-window .pack-player__finance {
+  color: var(--host-paper);
+  border-color: rgba(247, 243, 234, .1);
+  background: #061425;
+}
+
+.transfer-window .pack-card[class*="card-tier--"] .pack-player__identity h3,
+.transfer-window .pack-player__identity h3,
+.transfer-window .pack-player__identity p,
+.transfer-window .pack-player__finance strong {
+  color: var(--host-paper);
+}
+
+.transfer-window .pack-player__identity p,
+.transfer-window .pack-player__finance small {
+  color: var(--tw-muted);
+}
+
+.transfer-window .pack-card .pack-player__rarity,
+.transfer-window .pack-card .pack-player__transfer-state {
+  font-size: .34rem;
+}
+
+.transfer-window .pack-card .button {
+  min-height: 40px;
+  font-size: .78rem;
+}
+
+.transfer-window .pack-grid > .market-empty {
+  width: min(620px, calc(100% - 24px));
+  align-self: center;
+  margin: 0 auto;
+  padding: 18px;
+  color: var(--host-paper);
+  border: 1px solid rgba(102, 226, 194, .18);
+  border-radius: 7px;
+  background: rgba(2, 14, 29, .58);
+  font-size: .88rem;
+  text-align: center;
+}
+
+.transfer-window__footer {
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  margin: 0 -6px;
+  padding: 12px 18px;
+  color: var(--host-paper);
+  border: 1px solid var(--tw-line);
+  border-bottom: 0;
+  border-radius: 26px 26px 0 0;
+  background: linear-gradient(90deg, rgba(69, 216, 173, .045), transparent 42%), var(--tw-panel-deep);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .03);
+}
+
+.transfer-window__footer .button {
+  width: min(360px, 100%);
+  height: 58px;
+  min-height: 58px;
+  margin-left: auto;
+  font-size: 1.2rem;
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .transfer-window__shell {
+    grid-template-rows: 74px 96px minmax(212px, max-content) minmax(270px, 1fr) 74px;
+    gap: 8px;
+    overflow-y: auto;
+    scrollbar-color: rgba(69, 216, 173, .55) transparent;
+    scrollbar-width: thin;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    width: 198px !important;
+    height: 60px !important;
+  }
+
+  .transfer-window__scout {
+    min-height: 212px;
+    padding: 14px;
+  }
+
+  .transfer-window__scout .theme-form {
+    grid-template-columns: minmax(170px, 205px) minmax(0, 1fr);
+    gap: 8px 12px;
+  }
+
+  .transfer-window__scout .scout-console__heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .transfer-window__scout .compact-form-row {
+    grid-column: 2 !important;
+    grid-row: 1;
+  }
+
+  .transfer-window__scout .scout-console__filters {
+    grid-column: 2 !important;
+    grid-row: 2;
+  }
+
+  .transfer-window__scout .turnstile-slot {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+
+  .transfer-window__scout .form-error:not(:empty) {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+  }
+
+  .transfer-window .pack-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(240px, 1fr);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .transfer-window__shell {
+    display: block;
+    height: 100svh;
+    padding: 0 12px;
+    overflow-y: auto;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    min-height: 72px;
+    margin-right: -12px;
+    margin-left: -12px;
+  }
+
+  .dialog-header.transfer-window__heading {
+    min-height: 108px;
+    padding: 18px 4px 12px;
+  }
+
+  .dialog-header.transfer-window__heading h2 {
+    font-size: 3.5rem;
+  }
+
+  .transfer-window__scout {
+    min-height: 0;
+    margin-bottom: 10px;
+    padding: 14px;
+  }
+
+  .transfer-window__scout .theme-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .transfer-window__scout .scout-console__heading,
+  .transfer-window__scout .compact-form-row,
+  .transfer-window__scout .scout-console__filters,
+  .transfer-window__scout .turnstile-slot,
+  .transfer-window__scout .form-error:not(:empty) {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  .transfer-window__scout .compact-form-row {
+    grid-template-columns: minmax(0, 1fr) 118px;
+  }
+
+  .transfer-window .pack-grid {
+    min-height: 500px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(280px, auto);
+    margin-bottom: 10px;
+    overflow-y: auto;
+  }
+
+  .transfer-window__footer {
+    min-height: 82px;
+    margin: 0;
+  }
+
+  .transfer-window__footer .button {
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+  }
+}
+
+/* Transfers v2 cascade lock: keep shared manager chrome from repainting this dialog. */
+.transfer-window,
+.transfer-window__shell,
+.transfer-window .pack-grid {
+  background-color: #020b14 !important;
+}
+
+.transfer-window .manager-window-nav::before,
+.transfer-window .manager-window-header::before,
+.transfer-window .manager-window-header::after {
+  display: none !important;
+  content: none !important;
+}
+
+.transfer-window__topbar.manager-window-header {
+  overflow: hidden !important;
+}
+
+@media (min-width: 901px) {
+  .transfer-window__topbar.manager-window-header {
+    width: calc(100% + 60px) !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    margin-right: -30px !important;
+    margin-left: -30px !important;
+    padding: 0 30px !important;
+    grid-template-columns: 250px minmax(420px, 1fr) auto !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    width: auto !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    grid-template-columns: repeat(4, auto) !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    width: auto !important;
+    min-width: 116px !important;
+    height: 72px !important;
+    min-height: 72px !important;
+  }
+}
+
+/* Final Transfers shell lock — match Tactics and Season after all legacy rules. */
+.transfer-window[open] {
+  background: var(--host-paper) !important;
+}
+
+.transfer-window__shell {
+  background: transparent !important;
+}
+
+.transfer-window__shell > .manager-animated-bg {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+.transfer-window__shell::before {
+  display: block !important;
+  content: "" !important;
+}
+
+.transfer-window .manager-window-nav::before {
+  display: block !important;
+  background: linear-gradient(135deg, #52e5ba, #3cc99f) !important;
+  clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%) !important;
+  content: "" !important;
+}
+
+.transfer-window__topbar.manager-window-header {
+  color: var(--host-paper) !important;
+  background: var(--host-ink) !important;
+}
+
+.transfer-window .manager-window-nav button.is-active,
+.transfer-window .manager-window-nav button[aria-current="page"] {
+  color: var(--host-ink) !important;
+  background: transparent !important;
+}
+
+.transfer-window .pack-grid {
+  background: var(--host-ink) !important;
+}
+
+@media (min-width: 1181px) {
+  .transfer-window__topbar.manager-window-header {
+    width: 100vw !important;
+    height: 84px !important;
+    min-height: 84px !important;
+    grid-template-columns: 320px 600px minmax(0, 1fr) !important;
+    margin-right: calc(50% - 50vw) !important;
+    margin-left: calc(50% - 50vw) !important;
+    padding: 0 32px !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    width: 600px !important;
+    height: 84px !important;
+    min-height: 84px !important;
+    grid-template-columns: repeat(4, 150px) !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    width: 150px !important;
+    min-width: 150px !important;
+    height: 84px !important;
+    min-height: 84px !important;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .transfer-window__topbar.manager-window-header {
+    grid-template-columns: 190px 380px minmax(0, 1fr) !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    width: 180px !important;
+  }
+
+  .transfer-window .manager-window-header .manager-game-brand__logo {
+    width: 168px !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    width: 380px !important;
+    grid-template-columns: repeat(4, 95px) !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    width: 95px !important;
+    min-width: 95px !important;
+    gap: 2px !important;
+    padding: 0 4px !important;
+    font-size: .76rem !important;
+  }
+
+  .transfer-window .manager-window-nav button span {
+    min-width: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: .5rem !important;
+  }
+
+  .transfer-window__scout .scout-console__verification {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+}
+
+/* Transfers parity layer — the same shell, command bar and two-panel workspace
+   used by Tactics and Season. This intentionally wins over the retired mockups. */
+.transfer-window[open] {
+  color: var(--host-ink) !important;
+  background: var(--host-paper) !important;
+}
+
+.transfer-window__shell {
+  position: relative !important;
+  isolation: isolate;
+  display: grid !important;
+  width: 100vw !important;
+  height: 100svh !important;
+  min-height: 0 !important;
+  grid-template-rows: 10.55svh 12.05svh minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 5.7vw !important;
+  overflow: hidden !important;
+  color: var(--host-ink) !important;
+  background: var(--host-paper) !important;
+}
+
+.transfer-window__shell > .manager-animated-bg {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 1 !important;
+  object-fit: cover !important;
+  filter: saturate(1.32) contrast(1.06) !important;
+}
+
+.transfer-window__heading-grid.season-window__heading-grid.manager-grid {
+  position: relative !important;
+  z-index: 2;
+  display: block !important;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__commandbar.season-window__commandbar.tactics-commandbar {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2;
+  display: grid !important;
+  min-height: 12.05svh !important;
+  grid-template-columns: minmax(320px, .78fr) minmax(610px, 1.22fr) !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin: 0 !important;
+  padding: .8rem 1rem 1rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__title-block {
+  position: relative;
+  min-width: 0;
+}
+
+.transfer-window__title-block h2 {
+  max-width: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+  padding-top: .08em;
+  padding-bottom: .08em;
+  color: var(--host-ink) !important;
+  font: 600 clamp(4rem, 5vw, 5.05rem)/.7 var(--display) !important;
+  letter-spacing: -.02em !important;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 1 !important;
+  transform: scaleX(.88);
+  transform-origin: left center;
+}
+
+.transfer-window .transfer-theme-label {
+  position: absolute;
+  bottom: .35rem;
+  left: 1.1rem;
+  display: block !important;
+  max-width: 280px;
+  margin: 0 !important;
+  overflow: hidden;
+  color: #189875 !important;
+  font: 600 1rem/1 var(--display) !important;
+  letter-spacing: .1em !important;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.transfer-window__commandbar > .transfer-window__scout {
+  position: relative !important;
+  z-index: 2;
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0;
+  min-height: 0 !important;
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, .85fr) !important;
+  grid-template-rows: 44px 28px !important;
+  align-items: center !important;
+  gap: 4px 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  color: var(--host-ink) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__commandbar .compact-form-row {
+  display: grid !important;
+  min-width: 0;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  grid-template-columns: minmax(160px, 1fr) 136px !important;
+  gap: 8px !important;
+}
+
+.transfer-window__commandbar .prompt-field {
+  display: flex;
+  width: 100%;
+  height: 42px !important;
+  min-height: 42px !important;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px !important;
+  color: var(--host-ink) !important;
+  border: 1px solid rgba(3, 20, 38, .55) !important;
+  border-radius: 4px !important;
+  background: rgba(247, 243, 234, .95) !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__commandbar .prompt-field svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: none;
+  stroke: var(--host-ink) !important;
+  stroke-linecap: round;
+  stroke-width: 1.7;
+}
+
+.transfer-window__commandbar .prompt-field input {
+  width: 100%;
+  height: 40px;
+  min-width: 0;
+  padding: 0 !important;
+  color: var(--host-ink) !important;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  font: 600 .86rem/1 var(--smooth) !important;
+}
+
+.transfer-window__commandbar .prompt-field input::placeholder {
+  color: rgba(3, 20, 38, .58) !important;
+}
+
+.transfer-window__commandbar .compact-form-row .button {
+  width: 136px;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  color: var(--host-ink) !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: var(--host-mint) !important;
+  box-shadow: none !important;
+  font: 600 1rem/1 var(--display) !important;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.transfer-window__commandbar .scout-console__filters {
+  display: grid !important;
+  min-width: 0;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.transfer-window__commandbar .scout-console__filters label {
+  display: block;
+  min-width: 0;
+}
+
+.transfer-window__commandbar .scout-console__filters label > span {
+  display: none !important;
+}
+
+.transfer-window__commandbar .scout-console__filters select {
+  width: 100%;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 20px 0 8px !important;
+  color: var(--host-ink) !important;
+  border: 1px solid rgba(3, 20, 38, .55) !important;
+  border-radius: 4px !important;
+  background-color: rgba(247, 243, 234, .95) !important;
+  font: 600 .72rem/1 var(--smooth) !important;
+}
+
+.transfer-window__commandbar .scout-console__verification {
+  display: flex !important;
+  min-width: 0;
+  height: 28px;
+  min-height: 28px !important;
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  overflow: visible !important;
+}
+
+.transfer-window__commandbar .scout-console__verification > span {
+  color: rgba(3, 20, 38, .66) !important;
+  font: 600 .62rem/1 var(--smooth) !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.transfer-window__commandbar .turnstile-slot {
+  position: static !important;
+  display: block !important;
+  width: 132px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  grid-column: auto !important;
+  grid-row: auto !important;
+  overflow: hidden !important;
+}
+
+.transfer-window__commandbar .turnstile-slot > div,
+.transfer-window__commandbar .turnstile-slot iframe {
+  transform: scale(.43) !important;
+  transform-origin: left top !important;
+}
+
+.transfer-window__commandbar .form-error:empty {
+  display: none !important;
+}
+
+.transfer-window__commandbar .form-error:not(:empty) {
+  position: absolute !important;
+  right: 0;
+  bottom: -24px;
+  z-index: 20;
+  width: min(520px, 100%);
+  margin: 0;
+  padding: 5px 8px;
+  color: var(--host-paper);
+  border-left: 3px solid var(--host-red);
+  border-radius: 3px;
+  background: #6c1822;
+  font: 600 .72rem/1.2 var(--smooth);
+}
+
+.transfer-window__body.season-window__body {
+  position: relative;
+  z-index: 2;
+  display: block !important;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0 1.25rem !important;
+  overflow: hidden !important;
+  animation: hostPanelEnter 360ms cubic-bezier(.16, .84, .2, 1) both;
+}
+
+.transfer-window__market-layout.season-window__standings {
+  display: grid !important;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, .64fr) !important;
+  align-items: stretch;
+  gap: 1rem !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.transfer-window__market.standings-panel.season-standings-table,
+.transfer-window__shortlist.season-enemy-preview {
+  display: flex !important;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden !important;
+  color: var(--host-paper) !important;
+  border: 2px solid var(--host-ink) !important;
+  border-radius: 8px !important;
+  background: var(--host-ink) !important;
+  box-shadow: none !important;
+}
+
+.transfer-window__shortlist-shell.season-team-detail {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.transfer-window__market > header,
+.transfer-window__shortlist > header {
+  display: flex;
+  min-height: 76px !important;
+  flex: 0 0 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem !important;
+  color: var(--host-paper);
+  border: 0 !important;
+  border-bottom: 1px solid rgba(244, 239, 223, .18) !important;
+  background: var(--host-ink) !important;
+}
+
+.transfer-window__market > header small,
+.transfer-window__shortlist > header small {
+  display: block;
+  color: var(--host-mint) !important;
+  font: 600 .62rem/1 var(--display) !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase;
+}
+
+.transfer-window__market > header h3,
+.transfer-window__shortlist > header h3 {
+  margin: .12rem 0 0;
+  color: var(--host-paper) !important;
+  font: 600 1.7rem/.85 var(--display) !important;
+  text-transform: uppercase;
+}
+
+.transfer-window__market-count {
+  color: rgba(244, 239, 223, .68) !important;
+  font: 600 .7rem/1 var(--smooth) !important;
+  text-transform: uppercase;
+}
+
+.transfer-window__market-count b {
+  color: var(--host-mint) !important;
+}
+
+.transfer-window .pack-grid {
+  display: block !important;
+  min-width: 0;
+  min-height: 0 !important;
+  flex: 1;
+  margin: 0 !important;
+  padding: 0 8px 8px !important;
+  overflow: auto !important;
+  color: var(--host-paper);
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--host-ink) !important;
+  box-shadow: none !important;
+  scrollbar-color: rgba(69, 216, 173, .55) transparent;
+  scrollbar-width: thin;
+}
+
+.transfer-window .transfer-table-head,
+.transfer-window .transfer-row {
+  grid-template-columns: minmax(170px, 2fr) 48px minmax(76px, 1fr) 50px 72px minmax(100px, 1fr) 94px;
+  column-gap: 10px;
+}
+
+.transfer-window .transfer-table-head {
+  background: var(--host-ink-2) !important;
+}
+
+.transfer-window .transfer-row {
+  color: var(--host-paper);
+  border-bottom-color: rgba(244, 239, 223, .14);
+}
+
+.transfer-window .transfer-row:hover {
+  background: rgba(69, 216, 173, .08);
+}
+
+.transfer-window__shortlist-list {
+  min-height: 0;
+  flex: 1;
+  padding: 6px 12px 12px;
+  overflow: auto;
+  scrollbar-color: rgba(69, 216, 173, .55) transparent;
+  scrollbar-width: thin;
+}
+
+.transfer-window .shortlist-row {
+  min-height: 66px;
+  border-bottom-color: rgba(244, 239, 223, .14);
+}
+
+.transfer-window .pack-summary {
+  display: none !important;
+}
+
+.transfer-window .transfer-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  border-radius: 8px;
+}
+
+@media (min-width: 1360px) and (max-height: 900px),
+       (min-aspect-ratio: 16 / 9) and (max-height: 960px) {
+  .transfer-window__shell {
+    grid-template-rows: 84px 92px minmax(0, 1fr) !important;
+    padding-right: clamp(48px, 5.2vw, 80px) !important;
+    padding-left: clamp(48px, 5.2vw, 80px) !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    width: auto !important;
+    height: 84px !important;
+    min-height: 84px !important;
+    margin-right: calc(clamp(48px, 5.2vw, 80px) * -1) !important;
+    margin-left: calc(clamp(48px, 5.2vw, 80px) * -1) !important;
+  }
+
+  .transfer-window__commandbar.season-window__commandbar.tactics-commandbar {
+    min-height: 92px !important;
+    padding-top: 5px !important;
+    padding-bottom: 9px !important;
+  }
+
+  .transfer-window__title-block h2 {
+    font-size: 58px !important;
+    line-height: .76 !important;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .transfer-window__shell {
+    grid-template-rows: 74px 136px minmax(0, 1fr) !important;
+    padding: 0 2.5vw !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    width: auto !important;
+    height: 74px !important;
+    min-height: 74px !important;
+    margin-right: -2.5vw !important;
+    margin-left: -2.5vw !important;
+  }
+
+  .transfer-window__commandbar.season-window__commandbar.tactics-commandbar {
+    min-height: 136px !important;
+    grid-template-columns: minmax(230px, .5fr) minmax(0, 1.5fr) !important;
+    padding: .6rem !important;
+  }
+
+  .transfer-window__commandbar > .transfer-window__scout {
+    grid-template-columns: minmax(240px, 1fr) minmax(260px, .9fr) !important;
+  }
+
+  .transfer-window__market-layout.season-window__standings {
+    grid-template-columns: minmax(0, 1.2fr) minmax(310px, .8fr) !important;
+    overflow-x: auto !important;
+  }
+
+  .transfer-window .transfer-table-head > :nth-child(3),
+  .transfer-window .transfer-row__theme,
+  .transfer-window .transfer-table-head > :nth-child(6),
+  .transfer-window .transfer-row__status {
+    display: none;
+  }
+
+  .transfer-window .transfer-table-head,
+  .transfer-window .transfer-row {
+    grid-template-columns: minmax(150px, 2fr) 46px 48px 66px 88px;
+  }
+}
+
+@media (max-width: 900px) {
+  .transfer-window__shell {
+    display: grid !important;
+    height: 100svh !important;
+    grid-template-rows: 96px 170px minmax(560px, 1fr) !important;
+    padding: 0 .55rem !important;
+    overflow: auto !important;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    display: grid !important;
+    width: auto !important;
+    height: 96px !important;
+    min-height: 96px !important;
+    grid-template-columns: 190px minmax(0, 1fr) !important;
+    margin: 0 -.55rem !important;
+    padding: .4rem .65rem !important;
+    overflow: hidden !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    position: relative;
+    z-index: 2;
+    display: flex !important;
+    width: 180px !important;
+    height: 88px !important;
+    align-items: center;
+  }
+
+  .transfer-window .manager-window-header .manager-game-brand__logo {
+    position: static !important;
+    width: 168px !important;
+    max-height: 54px !important;
+    transform: none !important;
+  }
+
+  .transfer-window .manager-window-nav {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 2;
+    display: grid !important;
+    width: 100% !important;
+    height: 88px !important;
+    min-height: 88px !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 88px !important;
+    min-height: 88px !important;
+    padding: 0 4px !important;
+    font-size: .72rem !important;
+  }
+
+  .transfer-window .manager-window-nav button span {
+    display: none !important;
+  }
+
+  .transfer-window .manager-header-end {
+    display: none !important;
+  }
+
+  .transfer-window__commandbar.season-window__commandbar.tactics-commandbar {
+    min-height: 170px !important;
+    grid-template-columns: minmax(120px, .42fr) minmax(0, 1.58fr) !important;
+    gap: .55rem !important;
+    padding: .6rem !important;
+  }
+
+  .transfer-window__title-block h2 {
+    font-size: clamp(2.35rem, 10vw, 3.1rem) !important;
+  }
+
+  .transfer-window .transfer-theme-label {
+    bottom: .05rem;
+    left: .25rem;
+    max-width: 120px;
+    font-size: .66rem !important;
+  }
+
+  .transfer-window__commandbar > .transfer-window__scout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 42px 38px 24px !important;
+    gap: 4px !important;
+  }
+
+  .transfer-window__commandbar .compact-form-row {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    grid-template-columns: minmax(0, 1fr) 100px !important;
+  }
+
+  .transfer-window__commandbar .compact-form-row .button {
+    width: 100px;
+    font-size: .78rem !important;
+  }
+
+  .transfer-window__commandbar .scout-console__filters {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .transfer-window__commandbar .scout-console__filters select {
+    height: 36px !important;
+    min-height: 36px !important;
+    font-size: .62rem !important;
+  }
+
+  .transfer-window__commandbar .scout-console__verification {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+
+  .transfer-window__body.season-window__body {
+    padding-bottom: .55rem !important;
+    overflow: visible !important;
+  }
+
+  .transfer-window__market-layout.season-window__standings {
+    height: auto;
+    min-height: 560px;
+    grid-template-columns: minmax(520px, 1.2fr) minmax(290px, .8fr) !important;
+    overflow-x: auto !important;
+  }
+
+  .transfer-window .transfer-table-head,
+  .transfer-window .transfer-row {
+    grid-template-columns: minmax(150px, 2fr) 46px 48px 66px 88px;
+  }
+
+  .transfer-window .transfer-table-head > :nth-child(3),
+  .transfer-window .transfer-row__theme,
+  .transfer-window .transfer-table-head > :nth-child(6),
+  .transfer-window .transfer-row__status {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .transfer-window__shell {
+    grid-template-rows: 96px 230px minmax(940px, 1fr) !important;
+  }
+
+  .transfer-window__commandbar.season-window__commandbar.tactics-commandbar {
+    min-height: 230px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: 54px 158px !important;
+    align-content: center;
+    gap: 4px !important;
+  }
+
+  .transfer-window__title-block h2 {
+    font-size: 3rem !important;
+  }
+
+  .transfer-window .transfer-theme-label {
+    bottom: .02rem;
+    left: .2rem;
+    max-width: calc(100% - .4rem);
+  }
+
+  .transfer-window__commandbar > .transfer-window__scout {
+    align-self: stretch;
+  }
+
+  .transfer-window__topbar.manager-window-header {
+    grid-template-columns: 145px minmax(0, 1fr) !important;
+  }
+
+  .transfer-window .manager-window-header > .manager-game-brand {
+    width: 138px !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .transfer-window .manager-window-header .manager-game-brand__logo {
+    width: 132px !important;
+  }
+
+  .transfer-window .manager-window-nav button {
+    font-size: .62rem !important;
+  }
+
+  .transfer-window__market-layout.season-window__standings {
+    min-height: 920px;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(560px, 1fr) 340px !important;
+    overflow: visible !important;
+  }
+}
+
+@keyframes pitch-card-shine-sweep {
+  0%, 17% {
+    opacity: 0;
+    transform: translateX(-105%);
+  }
+
+  30% {
+    opacity: var(--tier-shine-opacity, 0.44);
+  }
+
+  49%, 100% {
+    opacity: 0;
+    transform: translateX(105%);
+  }
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::before {
+  position: absolute;
+  inset: 3px;
+  z-index: 4;
+  display: block !important;
+  content: "";
+  pointer-events: none;
+  background-image: var(--tier-animated-sheen) !important;
+  background-repeat: no-repeat !important;
+  background-position: center;
+  background-size: 100% 100% !important;
+  clip-path: polygon(8% 5%, 22% 0, 82% 2%, 96% 9%, 100% 20%, 96% 81%, 82% 91%, 50% 100%, 18% 91%, 4% 81%, 0 18%);
+  opacity: 0;
+  transform: translateX(-105%);
+  animation: pitch-card-shine-sweep var(--tier-shine-duration, 4.5s) ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
+  animation: var(--tier-luster-animation, none);
+  will-change: filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::after {
+    animation: none !important;
+  }
+
+  .pitch-slot[data-card-tier]:not([data-card-tier=""]):not(.is-empty)::before {
+    animation: none !important;
+    opacity: 0 !important;
   }
 }

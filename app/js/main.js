@@ -668,6 +668,42 @@ function fitPlayerCardNames(root) {
   });
 }
 
+const CARD_SHINE_CYCLE_MS = 4800;
+const CARD_SHINE_ANIMATION_NAMES = new Set([
+  "pitch-card-shine-sweep",
+  "tier-card-shine-sweep",
+  "tier-card-luster-pulse",
+]);
+
+function synchronizeCardShineAnimations() {
+  const timelineTime = Number(document.timeline?.currentTime) || performance.now();
+  const sharedPhase = timelineTime % CARD_SHINE_CYCLE_MS;
+
+  document.getAnimations().forEach((animation) => {
+    if (!CARD_SHINE_ANIMATION_NAMES.has(animation.animationName)) return;
+    animation.currentTime = sharedPhase;
+  });
+}
+
+function mountGlobalCardShineClock() {
+  let framePending = false;
+  const queueSync = () => {
+    if (framePending) return;
+    framePending = true;
+    requestAnimationFrame(() => {
+      framePending = false;
+      synchronizeCardShineAnimations();
+    });
+  };
+
+  new MutationObserver(queueSync).observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+  document.addEventListener("visibilitychange", queueSync);
+  queueSync();
+}
+
 function schedulePlayerCardNameFit(root) {
   requestAnimationFrame(() => fitPlayerCardNames(root));
   document.fonts?.ready.then(() => fitPlayerCardNames(root));
@@ -896,9 +932,15 @@ function renderSelectedPlayerInspector() {
   if (!elements.selectedPlayerInspector) return;
   const player = selectedPlayer() ?? state.collection.find((candidate) => starterIds().has(candidate.id)) ?? state.collection[0];
   if (!player) {
+    elements.selectedPlayerInspector.classList.remove("card-tier--silver", "card-tier--gold", "card-tier--shiny-gold", "card-tier--chroma");
+    delete elements.selectedPlayerInspector.dataset.cardTier;
     elements.selectedPlayerInspector.hidden = true;
     return;
   }
+  const tier = playerCardTier(player.overall);
+  elements.selectedPlayerInspector.classList.remove("card-tier--silver", "card-tier--gold", "card-tier--shiny-gold", "card-tier--chroma");
+  elements.selectedPlayerInspector.classList.add(tier.className);
+  elements.selectedPlayerInspector.dataset.cardTier = tier.id;
   const seasonStats = playerSeasonPerformance(state.season, player.id);
   const marketValue = marketValueMillions(player, state);
   const role = positionCategory(player.position);
@@ -1683,6 +1725,15 @@ async function handleThemeSubmit({ theme, formationId, turnstileContainer, error
   }
 }
 
+let activeManagerWindowAnimation = null;
+
+function managerWindowSlideLayer(windowName) {
+  if (windowName === "transfers") return elements.packDialog.querySelector(".manager-slide-layer");
+  if (windowName === "season") return elements.seasonDialog.querySelector(".manager-slide-layer");
+  if (windowName === "stats") return elements.statsDialog.querySelector(".manager-slide-layer");
+  return elements.managerScreen.querySelector(":scope > .manager-slide-layer");
+}
+
 function openManagerWindow(windowName) {
   const order = { tactics: 0, transfers: 1, season: 2, stats: 3 };
   const navGeometry = {
@@ -1699,6 +1750,8 @@ function openManagerWindow(windowName) {
         ? "stats"
         : "tactics";
   const targetWindow = order[windowName] === undefined ? "tactics" : windowName;
+  if (targetWindow === currentWindow) return;
+  const slideDirection = order[targetWindow] > order[currentWindow] ? "forward" : "backward";
   const fromGeometry = navGeometry[currentWindow];
   const toGeometry = navGeometry[targetWindow];
   document.body.style.setProperty("--manager-nav-from", order[currentWindow]);
@@ -1740,7 +1793,23 @@ function openManagerWindow(windowName) {
     }
   };
 
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  activeManagerWindowAnimation?.cancel();
+  activeManagerWindowAnimation = null;
   switchWindow();
+
+  const incomingLayer = managerWindowSlideLayer(targetWindow);
+  if (incomingLayer && !reducedMotion) {
+    const startX = slideDirection === "forward" ? "100vw" : "-100vw";
+    const animation = incomingLayer.animate(
+      [{ transform: `translateX(${startX})` }, { transform: "translateX(0)" }],
+      { duration: 440, easing: "cubic-bezier(.22, .72, .18, 1)" },
+    );
+    activeManagerWindowAnimation = animation;
+    animation.finished.finally(() => {
+      if (activeManagerWindowAnimation === animation) activeManagerWindowAnimation = null;
+    }).catch(() => {});
+  }
 
   window.setTimeout(() => {
     document.body.classList.remove("is-manager-nav-sliding");
@@ -1750,7 +1819,7 @@ function openManagerWindow(windowName) {
 function moveManagerAnimatedBackground(windowName) {
   const hosts = {
     tactics: elements.managerScreen,
-    transfers: elements.packDialog.querySelector(".transfer-window__shell"),
+    transfers: elements.packDialog.querySelector(".transfers-rebuild__shell"),
     season: elements.seasonDialog.querySelector(".season-window__shell"),
     stats: elements.statsDialog.querySelector(".stats-window__shell"),
   };
@@ -1763,6 +1832,25 @@ function moveManagerAnimatedBackground(windowName) {
     video.currentTime = playbackTime;
   }
   if (video.dataset.playDirection !== "reverse") video.play().catch(() => {});
+}
+
+function transferPlayerCardIconMarkup(player, tier, { revealed = true } = {}) {
+  const name = revealed ? player.name : "Unknown";
+  const position = revealed ? player.position : "—";
+  const overall = revealed ? player.overall : "?";
+  return `
+    <span class="transfer-player-card-stage" aria-hidden="true">
+      <span class="pitch-slot transfer-player-card ${tier.className}" data-card-tier="${escapeHtml(tier.id)}">
+        <span class="pitch-player-rating"><strong>${overall}</strong><small>OVR</small></span>
+        <span class="pitch-player-position">${escapeHtml(position)}</span>
+        <span class="pitch-player-tier">${escapeHtml(tier.shortLabel)}</span>
+        <span class="pitch-player-portrait">
+          <span class="pitch-player-poster" aria-hidden="true"></span>
+          <img class="pitch-player-photo" src="${escapeHtml(safeUrl(playerImageSource(player)))}" alt="" data-player-id="${escapeHtml(player.id)}" draggable="false" />
+        </span>
+        <span class="pitch-player-name">${escapeHtml(name)}</span>
+      </span>
+    </span>`;
 }
 
 function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
@@ -1787,7 +1875,8 @@ function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
   const freeCount = players.filter((player) => player.isFreeTransfer).length;
   const revealsUsed = Math.max(freeCount, Number(market.freeRevealsUsed) || 0);
   const picksRemaining = Math.max(0, 3 - revealsUsed);
-  elements.packTitle.textContent = market.theme || "Scouting report";
+  const transferThemeLabel = elements.packDialog.querySelector(".transfers-rebuild__theme");
+  if (transferThemeLabel) transferThemeLabel.textContent = market.theme || "Transfer market";
   const portraitCount = players.filter((player) => player.portrait.candidates.length).length;
   elements.packSummary.innerHTML = players.length ? [
     `<span><small>Targets shown</small><strong>${visiblePlayers.length} / ${players.length}</strong></span>`,
@@ -1801,60 +1890,45 @@ function renderTransferMarketDialog({ open = false, openPack = false } = {}) {
     : "Scouted transfer targets");
 
   elements.packGrid.innerHTML = visiblePlayers.length
-    ? visiblePlayers.map((player, index) => {
+    ? `<div class="transfer-card-menu" role="list">${visiblePlayers.map((player, index) => {
       const isRevealed = player.isRevealed !== false;
       const priceMillions = player.isFreeTransfer ? 0 : player.askingPriceMillions;
       const affordable = state.finances.balanceMillions >= priceMillions && state.collection.length < COLLECTION_LIMIT;
-      const projectedResale = marketValueMillions(player, state);
-      const tier = playerCardTier(player.overall);
-      const tone = ["is-red", "is-mint", "is-blue", "is-violet", "is-orange"][index % 5];
       const availability = state.collection.length >= COLLECTION_LIMIT
         ? "Squad full — sell a player first"
         : state.finances.balanceMillions < priceMillions
-          ? `Need ${formatMoney(priceMillions - state.finances.balanceMillions)} more`
+          ? player.theme
           : player.isFreeTransfer ? "Free transfer selected" : "Available to sign";
       const revealLabel = picksRemaining ? `Flip card ${index + 1} for a free transfer` : `Card ${index + 1}`;
+      const tier = playerCardTier(player.overall);
       return `
-        <article class="pack-player pack-card ${tone} ${tier.className}${isRevealed ? " is-revealed" : " is-concealed"}${player.isFreeTransfer ? " is-free-transfer" : ""}" data-card-tier="${tier.id}" style="--order:${index};--deal-delay:${index * 62}ms;--flip-delay:${index * 48}ms">
-          <div class="pack-card__inner">
-            <div class="pack-card__back">
-              <button class="pack-card__reveal" type="button" data-action="reveal-transfer" data-player-id="${escapeHtml(player.id)}" aria-label="${escapeHtml(revealLabel)}" ${picksRemaining ? "" : "disabled"}>
-                <span class="pack-card__number">${String(index + 1).padStart(2, "0")}</span>
-                <span class="pack-card__mark" aria-hidden="true">XI</span>
-                <strong>Flip for free</strong>
-                <small>${picksRemaining} pick${picksRemaining === 1 ? "" : "s"} remaining</small>
-              </button>
-            </div>
-            <div class="pack-card__front">
-              <div class="pack-player__visual">
-                <span class="pack-player__poster" aria-hidden="true"></span>
-                <div class="pack-player__topline"><span><strong>${player.overall}</strong><small>OVR</small></span><b>${escapeHtml(player.position)}</b></div>
-                <img class="pack-player-photo" src="${escapeHtml(safeUrl(playerImageSource(player)))}" alt="" data-player-id="${escapeHtml(player.id)}" />
-                <span class="pack-player__rarity">${escapeHtml(tier.label)}</span>
-                <span class="pack-player__transfer-state">${player.isFreeTransfer ? "Free transfer" : "Scouted target"}</span>
-              </div>
-              <div class="pack-player__identity"><h3>${escapeHtml(player.name)}</h3><p>${escapeHtml(player.theme)}</p></div>
-              <div class="pack-player__finance">
-                <span><small>Asking</small><strong>${player.isFreeTransfer ? "Free" : formatMoney(priceMillions)}</strong></span>
-                <span><small>Resale</small><strong>${formatMoney(projectedResale)}</strong></span>
-              </div>
-              <button class="button ${player.isFreeTransfer ? "button--free" : "button--transfer"}" type="button" data-action="sign-transfer" data-player-id="${escapeHtml(player.id)}" ${affordable ? "" : "disabled"}>${player.isFreeTransfer ? "Sign free" : `Buy ${formatMoney(priceMillions)}`}</button>
-              <small class="pack-player__availability">${escapeHtml(availability)}</small>
-            </div>
+        <article class="transfer-menu-card ${tier.className}${isRevealed ? " is-revealed" : " is-concealed"}${player.isFreeTransfer ? " is-free-transfer" : ""}" data-card-tier="${escapeHtml(tier.id)}" style="--order:${index}" role="listitem">
+          <div class="transfer-menu-card__portrait">
+            ${transferPlayerCardIconMarkup(player, tier, { revealed: isRevealed })}
           </div>
+          <div class="transfer-menu-card__body">
+            <header>
+              <div>
+                <strong>${isRevealed ? escapeHtml(player.name) : `Unknown target ${index + 1}`}</strong>
+                <span>${isRevealed ? escapeHtml(player.position) : "Concealed scouting card"}</span>
+              </div>
+              <b>${isRevealed ? (player.isFreeTransfer ? "Free" : formatMoney(priceMillions)) : "—"}</b>
+            </header>
+            <small>${isRevealed ? escapeHtml(availability) : `${picksRemaining} free pick${picksRemaining === 1 ? "" : "s"} remaining`}</small>
+          </div>
+          ${isRevealed
+            ? `<button class="button ${player.isFreeTransfer ? "button--free" : "button--transfer"}" type="button" data-action="sign-transfer" data-player-id="${escapeHtml(player.id)}" ${affordable ? "" : "disabled"}>${player.isFreeTransfer ? "Sign free" : "Buy player"}</button>`
+            : `<button class="button button--free" type="button" data-action="reveal-transfer" data-player-id="${escapeHtml(player.id)}" aria-label="${escapeHtml(revealLabel)}" ${picksRemaining ? "" : "disabled"}>Reveal</button>`}
         </article>
       `;
-    }).join("")
+    }).join("")}</div>`
     : players.length
-      ? '<p class="market-empty">No targets match these filters. Broaden the scouting criteria.</p>'
-      : '<p class="market-empty">No players remain on this scouting list.</p>';
+      ? '<p class="transfers-rebuild__empty">No targets match these filters. Broaden the scouting criteria.</p>'
+      : '<div class="transfers-rebuild__empty"><strong>No scouted players yet</strong><span>Search a theme above to build a new transfer list.</span></div>';
+
   hydrateImageFallbacks(elements.packGrid);
 
   if (open) {
-    if (openPack && players.length && !market.packOpened) {
-      renderPackOpening({ open: true });
-      return;
-    }
     if (!elements.packDialog.open) elements.packDialog.showModal();
     mountTurnstile("manager-turnstile").catch((error) => { elements.managerError.textContent = error.message; });
   }
@@ -2049,6 +2123,7 @@ function renderResultPitch(match, side = selectedResultTeam) {
     const player = roster.find((candidate) => candidate.id === performance.playerId);
     const photo = player ? safeUrl(playerImageSource(player)) : "";
     const tier = ratingTier(performance.rating);
+    const cardTier = playerCardTier(player?.overall ?? 0);
     const eventSummary = [
       performance.goals ? `${performance.goals} goals` : "",
       performance.assists ? `${performance.assists} assists` : "",
@@ -2059,7 +2134,8 @@ function renderResultPitch(match, side = selectedResultTeam) {
 
     return `
       <article
-        class="performance-player"
+        class="performance-player ${cardTier.className}"
+        data-card-tier="${escapeHtml(cardTier.id)}"
         style="--x:${slot.x}%;--y:${slot.y}%;--order:${index}"
         aria-label="${escapeHtml(performance.playerName)}, ${escapeHtml(slot.position)}, rated ${performance.rating.toFixed(1)}${eventSummary ? `, ${escapeHtml(eventSummary)}` : ""}"
       >
@@ -2513,6 +2589,7 @@ document.querySelectorAll("dialog").forEach((dialog) => {
   });
 });
 
+mountGlobalCardShineClock();
 render();
 refreshConnectionStatus();
 refreshMissingPortraits();
